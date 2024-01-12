@@ -49,13 +49,15 @@ export function showToast(
     shadow.append(toast);
 }
 
-export function showError(error: Error | { message: string; stack: string | undefined }) {
+export function showError(error: Error | { message: string; stack: string | undefined } | unknown) {
     console.error(error);
-    showToast('Error', error.message, {
+    const { message = `${error}`, stack = error instanceof Error ? error.stack : undefined } = error as any;
+
+    showToast('Error', message, {
         timeout: 5000,
         actionIcon: '⎘',
         action() {
-            navigator.clipboard.writeText(`Error: ${error.message}\n${error.stack}`);
+            navigator.clipboard.writeText(`Error: ${message}\n${stack}`);
             showToast('Info', 'Error copied to clipboard!', { timeout: 1000 });
         },
     });

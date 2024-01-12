@@ -30,7 +30,7 @@ export function getSentences(data: JpdbWordData, contextWidth: number) {
 
         while (left < right) {
             const middle = (left + right) >> 1;
-            if (boundaries[middle] <= data.contextOffset) {
+            if (boundaries[middle]! <= data.contextOffset) {
                 left = middle + 1;
             } else {
                 right = middle;
@@ -40,9 +40,9 @@ export function getSentences(data: JpdbWordData, contextWidth: number) {
         data.sentenceIndex = left;
     }
 
-    const start = data.sentenceBoundaries[Math.max(data.sentenceIndex - contextWidth, 0)] + 1;
+    const start = data.sentenceBoundaries[Math.max(data.sentenceIndex - contextWidth, 0)]! + 1;
     const end =
-        data.sentenceBoundaries[Math.min(data.sentenceIndex + contextWidth - 1, data.sentenceBoundaries.length - 1)] +
+        data.sentenceBoundaries[Math.min(data.sentenceIndex + contextWidth - 1, data.sentenceBoundaries.length - 1)]! +
         1;
 
     return data.context.slice(start, end).trim();

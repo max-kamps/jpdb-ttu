@@ -8,9 +8,9 @@ export class Dialog {
     #header: HTMLElement;
     #sentence: HTMLElement;
 
-    #clickStartedOutside: boolean;
-    #data: JpdbWordData;
-    #contextWidth: number;
+    #clickStartedOutside: boolean = true;
+    #data: JpdbWordData | undefined = undefined;
+    #contextWidth: number = 0;
 
     static #dialog: Dialog;
 
@@ -78,7 +78,7 @@ export class Dialog {
                             id='add-context'
                             onclick={() => {
                                 this.#contextWidth++;
-                                this.#sentence.innerText = getSentences(this.#data, this.#contextWidth);
+                                this.#sentence.innerText = getSentences(this.#data!, this.#contextWidth);
                             }}>
                             Add surrounding sentences
                         </button>

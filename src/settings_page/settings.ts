@@ -105,6 +105,7 @@ try {
             console.log(files);
 
             if (files === null || files.length === 0) return;
+            const file = files[0]!;
 
             const fileContents: string = await wrap(new FileReader(), (reader, resolve, reject) => {
                 reader.onload = () => {
@@ -112,7 +113,7 @@ try {
                     resolve(reader.result);
                 };
                 reader.onerror = () => reject({ message: 'Error occurred while reading file' });
-                reader.readAsText(files[0]);
+                reader.readAsText(file);
             });
 
             try {
@@ -127,7 +128,7 @@ try {
 
                 markUnsavedChanges();
             } catch (error) {
-                alert(`Could not import config: ${error.message}`);
+                alert(`Could not import config: ${(error as any).message ?? error}`);
             }
         } catch (error) {
             showError(error);

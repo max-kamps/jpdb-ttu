@@ -53,8 +53,8 @@ async function getTranscriptFromURL(url: string): Promise<Transcript | null> {
                 const startMatch = startRegex.exec(line);
                 const durMatch = durRegex.exec(line);
 
-                const start = startMatch ? parseFloat(startMatch[1]) : 0;
-                const dur = durMatch ? parseFloat(durMatch[1]) : 0;
+                const start = startMatch ? parseFloat(startMatch[1]!) : 0;
+                const dur = durMatch ? parseFloat(durMatch[1]!) : 0;
 
                 if (startMatch && durMatch) {
                     const htmlText = line
@@ -108,7 +108,7 @@ class Subs {
     jpdbButton: HTMLElement | null = null;
     isAsr = false;
     isActive = false;
-    transcript?: Transcript;
+    transcript?: Transcript | undefined;
 
     activate(transcript?: Transcript) {
         if (!transcript) return;
@@ -287,7 +287,7 @@ function observerCallback() {
             return;
         }
 
-        playerElement = playerElementArr[0];
+        playerElement = playerElementArr[0]!;
     }
 }
 

@@ -1,5 +1,5 @@
 import { Card, CardState, DeckId, Token } from '../types.js';
-import { assertNonNull, truncate } from '../util.js';
+import { assert, assertNonNull, nonNull, truncate } from '../util.js';
 import { config } from './background.js';
 
 const API_RATELIMIT = 0.2; // seconds between requests
@@ -123,6 +123,11 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
             pitchAccent,
         ] = vocab;
 
+        assert(
+            meaningsPartOfSpeech.length === meaningsChunks.length,
+            'Meanings and parts of speech must have the same length',
+        );
+
         return {
             vid,
             sid,
@@ -131,7 +136,8 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
             reading,
             frequencyRank,
             partOfSpeech,
-            meanings: meaningsChunks.map((glosses, i) => ({ glosses, partOfSpeech: meaningsPartOfSpeech[i] })),
+            // Safety: This is safe because of the assertion above
+            meanings: meaningsChunks.map((glosses, i) => ({ glosses, partOfSpeech: meaningsPartOfSpeech[i]! })),
             state: cardState ?? ['not-in-deck'],
             pitchAccent: pitchAccent ?? [], // HACK not documented... in case it can be null, better safe than sorry
         };
@@ -143,7 +149,7 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
             // NOTE: If you change these, make sure to change TOKEN_FIELDS too
             const [vocabularyIndex, position, length, furigana] = token;
 
-            const card = cards[vocabularyIndex];
+            const card = nonNull(cards[vocabularyIndex]);
 
             let offset = position;
             const rubies =

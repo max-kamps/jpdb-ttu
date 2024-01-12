@@ -9,7 +9,7 @@ export async function check() {
     try {
         await exec('npx prettier -c .');
         return 0;
-    } catch (error) {
+    } catch (error: any) {
         console.log(error.stderr);
         return error.stderr.match(/^\[warn\] /gm).length - 1;
     }
@@ -21,7 +21,7 @@ export async function format() {
         console.log(stdout);
         console.log(stderr);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.log(error.stderr);
         return false;
     }

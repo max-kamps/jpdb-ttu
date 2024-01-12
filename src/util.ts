@@ -61,12 +61,12 @@ export async function readExtFile(path: string): Promise<string> {
         const resp = await fetch(browser.runtime.getURL(path));
         return await resp.text();
     } catch (error) {
-        throw new Error(`Could not read file ${path}: ${error.message}`, { cause: error });
+        throw new Error(`Could not read file ${path}: ${(error as any).message ?? error}`, { cause: error });
     }
 }
 
 export function snakeToCamel(string: string): string {
-    return string.replaceAll(/(?<!^_*)_(.)/g, (m, p1) => p1.toUpperCase());
+    return string.replaceAll(/(?<!^_*)_(.)/g, (_match, group1) => group1.toUpperCase());
 }
 
 export function truncate(string: string, maxLength: number): string {

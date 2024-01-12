@@ -1,7 +1,7 @@
 import { BackgroundToContentMessage, ContentToBackgroundMessage, ResponseTypeMap } from '../message_types.js';
 import { DeckId, Grade, Token } from '../types.js';
 import { loadConfig } from './config.js';
-import { browser, isChrome, PromiseHandle, sleep } from '../util.js';
+import { assert, browser, isChrome, PromiseHandle, sleep } from '../util.js';
 import * as backend from './backend.js';
 
 export let config = loadConfig();
@@ -35,7 +35,7 @@ async function apiCaller() {
             call.resolve(result);
             await sleep(wait);
         } catch (error) {
-            call.reject(error);
+            call.reject(error as Error);
             // TODO implement exponential backoff
             await sleep(1500);
         }
@@ -92,10 +92,12 @@ async function batchParses() {
     if (strings.length === 0) return [null, 0] as [null, number];
 
     try {
-        const [[tokens, cards], timeout] = await backend.parse(strings);
+        const [[tokenBatches, cards], timeout] = await backend.parse(strings);
+
+        assert(tokenBatches.length === handles.length, 'Number of token batches does not match number of handles');
 
         for (const [i, handle] of handles.entries()) {
-            handle.resolve(tokens[i]);
+            handle.resolve(tokenBatches[i]!);
         }
 
         broadcast({ type: 'updateWordState', words: cards.map(card => [card.vid, card.sid, card.state]) });
@@ -103,7 +105,7 @@ async function batchParses() {
         return [null, timeout] as [null, number];
     } catch (error) {
         for (const handle of handles) {
-            handle.reject(error);
+            handle.reject(error as Error);
         }
 
         throw error;
@@ -260,7 +262,7 @@ async function onPortMessage(message: ContentToBackgroundMessage, port: browser.
     try {
         await messageHandlers[message.type](message as any, port);
     } catch (error) {
-        post(port, { type: 'error', seq: (message as any).seq ?? null, error: serializeError(error) });
+        post(port, { type: 'error', seq: (message as any).seq ?? null, error: serializeError(error as Error) });
     }
 }
 

@@ -24,7 +24,7 @@ export function displayCategory(node: Node): 'text' | 'ruby' | 'ruby-text' | 'in
         return 'text';
     } else if (node instanceof Element) {
         const display = getComputedStyle(node).display.split(/\s/g);
-        if (display[0] === 'none') return 'none';
+        if (display[0]! === 'none') return 'none';
 
         // NOTE Workaround for Chrome not supporting multi-value display and display: ruby
         if (node.tagName === 'RUBY') return 'ruby';
@@ -37,20 +37,20 @@ export function displayCategory(node: Node): 'text' | 'ruby' | 'ruby-text' | 'in
         if (display.some(x => x.startsWith('block'))) return 'block';
         if (display.some(x => x.startsWith('inline'))) return 'inline';
 
-        if (display[0] === 'flex') return 'block';
-        if (display[0] === '-webkit-box') return 'block'; // Old name of flex? Still used on Google Search for some reason.
-        if (display[0] === 'grid') return 'block';
-        if (display[0].startsWith('table')) return 'block';
-        if (display[0].startsWith('flow')) return 'block';
-        if (display[0] === 'ruby') return 'ruby';
-        if (display[0].startsWith('ruby-text')) return 'ruby-text';
-        if (display[0].startsWith('ruby-base')) return 'inline';
-        if (display[0].startsWith('math')) return 'inline';
+        if (display[0]! === 'flex') return 'block';
+        if (display[0]! === '-webkit-box') return 'block'; // Old name of flex? Still used on Google Search for some reason.
+        if (display[0]! === 'grid') return 'block';
+        if (display[0]!.startsWith('table')) return 'block';
+        if (display[0]!.startsWith('flow')) return 'block';
+        if (display[0]! === 'ruby') return 'ruby';
+        if (display[0]!.startsWith('ruby-text')) return 'ruby-text';
+        if (display[0]!.startsWith('ruby-base')) return 'inline';
+        if (display[0]!.startsWith('math')) return 'inline';
         if (display.includes('list-item')) return 'block';
 
         // Questionable
-        if (display[0] === 'contents') return 'inline';
-        if (display[0] === 'run-in') return 'block';
+        if (display[0]! === 'contents') return 'inline';
+        if (display[0]! === 'run-in') return 'block';
 
         alert(`Warning: Unknown display value ${display.join(' ')}, please report this!`);
 
@@ -61,7 +61,7 @@ export function displayCategory(node: Node): 'text' | 'ruby' | 'ruby-text' | 'in
 }
 
 function splitFragment(fragments: Fragment[], fragmentIndex: number, splitOffset: number) {
-    const oldFragment = fragments[fragmentIndex];
+    const oldFragment = fragments[fragmentIndex]!;
     // console.log('Splitting fragment', oldFragment);
 
     const newNode = oldFragment.node.splitText(splitOffset - oldFragment.start);
@@ -125,7 +125,7 @@ export function applyTokens(fragments: Paragraph, tokens: Token[]) {
 
             curOffset += fragment.length;
 
-            fragment = fragments[++fragmentIndex];
+            fragment = fragments[++fragmentIndex]!;
             if (!fragment) return;
         }
 
@@ -168,13 +168,15 @@ export function applyTokens(fragments: Paragraph, tokens: Token[]) {
                         if (ruby.start > fragment.start) {
                             splitFragment(fragments, fragmentIndex, ruby.start);
                             insertAfter(<rt></rt>, fragment.node);
-                            fragment = fragment = fragments[++fragmentIndex];
+                            fragment = fragments[++fragmentIndex];
+                            if (!fragment) break;
                         }
 
                         if (ruby.end < fragment.end) {
                             splitFragment(fragments, fragmentIndex, ruby.end);
                             insertAfter(<rt class='jpdb-furi'>{ruby.text}</rt>, fragment.node);
-                            fragment = fragment = fragments[++fragmentIndex];
+                            fragment = fragments[++fragmentIndex];
+                            if (!fragment) break;
                         } else {
                             insertAfter(<rt class='jpdb-furi'>{ruby.text}</rt>, fragment.node);
                         }
@@ -182,7 +184,8 @@ export function applyTokens(fragments: Paragraph, tokens: Token[]) {
                 }
             }
 
-            curOffset = fragment.end;
+            // TODO I don't remember how the logic here works, this seems incorrect
+            curOffset = fragment!.end;
 
             fragment = fragments[++fragmentIndex];
             if (!fragment) break;

@@ -40,7 +40,7 @@ function paragraphsInRange(range: Range): Paragraph[] {
     } else {
         // Selection starts inside the startContainer, at the startOffset'th child
         // Use that child as our start node
-        startNode = range.startContainer.childNodes[range.startOffset];
+        startNode = range.startContainer.childNodes[range.startOffset]!;
     }
 
     let endNode: Node;
@@ -64,7 +64,7 @@ function paragraphsInRange(range: Range): Paragraph[] {
     } else {
         // Selection ends inside the endContainer, at the endOffset'th child
         // Use the previous child (the last child that is still inside the selection) as our end node
-        endNode = range.endContainer.childNodes[range.endOffset - 1];
+        endNode = range.endContainer.childNodes[range.endOffset - 1]!;
     }
 
     console.log('start:', startNode, 'end:', endNode);
@@ -114,7 +114,7 @@ function paragraphsInRange(range: Range): Paragraph[] {
         // (The ones at the start have already been ignored)
         let end = fragments.length - 1;
         for (; end >= 0; end--) {
-            if (fragments[end].node.data.trim().length > 0) break;
+            if (fragments[end]!.node.data.trim().length > 0) break;
         }
 
         const trimmedFragments = fragments.slice(0, end + 1);
@@ -169,8 +169,8 @@ function paragraphsInRange(range: Range): Paragraph[] {
             continue;
         } else if (current.nextSibling !== null) {
             console.log('Continuing with sibling');
-            ignore = stack[stack.length - 1].ignore;
-            rubyTexts = stack[stack.length - 1].rubyTexts;
+            ignore = stack[stack.length - 1]!.ignore;
+            rubyTexts = stack[stack.length - 1]!.rubyTexts;
             current = current.nextSibling;
             continue;
         } else {
@@ -196,8 +196,8 @@ function paragraphsInRange(range: Range): Paragraph[] {
 
             // console.log('Continuing with parents sibling');
             current = parent.node.nextSibling;
-            rubyTexts = stack[stack.length - 1].rubyTexts;
-            ignore = stack[stack.length - 1].ignore;
+            rubyTexts = stack[stack.length - 1]!.rubyTexts;
+            ignore = stack[stack.length - 1]!.ignore;
             continue;
         }
     }

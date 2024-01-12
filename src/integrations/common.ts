@@ -14,7 +14,8 @@ export function paragraphsInNode(node: Node, filter: (node: Node) => boolean = (
 
         let end = fragments.length - 1;
         for (; end >= 0; end--) {
-            if (fragments[end].node.data.trim().length > 0) break;
+            // Safety: end must be between 0 and fragments.length - 1 at this point, so this is safe
+            if (fragments[end]!.node.data.trim().length > 0) break;
         }
 
         const trimmedFragments = fragments.slice(0, end + 1);

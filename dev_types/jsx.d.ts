@@ -10,15 +10,15 @@ type CommonAttributes = {
     lang?: 'ja';
     part?: string;
 
-    onclick?: (event: MouseEvent) => void;
-    onmousedown?: (event: MouseEvent) => void;
-    onmouseup?: (event: MouseEvent) => void;
-    onmouseenter?: (event: MouseEvent) => void;
-    onmouseleave?: (event: MouseEvent) => void;
+    onclick?: undefined | ((event: MouseEvent) => any);
+    onmousedown?: undefined | ((event: MouseEvent) => any);
+    onmouseup?: undefined | ((event: MouseEvent) => any);
+    onmouseenter?: undefined | ((event: MouseEvent) => any);
+    onmouseleave?: undefined | ((event: MouseEvent) => any);
 
-    onwheel?: (event: WheelEvent) => void;
+    onwheel?: undefined | ((event: WheelEvent) => any);
 
-    oninput?: (event: InputEvent) => void;
+    oninput?: undefined | ((event: InputEvent) => any);
 };
 type AnyChildren = {
     children?: (string | Text | HTMLElement | (string | Text | HTMLElement)[])[];

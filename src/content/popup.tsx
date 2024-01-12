@@ -131,7 +131,7 @@ const PARTS_OF_SPEECH: { [k: string]: string } = {
 function getClosestClientRect(elem: HTMLElement, x: number, y: number): DOMRect {
     const rects = elem.getClientRects();
 
-    if (rects.length === 1) return rects[0];
+    if (rects.length === 1) return rects[0]!;
 
     // Merge client rects that are adjacent
     // This works around a Chrome issue, where sometimes, non-deterministically,
@@ -147,7 +147,7 @@ function getClosestClientRect(elem: HTMLElement, x: number, y: number): DOMRect 
             continue;
         }
 
-        const prevRect = mergedRects[mergedRects.length - 1];
+        const prevRect = mergedRects[mergedRects.length - 1]!;
 
         if (horizontal) {
             if (rect.bottom === prevRect.bottom && rect.left === prevRect.right) {
@@ -234,7 +234,7 @@ export class Popup {
     #outerStyle: CSSStyleDeclaration;
     #vocabSection: HTMLElement;
     #mineButtons: HTMLElement;
-    #data: JpdbWordData;
+    #data: JpdbWordData | undefined = undefined;
 
     static #popup: Popup;
 
@@ -285,30 +285,36 @@ export class Popup {
                     <button
                         class='nothing'
                         onclick={
-                            demoMode ? undefined : async () => await requestReview(this.#data.token.card, 'nothing')
+                            demoMode ? undefined : async () => await requestReview(this.#data!.token.card, 'nothing')
                         }>
                         Nothing
                     </button>
                     <button
                         class='something'
                         onclick={
-                            demoMode ? undefined : async () => await requestReview(this.#data.token.card, 'something')
+                            demoMode ? undefined : async () => await requestReview(this.#data!.token.card, 'something')
                         }>
                         Something
                     </button>
                     <button
                         class='hard'
-                        onclick={demoMode ? undefined : async () => await requestReview(this.#data.token.card, 'hard')}>
+                        onclick={
+                            demoMode ? undefined : async () => await requestReview(this.#data!.token.card, 'hard')
+                        }>
                         Hard
                     </button>
                     <button
                         class='good'
-                        onclick={demoMode ? undefined : async () => await requestReview(this.#data.token.card, 'good')}>
+                        onclick={
+                            demoMode ? undefined : async () => await requestReview(this.#data!.token.card, 'good')
+                        }>
                         Good
                     </button>
                     <button
                         class='easy'
-                        onclick={demoMode ? undefined : async () => await requestReview(this.#data.token.card, 'easy')}>
+                        onclick={
+                            demoMode ? undefined : async () => await requestReview(this.#data!.token.card, 'easy')
+                        }>
                         Easy
                     </button>
                 </section>
@@ -368,7 +374,7 @@ export class Popup {
                 meaning.partOfSpeech.every((p, i) => p === lastPOS[i])
             ) {
                 // Append to previous meaning group
-                groupedMeanings[groupedMeanings.length - 1].glosses.push(meaning.glosses);
+                groupedMeanings[groupedMeanings.length - 1]!.glosses.push(meaning.glosses);
             } else {
                 // Create a new meaning group
                 groupedMeanings.push({
@@ -422,9 +428,9 @@ export class Popup {
                         ? undefined
                         : () =>
                               requestMine(
-                                  this.#data.token.card,
+                                  this.#data!.token.card,
                                   config.forqOnMine,
-                                  getSentences(this.#data, config.contextWidth).trim() || undefined,
+                                  getSentences(this.#data!, config.contextWidth).trim() || undefined,
                                   undefined,
                               )
                 }>
@@ -432,7 +438,7 @@ export class Popup {
             </button>,
             <button
                 class='edit-add-review'
-                onclick={this.#demoMode ? undefined : () => Dialog.get().showForWord(this.#data)}>
+                onclick={this.#demoMode ? undefined : () => Dialog.get().showForWord(this.#data!)}>
                 Edit, Add and Review...
             </button>,
             <button
@@ -440,7 +446,7 @@ export class Popup {
                 onclick={
                     this.#demoMode
                         ? undefined
-                        : async () => await requestSetFlag(this.#data.token.card, 'blacklist', !blacklisted)
+                        : async () => await requestSetFlag(this.#data!.token.card, 'blacklist', !blacklisted)
                 }>
                 {!blacklisted ? 'Blacklist' : 'Remove from blacklist'}
             </button>,
@@ -449,7 +455,7 @@ export class Popup {
                 onclick={
                     this.#demoMode
                         ? undefined
-                        : async () => await requestSetFlag(this.#data.token.card, 'never-forget', !neverForget)
+                        : async _event => await requestSetFlag(this.#data!.token.card, 'never-forget', !neverForget)
                 }>
                 {!neverForget ? 'Never forget' : 'Unmark as never forget'}
             </button>,

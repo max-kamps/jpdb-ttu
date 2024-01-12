@@ -8,7 +8,7 @@ const printer = ts.createPrinter({
 });
 
 type Binding = [ts.Identifier, ts.Identifier | undefined];
-type Import = { modulePath: string; namespace?: ts.Identifier; bindings: Binding[] };
+type Import = { modulePath: string; namespace?: ts.Identifier | undefined; bindings: Binding[] };
 
 function parseEsImport(sourceFile: ts.SourceFile, factory: ts.NodeFactory, node: ts.ImportDeclaration): Import {
     const modulePath = path.join(
@@ -39,7 +39,7 @@ function parseEsImport(sourceFile: ts.SourceFile, factory: ts.NodeFactory, node:
 }
 
 function createContentScriptImport(
-    sourceFile: ts.SourceFile,
+    _sourceFile: ts.SourceFile,
     factory: ts.NodeFactory,
     importData: Import,
 ): ts.Statement {

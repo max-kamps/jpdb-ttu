@@ -15,20 +15,18 @@ const sys: ts.System = {
     },
 };
 
-function reportDiagnostic(diagnostic: ts.Diagnostic) {
-    if (diagnostic.file && diagnostic.start) {
-        const { line, character } = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
-        const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-        console.log(`[typescript] ${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
-    } else {
-        console.log(`[typescript] ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`);
-    }
-}
+const diagnosticHost: ts.FormatDiagnosticsHost = {
+    getCanonicalFileName: (path: string) => path,
+    getCurrentDirectory: ts.sys.getCurrentDirectory,
+    getNewLine: () => ts.sys.newLine,
+};
 
 function reportDiagnostics(diagnostics: readonly ts.Diagnostic[]) {
-    for (const diagnostic of diagnostics) {
-        reportDiagnostic(diagnostic);
-    }
+    console.log(ts.formatDiagnosticsWithColorAndContext(diagnostics, diagnosticHost));
+}
+
+function reportDiagnostic(diagnostic: ts.Diagnostic) {
+    reportDiagnostics([diagnostic]);
 }
 
 function readConfig(configPath: string): [number, ts.ParsedCommandLine | null] {

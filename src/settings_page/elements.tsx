@@ -40,7 +40,7 @@ export class SettingElement extends HTMLElement {
         throw Error('SettingElement subclass must implement render()');
     }
 
-    attributeChangedCallback(name: any, oldValue: string, newValue: string) {
+    attributeChangedCallback(name: any, _oldValue: string, newValue: string) {
         (this as any)[name] = newValue;
     }
 
@@ -56,7 +56,7 @@ export class SettingElement extends HTMLElement {
         throw Error('SettingElement subclass must implement get value()');
     }
 
-    set value(newValue: unknown) {
+    set value(_newValue: unknown) {
         throw Error('SettingElement subclass must implement set value(newValue)');
     }
 
@@ -79,11 +79,11 @@ export class SettingElement extends HTMLElement {
 class SettingNumber extends SettingElement {
     declare input: HTMLInputElement;
 
-    static get observedAttributes() {
+    static override get observedAttributes() {
         return ['name', 'min', 'max', 'step'];
     }
 
-    renderInputElem(name: string): HTMLInputElement {
+    override renderInputElem(name: string): HTMLInputElement {
         return (
             <input
                 part='input'
@@ -121,11 +121,11 @@ class SettingNumber extends SettingElement {
         this.input.step = newValue;
     }
 
-    get value(): number {
+    override get value(): number {
         return this.input.valueAsNumber;
     }
 
-    set value(newValue: number) {
+    override set value(newValue: number) {
         this.input.valueAsNumber = newValue;
         this.valueChanged();
     }
@@ -134,7 +134,7 @@ class SettingNumber extends SettingElement {
 class SettingBoolean extends SettingElement {
     declare input: HTMLInputElement;
 
-    renderInputElem(name: string): HTMLInputElement {
+    override renderInputElem(name: string): HTMLInputElement {
         return (
             <input
                 part='input'
@@ -148,11 +148,11 @@ class SettingBoolean extends SettingElement {
         ) as HTMLInputElement;
     }
 
-    get value(): boolean {
+    override get value(): boolean {
         return this.input.checked;
     }
 
-    set value(newValue: boolean) {
+    override set value(newValue: boolean) {
         this.input.checked = newValue;
         this.valueChanged();
     }
@@ -161,7 +161,7 @@ class SettingBoolean extends SettingElement {
 class SettingToken extends SettingElement {
     declare input: HTMLInputElement;
 
-    renderInputElem(name: string): HTMLInputElement {
+    override renderInputElem(name: string): HTMLInputElement {
         return (
             <input
                 part='input'
@@ -175,11 +175,11 @@ class SettingToken extends SettingElement {
         ) as HTMLInputElement;
     }
 
-    get value(): string | null {
+    override get value(): string | null {
         return this.input.value ?? '';
     }
 
-    set value(newValue: string | null) {
+    override set value(newValue: string | null) {
         this.input.value = newValue ?? '';
         this.valueChanged();
     }
@@ -188,7 +188,7 @@ class SettingToken extends SettingElement {
 class SettingDeckId extends SettingElement {
     declare input: HTMLInputElement;
 
-    renderInputElem(name: string): HTMLInputElement {
+    override renderInputElem(name: string): HTMLInputElement {
         return (
             <input
                 part='input'
@@ -203,12 +203,12 @@ class SettingDeckId extends SettingElement {
         ) as HTMLInputElement;
     }
 
-    get value(): string | number | null {
+    override get value(): string | number | null {
         const n = parseInt(this.input.value);
         return isNaN(n) ? this.input.value || null : n;
     }
 
-    set value(newValue: string | number | null) {
+    override set value(newValue: string | number | null) {
         this.input.value = newValue === null ? '' : newValue.toString();
         this.valueChanged();
     }
@@ -217,7 +217,7 @@ class SettingDeckId extends SettingElement {
 class SettingString extends SettingElement {
     declare input: HTMLTextAreaElement;
 
-    renderInputElem(name: string): HTMLTextAreaElement {
+    override renderInputElem(name: string): HTMLTextAreaElement {
         return (
             <textarea
                 part='input'
@@ -230,16 +230,16 @@ class SettingString extends SettingElement {
         ) as HTMLTextAreaElement;
     }
 
-    get value(): string {
+    override get value(): string {
         return this.input.value;
     }
 
-    set value(newValue: string) {
+    override set value(newValue: string) {
         this.input.value = newValue;
         this.valueChanged();
     }
 
-    valueChanged(): void {
+    override valueChanged(): void {
         super.valueChanged();
 
         // Resize to fit all rows
@@ -256,9 +256,9 @@ function keybindToString(bind: Keybind) {
 class SettingKeybind extends SettingElement {
     declare input: HTMLButtonElement;
     #value: Keybind = null;
-    static active?: [SettingKeybind, (event: KeyboardEvent) => void];
+    static active: [SettingKeybind, (event: KeyboardEvent | MouseEvent) => void] | undefined = undefined;
 
-    renderInputElem(name: string): HTMLButtonElement {
+    override renderInputElem(name: string): HTMLButtonElement {
         return (
             <button
                 part='input'
@@ -323,11 +323,11 @@ class SettingKeybind extends SettingElement {
         SettingKeybind.active = [this, keyListener];
     }
 
-    get value(): Keybind {
+    override get value(): Keybind {
         return this.#value;
     }
 
-    set value(newValue: Keybind) {
+    override set value(newValue: Keybind) {
         this.#value = newValue;
         this.input.innerText = keybindToString(newValue);
         this.valueChanged();
