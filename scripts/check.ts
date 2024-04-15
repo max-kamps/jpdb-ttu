@@ -3,7 +3,7 @@ import * as typescript from './common/typescript.js';
 import * as prettier from './common/prettier.js';
 
 console.log('Checking types...');
-const typeErrors = await typescript.typecheck();
+const typeErrors = await typescript.typecheckAll();
 console.log('Linting...');
 const lintErrors = await eslint.lint();
 console.log('Checking formatting...');

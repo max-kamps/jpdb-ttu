@@ -142,23 +142,24 @@ List of classes:
 You can run the following command to build the release zip file:
 ```sh
 $ npm install
-$ npm run build
+$ npm run build  # build both chromium and gecko
+$ npm run build -- chromium # build only chromium, for faster builds
 ```
 The resulting file will be located in the `dist/` folder
 
-For development, you can also run the build in watch mode:
+For development, you can also run the build in watch mode. This will continously rebuild the extension as you change the code:
 ```sh
 $ npm install
-$ npm run watch
+$ npm run watch  # rebuild both chromium and gecko
+$ npm run watch -- chromium  # rebuild only chromium
 ```
-This will continuously rebuild the source code as it changes, and place the output in the `build/` folder.
-It can be loaded as an unpacked extension from there.
+The extension files will be output to the `build/gecko` and `build/chromium` folders. It can be loaded as an unpacked extension from there.
 Please remember to wait until building is done, and reload the extension on the "manage extensions" page before testing your changes.
 Also, please look at the [Contributing](#contributing) section if you plan on contributing your changes.
 
 ## Contributing
 
-Issues with feedback or ideas for new features are very welcome. You can also message me on the JPDB Discord server (@hmry#6502).
+Issues with feedback or ideas for new features are very welcome. You can also message me on the JPDB Discord server (@hmry).
 
 The following commands may be of interest to you:
 *  `npm run check`: Checks your code for formatting issues, linter warnings and type errors. The CI also runs this, so your pull request will only be accepted if it passes. You can use eslint ignore comments if you get false positives, but leave a comment explaining why you think the error is false and safe to ignore.
@@ -167,8 +168,8 @@ The following commands may be of interest to you:
 *  `npm run watch`: Automatically recompiles code when it changes, putting the output into `build/`. Using this is recommended during development.
 
 Please note the following:
-*  All coroutines must be awaited. All top-level code must be wrapped in try/catch that calls `showError(error)`. This is because extensions do not support the `error` and `unhandledrejection` events, so any errors not caught explicitly would get ignored and not shown to the user. (Working around browser bugs like this is annoying but necessary.)
-*  Event handlers added with `on<event>=` in JSX automatically get awaited and wrapped in a try/catch.
+*  Because of a browser bug, all coroutines must be awaited and all top-level code must be wrapped in try/catch that calls `showError(error)`. This is because the `error` and `unhandledrejection` events do not work correctly in extension content scripts, so any errors not caught explicitly would get ignored and not shown to the user.
+*  This is done automatically for event handlers added with `on<event>=` in JSX.
 
 (Don't worry *too* much about this. If you forget, I will (probably) notice during code review and fix it after merging.)
 

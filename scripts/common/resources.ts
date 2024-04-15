@@ -14,25 +14,27 @@ async function* walkDirectory(directory: string): AsyncGenerator<string, undefin
     }
 }
 
-function getDestPath(source: string) {
-    return path.join('build', path.relative('src', source));
+function getDestPath(engine: string, source: string) {
+    return path.join('build', engine, path.relative('src', source));
 }
 
-async function copyFile(source: string) {
-    const destination = getDestPath(source);
-    await fs.mkdir(path.dirname(destination), { recursive: true });
-    await fs.copyFile(source, destination);
+async function copyFile(engines: string[], source: string) {
+    for (const engine of engines) {
+        const destination = getDestPath(engine, source);
+        await fs.mkdir(path.dirname(destination), { recursive: true });
+        await fs.copyFile(source, destination);
+    }
 }
 
-export async function copy() {
+export async function copyAll(engines: string[]) {
     for await (const source of walkDirectory('src')) {
-        if (source.match(/\.tsx?$/) === null) {
-            await copyFile(source);
+        if (!source.match(/\.tsx?$/)) {
+            await copyFile(engines, source);
         }
     }
 }
 
-export async function watch() {
+export async function watch(engines: string[]) {
     const watcher = chokidar.watch('src', {
         ignored: /\.tsx?$/,
         disableGlobbing: true,
@@ -41,22 +43,28 @@ export async function watch() {
     watcher
         .on('add', async path => {
             console.log(`[resource] Added file ${path}`);
-            await copyFile(path);
+            await copyFile(engines, path);
         })
         .on('change', async path => {
             console.log(`[resource] Changed file ${path}`);
-            await copyFile(path);
+            await copyFile(engines, path);
         })
         .on('unlink', async path => {
             console.log(`[resource] Removed file ${path}`);
-            await fs.rm(getDestPath(path), { force: true });
+            for (const engine of engines) {
+                await fs.rm(getDestPath(engine, path), { force: true });
+            }
         })
         .on('addDir', async path => {
             console.log(`[resource] Added directory ${path}`);
+            // TODO do we need to do anything here?
+            // If a user copies a directory into the src folder, will the 'add' action be triggered for each file?
         })
         .on('unlinkDir', async path => {
             console.log(`[resource] Removed directory ${path}`);
-            await fs.rm(getDestPath(path), { recursive: true, force: true });
+            for (const engine of engines) {
+                await fs.rm(getDestPath(engine, path), { recursive: true, force: true });
+            }
         })
         .on('error', error => {
             console.error('[resource] Error:', error);

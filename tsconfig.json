@@ -1,8 +1,9 @@
 {
     "include": ["src/**/*", "dev_types/**/*"],
+    "exclude": ["src/manifest.ts"],
     "compilerOptions": {
         // Module Resolution
-        "rootDir": "src",
+        "rootDir": ".",
         "moduleDetection": "force",
         "moduleResolution": "NodeNext",
         "resolveJsonModule": true,

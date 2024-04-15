@@ -2,19 +2,6 @@ import * as path from 'node:path';
 import ts from 'typescript';
 import { rewriteImportsTransform, removeAnnoyingDefaultExportTransform } from '../transformers/content_script.js';
 
-const transformers = {
-    before: [rewriteImportsTransform],
-    after: [removeAnnoyingDefaultExportTransform],
-};
-
-const sys: ts.System = {
-    ...ts.sys,
-    writeFile(path, content, bom) {
-        console.log(`[typescript] Wrote file ${path}`);
-        ts.sys.writeFile(path, content, bom);
-    },
-};
-
 const diagnosticHost: ts.FormatDiagnosticsHost = {
     getCanonicalFileName: (path: string) => path,
     getCurrentDirectory: ts.sys.getCurrentDirectory,
@@ -29,7 +16,21 @@ function reportDiagnostic(diagnostic: ts.Diagnostic) {
     reportDiagnostics([diagnostic]);
 }
 
-function readConfig(configPath: string): [number, ts.ParsedCommandLine | null] {
+function getSys(engines: string[], outDir: string): ts.System {
+    return {
+        ...ts.sys,
+        writeFile(dest, content, bom) {
+            const relPath = path.relative(outDir, dest);
+            console.log(`[typescript] Recompiled file ${relPath}`);
+            for (const engine of engines) {
+                const destPath = path.join('build', engine, relPath);
+                ts.sys.writeFile(destPath, content, bom);
+            }
+        },
+    };
+}
+
+function readConfig(sys: ts.System, configPath: string): [number, ts.ParsedCommandLine | null] {
     const configJsonResult = ts.readConfigFile(configPath, sys.readFile);
     const configJson = configJsonResult.config;
     if (!configJson) {
@@ -47,9 +48,9 @@ function readConfig(configPath: string): [number, ts.ParsedCommandLine | null] {
     return [configResult.errors.length, configResult];
 }
 
-export async function typecheckConfig(configPath: string): Promise<number> {
+export async function typecheckSubproject(configPath: string): Promise<number> {
     try {
-        const [configErrors, config] = readConfig(configPath);
+        const [configErrors, config] = readConfig(ts.sys, configPath);
         if (!config) {
             return configErrors;
         }
@@ -67,21 +68,33 @@ export async function typecheckConfig(configPath: string): Promise<number> {
     }
 }
 
-export async function typecheck(): Promise<number> {
-    return (await typecheckConfig('scripts/tsconfig.json')) + (await typecheckConfig('tsconfig.json'));
+export async function typecheckAll(): Promise<number> {
+    return (await typecheckSubproject('scripts/tsconfig.json')) + (await typecheckSubproject('tsconfig.json'));
 }
 
-export async function compile(): Promise<boolean> {
+const transformers = {
+    before: [rewriteImportsTransform],
+    after: [removeAnnoyingDefaultExportTransform],
+};
+
+export async function compileAll(engines: string[]): Promise<boolean> {
+    // TODO it would be really nice if someone can figure out how to make this work with the solution builder API,
+    // instead of createProgram. That could cut down on duplication between this function and watch()
     try {
-        const [_configErrors, config] = readConfig('tsconfig.json');
+        const outDir = `build/${engines[0]}`;
+        const sys = getSys(engines, outDir);
+
+        const [_configErrors, config] = readConfig(sys, 'tsconfig.json');
         if (!config) {
             return false;
         }
 
+        config.options.outDir = outDir;
         config.options.noEmitOnError = true;
+        config.options.incremental = false;
 
         const program = ts.createProgram(config.fileNames, config.options);
-        const emitResult = program.emit(undefined, undefined, undefined, undefined, transformers);
+        const emitResult = program.emit(undefined, sys.writeFile, undefined, undefined, transformers);
         const diagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
         reportDiagnostics(diagnostics);
 
@@ -108,13 +121,18 @@ function buildProject(builder: ts.SolutionBuilder<ts.EmitAndSemanticDiagnosticsB
     }
 }
 
-export async function watch() {
-    const [_configErrors, config] = readConfig('tsconfig.json');
+export async function watch(engines: string[]) {
+    const outDir = `build/${engines[0]}`;
+    const sys = getSys(engines, outDir);
+
+    const [_configErrors, config] = readConfig(sys, 'tsconfig.json');
     if (!config) {
         return false;
     }
 
+    config.options.outDir = outDir;
     config.options.noEmitOnError = false;
+    config.options.incremental = true;
 
     const host = ts.createSolutionBuilderWithWatchHost(
         sys,
