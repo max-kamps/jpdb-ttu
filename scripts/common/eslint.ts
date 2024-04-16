@@ -1,19 +1,28 @@
 import * as console from 'node:console';
+import { stdout } from 'node:process';
 import { ESLint } from 'eslint';
 
-export async function lint() {
+export async function lint(): Promise<{ warnings: number; errors: number }> {
+    let warnings = 0,
+        errors = 0;
+
     try {
         const eslint = new ESLint();
         const formatter = await eslint.loadFormatter('stylish');
 
         const lintResults = await eslint.lintFiles('src');
 
-        console.log(formatter.format(lintResults));
+        stdout.write(await formatter.format(lintResults));
 
-        return lintResults.reduce((count, result) => count + result.errorCount + result.warningCount, 0);
+        for (const result of lintResults) {
+            warnings += result.warningCount;
+            errors += result.errorCount;
+        }
+        return { warnings, errors };
     } catch (error) {
+        errors += 1;
         console.error(error);
-        return 1;
+        return { warnings, errors };
     }
 }
 

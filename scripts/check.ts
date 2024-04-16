@@ -3,14 +3,21 @@ import * as typescript from './common/typescript.js';
 import * as prettier from './common/prettier.js';
 
 console.log('Checking types...');
-const typeErrors = await typescript.typecheckAll();
+const typescriptResult = typescript.typecheckAll();
 console.log('Linting...');
-const lintErrors = await eslint.lint();
+const eslintResult = await eslint.lint();
 console.log('Checking formatting...');
-const formattingErrors = await prettier.check();
+const prettierResult = await prettier.check();
 
-const totalErrors = typeErrors + lintErrors + formattingErrors;
-
-console.log(`Results: ${typeErrors} type errors, ${lintErrors} lint errors, ${formattingErrors} formatting errors.`);
-console.log(totalErrors === 0 ? 'Check passed!' : 'Check failed!');
-process.exit(totalErrors);
+let total = 0;
+console.log('Results:');
+for (const [name, result] of [
+    ['typescript', typescriptResult],
+    ['eslint', eslintResult],
+    ['prettier', prettierResult],
+] as const) {
+    console.log(`  [${name}] ${result.errors} error(s) and ${result.warnings} warning(s)`);
+    total += result.errors + result.warnings;
+}
+console.log(total === 0 ? 'Check passed!' : 'Check failed!');
+process.exit(total);

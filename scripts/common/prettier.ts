@@ -1,28 +1,34 @@
 import { promisify } from 'node:util';
-import * as console from 'node:console';
+import { stdout } from 'node:process';
 import * as childProcess from 'child_process';
 const exec = promisify(childProcess.exec);
 
 // prettier API is very lacking, we'll just call the CLI directly
 
-export async function check() {
+function countWarningsAndErrors(output: string): { warnings: number; errors: number } {
+    const warnings = output.match(/^\[warn\] /gm)?.length ?? 0;
+    const errors = output.match(/^\[error\] /gm)?.length ?? 0;
+    return { warnings, errors };
+}
+
+export async function check(): Promise<{ warnings: number; errors: number }> {
     try {
-        await exec('npx prettier -c .');
-        return 0;
+        const streams = await exec('npx prettier -c .');
+        stdout.write(streams.stderr);
+        return countWarningsAndErrors(streams.stderr);
     } catch (error: any) {
-        console.log(error.stderr);
-        return error.stderr.match(/^\[warn\] /gm).length - 1;
+        stdout.write(error.stderr);
+        return countWarningsAndErrors(error.stderr);
     }
 }
 
 export async function format() {
     try {
-        const { stdout, stderr } = await exec('npx prettier -w .');
-        console.log(stdout);
-        console.log(stderr);
+        const out = await exec('npx prettier -w .');
+        stdout.write(out.stderr);
         return true;
     } catch (error: any) {
-        console.log(error.stderr);
+        stdout.write(error.stderr);
         return false;
     }
 }
