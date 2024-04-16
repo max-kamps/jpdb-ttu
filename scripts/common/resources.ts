@@ -3,6 +3,12 @@ import * as path from 'node:path';
 import * as console from 'node:console';
 import * as chokidar from 'chokidar';
 
+// TODO putting this in here feels pretty hacky...
+const ENGINE_IGNORE_FILES: Record<string, RegExp | undefined> = {
+    chromium: /\.(ts|tsx|svg)$/,
+    gecko: /\.(ts|tsx|png)$/,
+};
+
 async function* walkDirectory(directory: string): AsyncGenerator<string, undefined, undefined> {
     for await (const entry of await fs.opendir(directory)) {
         const childPath = path.join(directory, entry.name);
@@ -20,6 +26,10 @@ function getDestPath(engine: string, source: string) {
 
 async function copyFile(engines: string[], source: string) {
     for (const engine of engines) {
+        if (ENGINE_IGNORE_FILES[engine]?.test(source)) {
+            continue;
+        }
+
         const destination = getDestPath(engine, source);
         await fs.mkdir(path.dirname(destination), { recursive: true });
         await fs.copyFile(source, destination);
@@ -28,9 +38,7 @@ async function copyFile(engines: string[], source: string) {
 
 export async function copyAll(engines: string[]) {
     for await (const source of walkDirectory('src')) {
-        if (!source.match(/\.tsx?$/)) {
-            await copyFile(engines, source);
-        }
+        await copyFile(engines, source);
     }
 }
 
