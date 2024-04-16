@@ -13,12 +13,13 @@
 
         // Code Generation
         "outDir": "build",
-        "sourceMap": true,
         "target": "ES2022",
         "module": "NodeNext",
         "jsx": "react",
         "jsxFactory": "jsxCreateElement",
         "jsxFragmentFactory": "NOT_IMPLEMENTED",
+        "sourceMap": true,
+        "inlineSources": true,
 
         // Type checking and linting
         "skipLibCheck": true,

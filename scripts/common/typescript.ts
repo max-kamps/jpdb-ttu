@@ -9,7 +9,7 @@ const diagnosticHost: ts.FormatDiagnosticsHost = {
 };
 
 function reportDiagnostics(diagnostics: readonly ts.Diagnostic[]) {
-    console.log(ts.formatDiagnosticsWithColorAndContext(diagnostics, diagnosticHost));
+    console.log(ts.formatDiagnosticsWithColorAndContext(diagnostics, diagnosticHost).trimEnd());
 }
 
 function reportDiagnostic(diagnostic: ts.Diagnostic) {
@@ -78,46 +78,35 @@ const transformers = {
     after: [removeAnnoyingDefaultExportTransform],
 };
 
+// TODO currently we implement build/watch mode specific options (like incremental or noEmitOnError) by changing their
+// default value, and not specifying them in tsconfig.json. This means it would be possible to accidentally override
+// them if we add them to the tsconfig.json.
+// Instead we should probably force those values, but I haven't found a nice way to do that.
+// It seems createProgram takes the compiler options as an argument, so that might be the customization point.
+// Writing a custom wrapper function around createEmitAndSemanticDiagnosticsBuilderProgram that changes the options.
+// If that is done, perhaps we might also only want to generate sourcemaps in watch mode.
+
 export async function compileAll(engines: string[]): Promise<boolean> {
-    // TODO it would be really nice if someone can figure out how to make this work with the solution builder API,
-    // instead of createProgram. That could cut down on duplication between this function and watch()
-    try {
-        const [_configErrors, config] = readConfig(ts.sys, 'tsconfig.json');
-        if (!config) {
-            return false;
-        }
-
-        const sys = getSys(engines, config.options.outDir ?? 'build');
-
-        config.options.noEmitOnError = true;
-        config.options.incremental = false;
-
-        const program = ts.createProgram(config.fileNames, config.options);
-        const emitResult = program.emit(undefined, sys.writeFile, undefined, undefined, transformers);
-        const diagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-        reportDiagnostics(diagnostics);
-
-        return !emitResult.emitSkipped;
-    } catch (error) {
-        console.error(error);
+    const [_configErrors, config] = readConfig(ts.sys, 'tsconfig.json');
+    if (!config) {
         return false;
     }
-}
 
-function buildProject(builder: ts.SolutionBuilder<ts.EmitAndSemanticDiagnosticsBuilderProgram>) {
-    const project = builder.getNextInvalidatedProject();
-    if (project) {
-        console.log(
-            `[typescript] Invalidated project ${project.project}, kind: ${ts.InvalidatedProjectKind[project.kind]}`,
-        );
-        if (project.kind == ts.InvalidatedProjectKind.Build) {
-            const emitResult = project.emit(undefined, undefined, undefined, undefined, transformers);
+    const host = ts.createSolutionBuilderHost(
+        getSys(engines, config.options.outDir ?? 'build'),
+        ts.createEmitAndSemanticDiagnosticsBuilderProgram,
+        reportDiagnostic,
+        reportDiagnostic,
+    );
 
-            if (emitResult) {
-                reportDiagnostics(emitResult.diagnostics);
-            }
-        }
-    }
+    const builder = ts.createSolutionBuilder(host, config.options.rootDirs ?? ['.'], {
+        noEmitOnError: true,
+        incremental: false,
+    });
+
+    const exitStatus = builder.build(undefined, undefined, undefined, _project => transformers);
+
+    return exitStatus === ts.ExitStatus.Success;
 }
 
 export async function watch(engines: string[]) {
@@ -126,26 +115,25 @@ export async function watch(engines: string[]) {
         return false;
     }
 
-    const sys = getSys(engines, config.options.outDir ?? 'build');
-
-    config.options.noEmitOnError = false;
-    config.options.incremental = true;
-
     const host = ts.createSolutionBuilderWithWatchHost(
-        sys,
+        getSys(engines, config.options.outDir ?? 'build'),
         ts.createEmitAndSemanticDiagnosticsBuilderProgram,
         reportDiagnostic,
         reportDiagnostic,
-        diagnostic => {
-            reportDiagnostic(diagnostic);
-            buildProject(builder);
-        },
+        reportDiagnostic,
     );
 
-    const builder = ts.createSolutionBuilderWithWatch(host, config.options.rootDirs ?? ['.'], {}, config.watchOptions);
+    const builder = ts.createSolutionBuilderWithWatch(
+        host,
+        config.options.rootDirs ?? ['.'],
+        {
+            noEmitOnError: false,
+            incremental: true,
+        },
+        undefined,
+    );
 
-    buildProject(builder);
-    builder.build();
+    const exitStatus = builder.build(undefined, undefined, undefined, _project => transformers);
 
-    return true;
+    return exitStatus === ts.ExitStatus.Success;
 }
