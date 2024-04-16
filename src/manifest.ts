@@ -21,7 +21,7 @@ export default (engine: 'gecko' | 'chromium'): JsonObject => {
         ...includeIf(engine === 'gecko', {
             browser_specific_settings: {
                 gecko: {
-                    id: ' {ec12956c-1b03-4829-a79a-b501802dd407}',
+                    id: '{ec12956c-1b03-4829-a79a-b501802dd407}',
                 },
             },
         }),
