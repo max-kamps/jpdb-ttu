@@ -17,11 +17,12 @@ function reportDiagnostic(diagnostic: ts.Diagnostic) {
 }
 
 function getSys(engines: string[], outDir: string): ts.System {
+    const baseDir = path.join(outDir, 'src');
     return {
         ...ts.sys,
         writeFile(dest, content, bom) {
-            const relPath = path.relative(outDir, dest);
-            console.log(`[typescript] Recompiled file ${relPath}`);
+            const relPath = path.relative(baseDir, dest);
+            console.log(`[typescript] Recompiled file src/${relPath}`);
             for (const engine of engines) {
                 const destPath = path.join('build', engine, relPath);
                 ts.sys.writeFile(destPath, content, bom);
@@ -81,15 +82,13 @@ export async function compileAll(engines: string[]): Promise<boolean> {
     // TODO it would be really nice if someone can figure out how to make this work with the solution builder API,
     // instead of createProgram. That could cut down on duplication between this function and watch()
     try {
-        const outDir = `build/${engines[0]}`;
-        const sys = getSys(engines, outDir);
-
-        const [_configErrors, config] = readConfig(sys, 'tsconfig.json');
+        const [_configErrors, config] = readConfig(ts.sys, 'tsconfig.json');
         if (!config) {
             return false;
         }
 
-        config.options.outDir = outDir;
+        const sys = getSys(engines, config.options.outDir ?? 'build');
+
         config.options.noEmitOnError = true;
         config.options.incremental = false;
 
@@ -122,15 +121,13 @@ function buildProject(builder: ts.SolutionBuilder<ts.EmitAndSemanticDiagnosticsB
 }
 
 export async function watch(engines: string[]) {
-    const outDir = `build/${engines[0]}`;
-    const sys = getSys(engines, outDir);
-
-    const [_configErrors, config] = readConfig(sys, 'tsconfig.json');
+    const [_configErrors, config] = readConfig(ts.sys, 'tsconfig.json');
     if (!config) {
         return false;
     }
 
-    config.options.outDir = outDir;
+    const sys = getSys(engines, config.options.outDir ?? 'build');
+
     config.options.noEmitOnError = false;
     config.options.incremental = true;
 
@@ -145,7 +142,7 @@ export async function watch(engines: string[]) {
         },
     );
 
-    const builder = ts.createSolutionBuilderWithWatch(host, ['.'], {}, config.watchOptions);
+    const builder = ts.createSolutionBuilderWithWatch(host, config.options.rootDirs ?? ['.'], {}, config.watchOptions);
 
     buildProject(builder);
     builder.build();
