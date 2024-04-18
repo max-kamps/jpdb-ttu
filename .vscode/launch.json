@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Watch Script",
+            "program": "${workspaceFolder}/scripts/watch.ts",
+            "preLaunchTask": "tsc: build - scripts/tsconfig.json",
+            "outFiles": ["${workspaceFolder}/build/scripts/**/*.js"]
+        }
+    ]
+}

@@ -1,8 +1,5 @@
 {
     "extends": "../tsconfig.json",
     "include": ["./**/*", "../src/manifest.ts"],
-    "compilerOptions": {
-        "noEmit": true,
-        "allowImportingTsExtensions": true
-    }
+    "compilerOptions": {}
 }

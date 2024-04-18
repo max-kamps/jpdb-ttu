@@ -10,6 +10,7 @@
         "isolatedModules": true,
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "typeRoots": ["dev_types", "./node_modules/@types"],
+        "esModuleInterop": true,
 
         // Code Generation
         "outDir": "build",

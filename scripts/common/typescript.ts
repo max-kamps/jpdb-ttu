@@ -93,9 +93,10 @@ export function watch(engines: string[]) {
         diagnostics.reportDiagnostic.bind(diagnostics),
         diagnostics.reportDiagnostic.bind(diagnostics),
     );
+    host.getCustomTransformers = () => transformers;
     const builder = ts.createSolutionBuilderWithWatch(host, ['.'], {
         noEmitOnError: false,
         incremental: true,
     });
-    builder.build(undefined, undefined, undefined, _project => transformers);
+    builder.build();
 }
