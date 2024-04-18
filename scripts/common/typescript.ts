@@ -33,7 +33,9 @@ function getSys(engines: string[], baseDir: string): ts.System {
     return {
         ...ts.sys,
         writeFile(dest, content, bom) {
+            ts.sys.writeFile(dest, content, bom);
             const relPath = path.relative(baseDir, dest);
+            if (relPath.startsWith('..')) return;
             console.log(`[typescript] Recompiled file src/${relPath}`);
             for (const engine of engines) {
                 const destPath = path.join('build', engine, relPath);
