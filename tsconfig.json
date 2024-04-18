@@ -5,7 +5,7 @@
         // Module Resolution
         "rootDir": ".",
         "moduleDetection": "force",
-        "moduleResolution": "NodeNext",
+        "moduleResolution": "Bundler",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
@@ -14,7 +14,7 @@
         // Code Generation
         "outDir": "build",
         "target": "ES2022",
-        "module": "NodeNext",
+        "module": "ES2022",
         "jsx": "react",
         "jsxFactory": "jsxCreateElement",
         "jsxFragmentFactory": "NOT_IMPLEMENTED",
