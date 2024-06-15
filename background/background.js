@@ -1,54 +1,23 @@
 import { loadConfig } from "./config.js";
-import { browser, isChrome, sleep } from "../util.js";
+import { browser, isChrome } from "../util.js";
 import * as backend from "./backend.js";
+import { serialQueue } from "./lib/serial-queue.js";
 export let config = loadConfig();
-const pendingAPICalls = [];
-let callerRunning = false;
-async function apiCaller() {
-  // If no API calls are pending, stop running
-  if (callerRunning || pendingAPICalls.length === 0)
-    // Only run one instance of this function at a time
-    return;
-  callerRunning = true;
-  while (pendingAPICalls.length > 0) {
-    // Get first call from queue
-    // Safety: We know this can't be undefined, because we checked that the length > 0
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const call = pendingAPICalls.shift();
-    try {
-      const intermediate = await call.func();
-      console.log({ call, intermediate });
-      const [result, wait] = intermediate;
-      call.resolve(result);
-      await sleep(wait);
-    } catch (error) {
-      call.reject(error);
-      // TODO implement exponential backoff
-      await sleep(1500);
-    }
-  }
-  callerRunning = false;
-}
-function enqueue(func) {
-  return new Promise((resolve, reject) => {
-    pendingAPICalls.push({ func, resolve, reject });
-    apiCaller();
-  });
-}
+
 export async function addToDeck(vid, sid, sentence, deckId) {
-  return enqueue(() => backend.addToDeck(vid, sid, sentence, deckId));
+  return serialQueue.queue(() => backend.addToDeck(vid, sid, sentence, deckId));
 }
 export async function removeFromDeck(vid, sid) {
-  return enqueue(() => backend.removeFromDeck(vid, sid));
+  return serialQueue.queue(() => backend.removeFromDeck(vid, sid));
 }
 export async function review(vid, sid, rating) {
-  return enqueue(() => backend.review(vid, sid, rating));
+  return serialQueue.queue(() => backend.review(vid, sid, rating));
 }
 export async function getCardState(vid, sid) {
-  return enqueue(() => backend.getCardState(vid, sid));
+  return serialQueue.queue(() => backend.getCardState(vid, sid));
 }
 export async function openInAnki(vid, sid, spelling) {
-  return enqueue(() => backend.openInAnki(vid, sid, spelling));
+  return serialQueue.queue(() => backend.openInAnki(vid, sid, spelling));
 }
 const maxParseLength = 16384;
 const pendingParagraphs = new Map();
@@ -107,17 +76,11 @@ export function enqueueParse(seq, text) {
   });
 }
 export function startParse() {
-  const batches = createBatches();
-  if (batches.length > 0) {
-    for (const batch of batches) {
-      pendingAPICalls.push({
-        func: () => parseBatch(batch),
-        resolve: () => {},
-        reject: () => {},
-      });
-    }
-    apiCaller();
-  }
+  const batches = createBatches() ?? [];
+
+  batches.forEach((batch) => {
+    serialQueue.queue(() => parseBatch(batch));
+  });
 }
 // Content script communication
 const ports = new Set();

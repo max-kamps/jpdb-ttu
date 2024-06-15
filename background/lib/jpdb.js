@@ -1,5 +1,4 @@
-import { truncate } from "../util.js";
-import { loadConfig } from "./config.js";
+import { loadConfig } from "../config.js";
 
 /**
  * @typedef {Enum} JPDBCardState The state of the card
@@ -132,7 +131,7 @@ class JPDB {
       const data = await response.json();
 
       throw Error(
-        `${data.error_message} while parsing 「${truncate(
+        `${data.error_message} while parsing 「${this.truncate(
           paragraphs.join(" "),
           20
         )}」`
@@ -260,6 +259,12 @@ class JPDB {
 
   toPascalCase(str) {
     return str.replace(/(?:^|\s)\S/g, (a) => a.toUpperCase());
+  }
+
+  truncate(string, maxLength) {
+    return string.length <= maxLength
+      ? string
+      : string.slice(0, maxLength - 1) + "…";
   }
 }
 

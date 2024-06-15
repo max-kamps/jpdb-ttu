@@ -1,9 +1,7 @@
-import { anki } from "./anki.js";
-import { parser } from "./parser.js";
+import { anki } from "./lib/anki.js";
+import { parser } from "./lib/parser.js";
 
 import { config } from "./background.js";
-const API_RATELIMIT = 0.2; // seconds between requests
-// NOTE: If you change these, make sure to change the .map calls down below in the parse function too
 
 const PARTS_OF_SPEECH = {
   n: "Noun",
@@ -274,8 +272,6 @@ export async function openInAnki(vid, sid, spelling) {
   const query = card.note ? `nid:${card.note}` : `word:${spelling}`;
 
   await invokeAnki("guiBrowse", { query });
-
-  return [null, API_RATELIMIT];
 }
 
 function sanitizeSentence(sentence) {
@@ -424,7 +420,7 @@ export async function parse(text) {
     jpdbCards[key] = value[0];
   });
 
-  return [[data.jpdbTokens, cards], API_RATELIMIT];
+  return [data.jpdbTokens, cards];
 }
 
 export async function addToDeck(vid, sid, sentence, deckId) {
@@ -513,8 +509,6 @@ export async function addToDeck(vid, sid, sentence, deckId) {
     state: stateMap[deckId],
   });
   jpdbCard.source = "anki";
-
-  return [null, API_RATELIMIT];
 }
 
 export async function removeFromDeck(vid, sid) {
@@ -534,8 +528,6 @@ export async function removeFromDeck(vid, sid) {
     state: ["not-in-deck"],
   });
   jpdbCard.source = "jpdb";
-
-  return [null, API_RATELIMIT];
 }
 
 export async function getCardState(vid, sid) {
@@ -543,5 +535,5 @@ export async function getCardState(vid, sid) {
   const state = card?.state ?? ["not-in-deck"];
   const source = card?.source ?? "jpdb";
 
-  return [[state, source], API_RATELIMIT];
+  return [state, source];
 }

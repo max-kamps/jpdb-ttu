@@ -1,4 +1,4 @@
-import { loadConfig } from "./config.js";
+import { loadConfig } from "../config.js";
 import { anki } from "./anki.js";
 import { jpdb } from "./jpdb.js";
 
