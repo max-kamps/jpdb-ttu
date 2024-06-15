@@ -1,0 +1,111 @@
+import { config, requestMine } from "./background_comms.js";
+import { Popup } from "./popup.js";
+import { showError } from "./toast.js";
+import { getSentences } from "./word.js";
+export let currentHover = null;
+let popupKeyHeld = false;
+function matchesHotkey(event, hotkey) {
+  const code =
+    event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
+  return (
+    hotkey &&
+    code === hotkey.code &&
+    hotkey.modifiers.every((name) => event.getModifierState(name))
+  );
+}
+async function hotkeyListener(event) {
+  try {
+    if (matchesHotkey(event, config.showPopupKey) && !config.showPopupOnHover) {
+      event.preventDefault();
+      popupKeyHeld = true;
+      const popup = Popup.get();
+      popup.disablePointer();
+      if (!currentHover) {
+        popup.fadeOut();
+      }
+    }
+    if (currentHover) {
+      const [word, x, y] = currentHover;
+      const card = word.jpdbData.token.card;
+      if (matchesHotkey(event, config.addKey)) {
+        await requestMine(
+          word.jpdbData.token.card,
+          config.forqOnMine,
+          getSentences(word.jpdbData, config.contextWidth).trim() || undefined,
+          undefined
+        );
+      }
+      if (matchesHotkey(event, config.dialogKey)) {
+      }
+      if (matchesHotkey(event, config.showPopupKey)) {
+        event.preventDefault();
+        Popup.get().showForWord(word, x, y);
+      }
+      if (matchesHotkey(event, config.blacklistKey)) {
+        event.preventDefault();
+      }
+      if (matchesHotkey(event, config.neverForgetKey)) {
+        event.preventDefault();
+      }
+      if (matchesHotkey(event, config.nothingKey)) {
+        event.preventDefault();
+      }
+      if (matchesHotkey(event, config.somethingKey)) {
+        event.preventDefault();
+      }
+      if (matchesHotkey(event, config.hardKey)) {
+        event.preventDefault();
+      }
+      if (matchesHotkey(event, config.goodKey)) {
+        event.preventDefault();
+      }
+      if (matchesHotkey(event, config.easyKey)) {
+        event.preventDefault();
+      }
+    }
+  } catch (error) {
+    showError(error);
+  }
+}
+window.addEventListener("keydown", hotkeyListener);
+window.addEventListener("mousedown", hotkeyListener);
+function hidePopupHotkeyListener(event) {
+  if (matchesHotkey(event, config.showPopupKey)) {
+    event.preventDefault();
+    popupKeyHeld = false;
+    Popup.get().enablePointer();
+  }
+}
+window.addEventListener("keyup", hidePopupHotkeyListener);
+window.addEventListener("mouseup", hidePopupHotkeyListener);
+document.addEventListener("mousedown", (e) => {
+  if (config.touchscreenSupport) {
+    // to prevent issues with simultaneous showing and hiding
+    // and to allow clicking on the popup without making it disappear.
+    if (currentHover == null && !Popup.get().containsMouse(e)) {
+      Popup.get().fadeOut();
+    }
+  } else {
+    Popup.get().fadeOut();
+  }
+});
+export function onWordHoverStart({ target, x, y }) {
+  if (target === null) return;
+  currentHover = [target, x, y];
+  if (popupKeyHeld || config.showPopupOnHover) {
+    // On mobile devices, the position of the popup is occasionally adjusted to ensure
+    // it remains on the screen. However, due to the interaction between the 'onmouseenter'
+    // event and the popup, there are instances where the popup appears and at the same
+    // time a (review) button is being clicked.
+    if (config.touchscreenSupport) {
+      Popup.get().disablePointer();
+      setTimeout(() => {
+        Popup.get().enablePointer();
+      }, 400);
+    }
+    Popup.get().showForWord(target, x, y);
+  }
+}
+export function onWordHoverStop() {
+  currentHover = null;
+}
