@@ -79,7 +79,7 @@ const deserializeError = isChrome
   : (err) => err;
 export const port = browser.runtime.connect();
 port.onDisconnect.addListener(() => {
-  console.error("disconnect:", port);
+  console.log("disconnect:", port);
 });
 port.onMessage.addListener((message, port) => {
   // console.log("message:", message, port);
