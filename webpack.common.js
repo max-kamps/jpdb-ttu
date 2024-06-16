@@ -51,7 +51,8 @@ module.exports = {
         //     }),
         //   {},
         // ),
-        // styles: '@styles/main.scss',
+        theme: './src/styles/theme.scss',
+        common: './src/styles/common.scss',
       },
       resolve: {
         extensions: ['.tsx', '.ts', '.js'],
@@ -85,36 +86,17 @@ module.exports = {
             new HtmlWebpackPlugin({
               filename: `views/${view}.html`,
               template: `src/views/${view}/${view}.html`,
-              // chunks: ['styles', `view/${view}`],
-              chunks: [`views/${view}`],
+              chunks: ['theme', 'common', `views/${view}`],
             }),
         ),
       ],
       module: {
         rules: [
-          //   {
-          //     test: /\.(scss)$/,
-          //     include: [path.resolve(__dirname, 'src/styles')],
-          //     use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
-          //   },
-          //   {
-          //     test: /\.css|\.s(c|a)ss$/,
-          //     include: [
-          //       path.resolve(__dirname, 'src/components'),
-          //       path.resolve(__dirname, 'src/views'),
-          //     ],
-          //     use: [
-          //       {
-          //         loader: 'lit-scss-loader',
-          //         options: {
-          //           minify: true,
-          //         },
-          //       },
-          //       'extract-loader',
-          //       'css-loader',
-          //       'sass-loader',
-          //     ],
-          //   },
+          {
+            test: /\.(scss)$/,
+            include: [path.resolve(__dirname, 'src/styles'), path.resolve(__dirname, 'src/views')],
+            use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
+          },
           //   {
           //     test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
           //     type: 'asset/resource',

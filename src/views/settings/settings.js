@@ -4,6 +4,9 @@ import { Popup } from '../../content/popup.js';
 import { showError } from '../../content/toast.js';
 import { assert, nonNull, wrap } from '../../util.js';
 import { defineCustomElements } from './elements.js';
+
+import './settings.scss';
+
 // Custom element definitions
 // Common behavior shared for all settings elements
 const POPUP_EXAMPLE_DATA = {

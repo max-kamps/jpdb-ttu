@@ -11,7 +11,7 @@ export async function removeFromDeck(vid, sid) {
   return serialQueue.queue(() => backend.removeFromDeck(vid, sid));
 }
 export async function review(vid, sid, rating) {
-  return serialQueue.queue(() => backend.review(vid, sid, rating));
+  // return serialQueue.queue(() => backend.review(vid, sid, rating));
 }
 export async function getCardState(vid, sid) {
   return serialQueue.queue(() => backend.getCardState(vid, sid));
