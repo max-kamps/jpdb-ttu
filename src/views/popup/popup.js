@@ -1,6 +1,6 @@
 import { loadConfig } from '../../background/config.js';
 import { browser, nonNull } from '../../util.js';
-import { jsxCreateElement } from '../../jsx.js';
+import { jsxCreateElement } from '../../lib/jsx.js';
 const config = loadConfig();
 async function parsePage(tab) {
   // Parse the page

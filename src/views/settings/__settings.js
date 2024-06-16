@@ -1,11 +1,9 @@
 import { loadConfig, migrateSchema, saveConfig } from '../../background/config.js';
 import { requestUpdateConfig } from '../../content/background_comms.js';
 import { Popup } from '../../content/popup.js';
-import { showError } from '../../content/toast.js';
+import { showError } from '../../lib/toast.ts/index.js';
 import { assert, nonNull, wrap } from '../../util.js';
 import { defineCustomElements } from './elements.js';
-
-// import './settings.scss';
 
 // Custom element definitions
 // Common behavior shared for all settings elements

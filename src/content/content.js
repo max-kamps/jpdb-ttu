@@ -1,16 +1,13 @@
-import { config, requestMine } from "./background_comms.js";
-import { Popup } from "./popup.js";
-import { showError } from "./toast.js";
-import { getSentences } from "./word.js";
+import { config, requestMine } from './background_comms.js';
+import { Popup } from './popup.js';
+import { showError } from '../lib/toast.ts/index.js';
+import { getSentences } from './word.js';
 export let currentHover = null;
 let popupKeyHeld = false;
 function matchesHotkey(event, hotkey) {
-  const code =
-    event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
+  const code = event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
   return (
-    hotkey &&
-    code === hotkey.code &&
-    hotkey.modifiers.every((name) => event.getModifierState(name))
+    hotkey && code === hotkey.code && hotkey.modifiers.every((name) => event.getModifierState(name))
   );
 }
 async function hotkeyListener(event) {
@@ -32,7 +29,7 @@ async function hotkeyListener(event) {
           word.jpdbData.token.card,
           config.forqOnMine,
           getSentences(word.jpdbData, config.contextWidth).trim() || undefined,
-          undefined
+          undefined,
         );
       }
       if (matchesHotkey(event, config.dialogKey)) {
@@ -67,8 +64,8 @@ async function hotkeyListener(event) {
     showError(error);
   }
 }
-window.addEventListener("keydown", hotkeyListener);
-window.addEventListener("mousedown", hotkeyListener);
+window.addEventListener('keydown', hotkeyListener);
+window.addEventListener('mousedown', hotkeyListener);
 function hidePopupHotkeyListener(event) {
   if (matchesHotkey(event, config.showPopupKey)) {
     event.preventDefault();
@@ -76,9 +73,9 @@ function hidePopupHotkeyListener(event) {
     Popup.get().enablePointer();
   }
 }
-window.addEventListener("keyup", hidePopupHotkeyListener);
-window.addEventListener("mouseup", hidePopupHotkeyListener);
-document.addEventListener("mousedown", (e) => {
+window.addEventListener('keyup', hidePopupHotkeyListener);
+window.addEventListener('mouseup', hidePopupHotkeyListener);
+document.addEventListener('mousedown', (e) => {
   if (config.touchscreenSupport) {
     // to prevent issues with simultaneous showing and hiding
     // and to allow clicking on the popup without making it disappear.

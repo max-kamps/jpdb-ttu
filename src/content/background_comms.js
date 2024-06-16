@@ -1,7 +1,7 @@
-import { browser, Canceled, isChrome } from "../util.js";
-import { reverseIndex } from "./parse.js";
-import { Popup } from "./popup.js";
-import { showError } from "./toast.js";
+import { browser, Canceled, isChrome } from '../util.js';
+import { reverseIndex } from './parse.js';
+import { Popup } from './popup.js';
+import { showError } from '../lib/toast.ts/index.js';
 // Background script communication
 export let config;
 const waitingPromises = new Map();
@@ -18,8 +18,8 @@ function preregisterAbortableRequest() {
   const abort = new AbortController();
   const promise = new Promise((resolve, reject) => {
     waitingPromises.set(seq, { resolve, reject });
-    abort.signal.addEventListener("abort", () => {
-      port.postMessage({ type: "cancel", seq });
+    abort.signal.addEventListener('abort', () => {
+      port.postMessage({ type: 'cancel', seq });
     });
   });
   return [seq, promise, abort];
@@ -32,7 +32,7 @@ function requestUnabortable(message) {
 }
 export function requestMine(card, sentence, deckId) {
   return requestUnabortable({
-    type: "addToAnki",
+    type: 'addToAnki',
     vid: card.vid,
     sid: card.sid,
     sentence,
@@ -41,20 +41,20 @@ export function requestMine(card, sentence, deckId) {
 }
 export function requestRemoveFromAnki(card) {
   return requestUnabortable({
-    type: "removeFromAnki",
+    type: 'removeFromAnki',
     vid: card.vid,
     sid: card.sid,
   });
 }
 export function requestOpenInAnki(card) {
   return requestUnabortable({
-    type: "openInAnki",
+    type: 'openInAnki',
     vid: card.vid,
     sid: card.sid,
   });
 }
 export function requestUpdateConfig() {
-  return requestUnabortable({ type: "updateConfig" });
+  return requestUnabortable({ type: 'updateConfig' });
 }
 export function createParseBatch(paragraph) {
   const [seq, promise, abort] = preregisterAbortableRequest();
@@ -64,9 +64,9 @@ export function createParseBatch(paragraph) {
 export function requestParse(batches) {
   const texts = batches.map((batch) => [
     batch.seq,
-    batch.paragraph.map((fragment) => fragment.node.data).join(""),
+    batch.paragraph.map((fragment) => fragment.node.data).join(''),
   ]);
-  return requestUnabortable({ type: "parse", texts });
+  return requestUnabortable({ type: 'parse', texts });
 }
 // Chrome can't send Error objects over background ports, so we have to serialize and deserialize them...
 // (To be specific, Firefox can send any structuredClone-able object, while Chrome can only send JSON-stringify-able objects)
@@ -79,12 +79,12 @@ const deserializeError = isChrome
   : (err) => err;
 export const port = browser.runtime.connect();
 port.onDisconnect.addListener(() => {
-  console.log("disconnect:", port);
+  console.log('disconnect:', port);
 });
 port.onMessage.addListener((message, port) => {
   // console.log("message:", message, port);
   switch (message.type) {
-    case "success":
+    case 'success':
       {
         const promise = waitingPromises.get(message.seq);
         waitingPromises.delete(message.seq);
@@ -95,7 +95,7 @@ port.onMessage.addListener((message, port) => {
         }
       }
       break;
-    case "error":
+    case 'error':
       {
         const promise = waitingPromises.get(message.seq);
         waitingPromises.delete(message.seq);
@@ -106,27 +106,27 @@ port.onMessage.addListener((message, port) => {
         }
       }
       break;
-    case "canceled":
+    case 'canceled':
       {
         const promise = waitingPromises.get(message.seq);
         waitingPromises.delete(message.seq);
         if (promise) {
-          promise.reject(new Canceled("Canceled"));
+          promise.reject(new Canceled('Canceled'));
         }
       }
       break;
-    case "updateConfig":
+    case 'updateConfig':
       {
         config = message.config;
         Popup.get().updateStyle();
       }
       break;
-    case "updateWordState":
+    case 'updateWordState':
       {
         for (const [vid, sid, [state, source]] of message.words) {
           const idx = reverseIndex.get(`${vid}/${sid}`);
           if (idx === undefined) continue;
-          const className = `jpdb-word ${state.join(" ")}`;
+          const className = `jpdb-word ${state.join(' ')}`;
           if (idx.className === className) continue;
           for (const element of idx.elements) {
             element.className = className;
