@@ -1,28 +1,18 @@
-import { loadConfig } from '../../___/background/config.js';
-import { browser, nonNull } from '../../lib/util.js';
-import { jsxCreateElement } from '../../lib/jsx.js';
-const config = loadConfig();
-async function parsePage(tab) {
-  // Parse the page
-  await browser.tabs.insertCSS(tab.id, { file: '/content/word.css', cssOrigin: 'author' });
-  if (config.customWordCSS)
-    await browser.tabs.insertCSS(tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
-  browser.tabs.executeScript(tab.id, { file: '/integrations/parse_selection.js' });
-  // Close the popup
-  setTimeout(() => window.close(), 10);
-}
-nonNull(document.querySelector('#settings-link')).addEventListener('click', () => {
-  setTimeout(() => window.close(), 10);
-});
-browser.tabs.query({ active: true }, (tabs) => {
-  const buttonContainer = nonNull(document.querySelector('article'));
-  for (const tab of tabs) {
+import { jsxCreateElement } from '@lib/jsx';
+import { getCallable, requestParse } from '@lib/messaging';
+
+chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
+  const buttonContainer = document.querySelector('article');
+
+  tabs.forEach((tab) => {
     buttonContainer.append(
       jsxCreateElement(
         'button',
-        { onclick: () => parsePage(tab) },
+        {
+          onclick: () => requestParse(tab.id).then(() => window.close()),
+        },
         `Parse "${tab.title ?? 'Untitled'}"`,
       ),
     );
-  }
+  });
 });

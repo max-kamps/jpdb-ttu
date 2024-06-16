@@ -1,6 +1,10 @@
-import { showError } from './toast.ts';
+import { showError } from './toast';
 
-export function jsxCreateElement(name, props, ...content) {
+export function jsxCreateElement<Tag extends keyof HTMLElementTagNameMap>(
+  name: Tag,
+  props: { [id: string]: any } | null,
+  ...content: (string | HTMLElement)[]
+): HTMLElementTagNameMap[Tag] {
   const elem = document.createElement(name);
 
   if (props) {
@@ -11,8 +15,6 @@ export function jsxCreateElement(name, props, ...content) {
             try {
               await value(...args);
             } catch (error) {
-              console.error(error);
-
               showError(error);
             }
           });

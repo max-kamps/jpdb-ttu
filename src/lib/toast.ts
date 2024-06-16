@@ -1,5 +1,6 @@
-import { browser } from './util.js';
-import { jsxCreateElement } from './jsx.js';
+import { browser } from './util';
+import { jsxCreateElement } from './jsx';
+import { cssURL } from './paths';
 
 class Toast {
   private static _shadow: ShadowRoot;
@@ -47,7 +48,7 @@ class Toast {
       ),
     );
 
-    this._shadow.append(toast);
+    this._getShadow().append(toast);
   }
 
   private static _getShadow(): ShadowRoot {
@@ -58,15 +59,15 @@ class Toast {
       this._shadow.append(
         jsxCreateElement('link', {
           rel: 'stylesheet',
-          href: browser.runtime.getURL('styles/themes.css'),
+          href: cssURL('theme'),
         }),
         jsxCreateElement('link', {
           rel: 'stylesheet',
-          href: browser.runtime.getURL('styles/common.css'),
+          href: cssURL('common'),
         }),
         jsxCreateElement('link', {
           rel: 'stylesheet',
-          href: browser.runtime.getURL('styles/toast.css'),
+          href: cssURL('toast'),
         }),
       );
 

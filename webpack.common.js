@@ -2,13 +2,13 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const serviceWorker = 'service-worker/service-worker';
 const views = [
   // 'background',
   // 'settings',
   'popup',
 ];
 const integrations = [
+  'parse_selection',
   // 'ttu',
   // 'anacreon',
   // 'mokuro',
@@ -18,6 +18,7 @@ const integrations = [
   // 'youtube',
   // 'bunpro',
 ];
+const globalStyles = ['toast', 'word'];
 
 module.exports = {
   async config(env) {
@@ -65,12 +66,12 @@ module.exports = {
           '.cts': ['.cjs', '.cts'],
           '.mts': ['.mjs', '.mts'],
         },
-        // alias: {
-        //   '@apps': path.resolve(__dirname, 'src/apps'),
-        //   '@components': path.resolve(__dirname, 'src/components'),
-        //   '@lib': path.resolve(__dirname, 'src/lib'),
-        //   '@styles': path.resolve(__dirname, 'src/styles'),
-        // },
+        alias: {
+          //   '@apps': path.resolve(__dirname, 'src/apps'),
+          //   '@components': path.resolve(__dirname, 'src/components'),
+          '@lib': path.resolve(__dirname, 'src/lib'),
+          '@styles': path.resolve(__dirname, 'src/styles'),
+        },
       },
       plugins: [
         new CopyPlugin({
@@ -92,6 +93,10 @@ module.exports = {
             ...integrations.map((integration) => ({
               filename: `integrations/${integration}.js`,
               import: `./src/integrations/${integration}.js`,
+            })),
+            ...globalStyles.map((style) => ({
+              filename: `styles/${style}.css`,
+              import: `./src/styles/${style}.scss`,
             })),
           ],
           js: {
