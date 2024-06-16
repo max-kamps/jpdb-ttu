@@ -10,6 +10,13 @@ class SerialQueue {
     this.running = false;
   }
 
+  /**
+   * Queue a function to be executed.
+   *
+   * @public
+   * @param {<T>() => T} func
+   * @returns {Promise<T>}
+   */
   queue(func) {
     return new Promise((resolve, reject) => {
       this.pending.push({ func, resolve, reject });
@@ -18,6 +25,12 @@ class SerialQueue {
     });
   }
 
+  /**
+   * Runs the next item in the queue. Recursively calls itself until the queue is empty.
+   *
+   * @private
+   * @returns {void}
+   */
   run() {
     if (this.running || this.pending.length === 0) {
       return;
