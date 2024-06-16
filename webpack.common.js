@@ -2,16 +2,21 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const views = ['background', 'settings', 'popup'];
+const serviceWorker = 'service-worker/service-worker';
+const views = [
+  // 'background',
+  // 'settings',
+  'popup',
+];
 const integrations = [
-  'ttu',
-  'anacreon',
-  'mokuro',
-  'asbplayer',
-  'readwok',
-  'wikipedia',
-  'youtube',
-  'bunpro',
+  // 'ttu',
+  // 'anacreon',
+  // 'mokuro',
+  // 'asbplayer',
+  // 'readwok',
+  // 'wikipedia',
+  // 'youtube',
+  // 'bunpro',
 ];
 
 module.exports = {
@@ -76,6 +81,10 @@ module.exports = {
         }),
         new HtmlBundlerPlugin({
           entry: [
+            {
+              filename: 'service-worker/service-worker.js',
+              import: './src/service-worker/service-worker.ts',
+            },
             ...views.map((view) => ({
               filename: `views/${view}/${view}.html`,
               import: `src/views/${view}/${view}.html`,

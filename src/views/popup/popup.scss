@@ -1,0 +1,11 @@
+body {
+  min-width: min-content;
+}
+article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  min-width: 20em;
+  max-width: 100%;
+  align-items: stretch;
+}

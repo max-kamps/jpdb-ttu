@@ -1,7 +1,7 @@
 import { createParseBatch, requestParse } from '../content/background_comms.js';
 import { applyTokens, displayCategory } from '../content/parse.js';
 import { showError } from '../lib/toast.ts/index.js';
-import { Canceled } from '../util.js';
+import { Canceled } from '../../util.js';
 export function paragraphsInNode(node, filter = () => true) {
   let offset = 0;
   const fragments = [];
