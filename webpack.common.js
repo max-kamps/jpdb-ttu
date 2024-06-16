@@ -2,11 +2,7 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const views = [
-  // 'background',
-  // 'settings',
-  'popup',
-];
+const views = ['settings', 'popup'];
 const integrations = [
   'parse_selection',
   // 'ttu',
@@ -24,41 +20,6 @@ module.exports = {
   async config(env) {
     return {
       mode: env,
-      entry: {
-        // ...views.reduce(
-        //   (acc, view) =>
-        //     Object.assign(acc, {
-        //       [`views/${view}`]: {
-        //         import: `./src/views/${view}/${view}.js`,
-        //       },
-        //     }),
-        //   {},
-        // ),
-        // ...integrations.reduce(
-        //   (acc, integration) =>
-        //     Object.assign(acc, {
-        //       [`integrations/${integration}`]: {
-        //         import: `./src/integrations/${integration}.js`,
-        //       },
-        //     }),
-        //   {},
-        // ),
-        // 'service-worker': {
-        //   import: './src/service-worker.ts',
-        //   runtime: false,
-        // },
-        // ...contentScripts.reduce(
-        //   (acc, contentScript) =>
-        //     Object.assign(acc, {
-        //       [`apps/${contentScript}`]: {
-        //         import: `./src/apps/${contentScript}.ts`,
-        //         runtime: false,
-        //       },
-        //     }),
-        //   {},
-        // ),
-        // styles: ['./src/styles/theme.scss', './src/styles/common.scss'],
-      },
       resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         extensionAlias: {
@@ -67,8 +28,6 @@ module.exports = {
           '.mts': ['.mjs', '.mts'],
         },
         alias: {
-          //   '@apps': path.resolve(__dirname, 'src/apps'),
-          //   '@components': path.resolve(__dirname, 'src/components'),
           '@lib': path.resolve(__dirname, 'src/lib'),
           '@styles': path.resolve(__dirname, 'src/styles'),
         },
@@ -120,20 +79,6 @@ module.exports = {
             },
           },
         }),
-        // new DefinePlugin({
-        //   __VERSION__: JSON.stringify(version),
-        //   __ENV__: JSON.stringify(),
-        //   __PRODUCTION__: JSON.stringify(env === 'production'),
-        //   __DEVELOPMENT__: JSON.stringify(env === 'development'),
-        // }),
-        // ...views.map(
-        //   (view) =>
-        //     new HtmlWebpackPlugin({
-        //       filename: `views/${view}.html`,
-        //       template: `src/views/${view}/${view}.html`,
-        //       chunks: [`views/${view}`],
-        //     }),
-        // ),
       ],
       module: {
         rules: [
@@ -148,10 +93,6 @@ module.exports = {
               filename: '[path][name][ext]',
             },
           },
-          //   {
-          //     test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
-          //     type: 'asset/resource',
-          //   },
           {
             test: /.([cm]?ts|tsx)$/,
             exclude: /node_modules/,
