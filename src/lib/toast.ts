@@ -1,4 +1,4 @@
-import { browser } from '../util.js';
+import { browser } from './util.js';
 import { jsxCreateElement } from './jsx.js';
 
 class Toast {

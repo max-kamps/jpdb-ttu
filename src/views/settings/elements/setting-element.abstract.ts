@@ -1,4 +1,4 @@
-import { browser } from '../../../util';
+import { browser } from '../../../lib/util';
 import { jsxCreateElement } from '../../../lib/jsx';
 
 export abstract class SettingElement<

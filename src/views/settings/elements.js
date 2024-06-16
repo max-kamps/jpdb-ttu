@@ -1,4 +1,4 @@
-import { defaultConfig } from '../../background/config.js';
+import { defaultConfig } from '../../___/background/config.js';
 import { jsxCreateElement } from '../../jsx.js';
 import { markUnsavedChanges } from './settings.js';
 

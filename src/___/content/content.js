@@ -1,6 +1,6 @@
 import { config, requestMine } from './background_comms.js';
 import { Popup } from './popup.js';
-import { showError } from '../lib/toast.ts/index.js';
+import { showError } from '../background/lib/toast.ts/index.js';
 import { getSentences } from './word.js';
 export let currentHover = null;
 let popupKeyHeld = false;

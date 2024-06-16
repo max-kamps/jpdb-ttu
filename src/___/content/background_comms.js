@@ -1,7 +1,7 @@
 import { browser, Canceled, isChrome } from '../util.js';
 import { reverseIndex } from './parse.js';
 import { Popup } from './popup.js';
-import { showError } from '../lib/toast.ts/index.js';
+import { showError } from '../background/lib/toast.ts/index.js';
 // Background script communication
 export let config;
 const waitingPromises = new Map();
