@@ -1,7 +1,7 @@
-import { loadConfig } from './config.js';
-import { browser, isChrome } from '../util.js';
-import * as backend from './backend.js';
-import { serialQueue } from './lib/serial-queue.js';
+import { loadConfig } from '../../background/config';
+import { browser, isChrome } from '../../util';
+import * as backend from '../../background/backend.js';
+import { serialQueue } from '../../background/lib/serial-queue.js';
 export let config = loadConfig();
 
 export async function addToDeck(vid, sid, sentence, deckId) {
@@ -11,7 +11,7 @@ export async function removeFromDeck(vid, sid) {
   return serialQueue.queue(() => backend.removeFromDeck(vid, sid));
 }
 export async function review(vid, sid, rating) {
-  // return serialQueue.queue(() => backend.review(vid, sid, rating));
+  return serialQueue.queue(() => backend.review(vid, sid, rating));
 }
 export async function getCardState(vid, sid) {
   return serialQueue.queue(() => backend.getCardState(vid, sid));

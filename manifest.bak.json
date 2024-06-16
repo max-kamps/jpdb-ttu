@@ -28,7 +28,8 @@
   "content_scripts": [
     {
       "matches": ["*://reader.ttsu.app/*", "*://ttu-ebook.web.app/*"],
-      "js": ["integrations/ttu.js"]
+      "js": ["integrations/ttu.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": [
@@ -37,38 +38,61 @@
         "*://kamwithk.github.io/exSTATic/tracker.html",
         "*://renji-xd.github.io/texthooker-ui/"
       ],
-      "js": ["integrations/anacreon.js"]
+      "js": ["integrations/anacreon.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": ["file:///*mokuro*.html"],
-      "js": ["integrations/mokuro.js"]
+      "js": ["integrations/mokuro.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": ["<all_urls>"],
       "js": ["integrations/asbplayer.js"],
-      "all_frames": true
+      "all_frames": true,
+      "css": ["content/word.css"]
     },
     {
       "matches": ["*://app.readwok.com/*"],
-      "js": ["integrations/readwok.js"]
+      "js": ["integrations/readwok.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": ["*://ja.wikipedia.org/*", "*://ja.m.wikipedia.org/*"],
-      "js": ["integrations/wikipedia.js"]
+      "js": ["integrations/wikipedia.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": ["*://*.youtube.com/*"],
-      "js": ["integrations/youtube.js"]
+      "js": ["integrations/youtube.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": ["*://bunpro.jp/*"],
-      "js": ["integrations/bunpro.js"]
+      "js": ["integrations/bunpro.js"],
+      "css": ["content/word.css"]
     }
   ],
   "background": {
     "page": "views/background.html",
     "persistent": true
   },
+  "web_accessible_resources": [
+    "integrations/common.js",
+    "content/background_comms.js",
+    "content/content.js",
+    "content/parse.js",
+    "content/popup.js",
+    "content/popup.css",
+    "content/word.js",
+    "content/word.css",
+    "content/toast.js",
+    "content/toast.css",
+    "util.js",
+    "jsx.js",
+    "common.css",
+    "themes.css"
+  ],
   "permissions": [
     "tabs",
     "activeTab",

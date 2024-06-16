@@ -1,10 +1,42 @@
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+
+const views = ['background', 'settings', 'popup'];
+const integrations = [
+  'ttu',
+  'anacreon',
+  'mokuro',
+  'asbplayer',
+  'readwok',
+  'wikipedia',
+  'youtube',
+  'bunpro',
+];
 
 module.exports = {
   async config(env) {
     return {
       mode: env,
       entry: {
+        ...views.reduce(
+          (acc, view) =>
+            Object.assign(acc, {
+              [`views/${view}`]: {
+                import: `./src/views/${view}/${view}.js`,
+              },
+            }),
+          {},
+        ),
+        ...integrations.reduce(
+          (acc, integration) =>
+            Object.assign(acc, {
+              [`integrations/${integration}`]: {
+                import: `./src/integrations/${integration}.js`,
+              },
+            }),
+          {},
+        ),
         // 'service-worker': {
         //   import: './src/service-worker.ts',
         //   runtime: false,
@@ -15,15 +47,6 @@ module.exports = {
         //       [`apps/${contentScript}`]: {
         //         import: `./src/apps/${contentScript}.ts`,
         //         runtime: false,
-        //       },
-        //     }),
-        //   {},
-        // ),
-        // ...views.reduce(
-        //   (acc, view) =>
-        //     Object.assign(acc, {
-        //       [`view/${view}`]: {
-        //         import: `./src/views/${view}/${view}.ts`,
         //       },
         //     }),
         //   {},
@@ -57,65 +80,66 @@ module.exports = {
         //   __PRODUCTION__: JSON.stringify(env === 'production'),
         //   __DEVELOPMENT__: JSON.stringify(env === 'development'),
         // }),
-        // ...views.map(
-        //   (view) =>
-        //     new HtmlWebpackPlugin({
-        //       filename: `views/${view}.html`,
-        //       template: `src/views/${view}/${view}.html`,
-        //       chunks: ['styles', `view/${view}`],
-        //     }),
-        // ),
+        ...views.map(
+          (view) =>
+            new HtmlWebpackPlugin({
+              filename: `views/${view}.html`,
+              template: `src/views/${view}/${view}.html`,
+              // chunks: ['styles', `view/${view}`],
+              chunks: [`views/${view}`],
+            }),
+        ),
       ],
       module: {
-        // rules: [
-        //   {
-        //     test: /\.(scss)$/,
-        //     include: [path.resolve(__dirname, 'src/styles')],
-        //     use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
-        //   },
-        //   {
-        //     test: /\.css|\.s(c|a)ss$/,
-        //     include: [
-        //       path.resolve(__dirname, 'src/components'),
-        //       path.resolve(__dirname, 'src/views'),
-        //     ],
-        //     use: [
-        //       {
-        //         loader: 'lit-scss-loader',
-        //         options: {
-        //           minify: true,
-        //         },
-        //       },
-        //       'extract-loader',
-        //       'css-loader',
-        //       'sass-loader',
-        //     ],
-        //   },
-        //   {
-        //     test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
-        //     type: 'asset/resource',
-        //   },
-        //   {
-        //     test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
-        //     type: 'asset/resource',
-        //   },
-        //   {
-        //     test: /.([cm]?ts|tsx)$/,
-        //     exclude: /node_modules/,
-        //     use: [
-        //       {
-        //         loader: 'ts-loader',
-        //         options: {
-        //           transpileOnly: true,
-        //         },
-        //       },
-        //     ],
-        //   },
-        // ],
+        rules: [
+          //   {
+          //     test: /\.(scss)$/,
+          //     include: [path.resolve(__dirname, 'src/styles')],
+          //     use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
+          //   },
+          //   {
+          //     test: /\.css|\.s(c|a)ss$/,
+          //     include: [
+          //       path.resolve(__dirname, 'src/components'),
+          //       path.resolve(__dirname, 'src/views'),
+          //     ],
+          //     use: [
+          //       {
+          //         loader: 'lit-scss-loader',
+          //         options: {
+          //           minify: true,
+          //         },
+          //       },
+          //       'extract-loader',
+          //       'css-loader',
+          //       'sass-loader',
+          //     ],
+          //   },
+          //   {
+          //     test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
+          //     type: 'asset/resource',
+          //   },
+          //   {
+          //     test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
+          //     type: 'asset/resource',
+          //   },
+          {
+            test: /.([cm]?ts|tsx)$/,
+            exclude: /node_modules/,
+            use: [
+              {
+                loader: 'ts-loader',
+                options: {
+                  transpileOnly: true,
+                },
+              },
+            ],
+          },
+        ],
       },
       output: {
-        filename: 'runtime/[name].js',
-        path: path.resolve(__dirname, 'dist'),
+        // filename: 'runtime/[name].js',
+        path: path.resolve(__dirname, 'anki-jpdb.reader'),
         clean: true,
       },
     };

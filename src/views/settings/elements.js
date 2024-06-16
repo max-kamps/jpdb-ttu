@@ -1,41 +1,41 @@
-import { defaultConfig } from "../background/config.js";
-import { jsxCreateElement } from "../jsx.js";
-import { markUnsavedChanges } from "./settings.js";
+import { defaultConfig } from '../../background/config.js';
+import { jsxCreateElement } from '../../jsx.js';
+import { markUnsavedChanges } from './settings.js';
 export class SettingElement extends HTMLElement {
   input;
   reset;
   static get observedAttributes() {
-    return ["name"];
+    return ['name'];
   }
   constructor() {
     super();
     const label = jsxCreateElement(
-      "label",
-      { part: "label", for: "input" },
-      jsxCreateElement("slot", null)
+      'label',
+      { part: 'label', for: 'input' },
+      jsxCreateElement('slot', null),
     );
-    this.input = this.renderInputElem(this.getAttribute("name") ?? "");
+    this.input = this.renderInputElem(this.getAttribute('name') ?? '');
     this.reset = jsxCreateElement(
-      "button",
+      'button',
       {
-        part: "reset-button",
+        part: 'reset-button',
         onclick: () => {
           this.resetValue();
           markUnsavedChanges();
         },
       },
-      "Reset"
+      'Reset',
     );
-    const shadow = this.attachShadow({ mode: "open" });
+    const shadow = this.attachShadow({ mode: 'open' });
     shadow.append(
-      jsxCreateElement("link", { rel: "stylesheet", href: "../common.css" }),
+      jsxCreateElement('link', { rel: 'stylesheet', href: '../common.css' }),
       label,
       this.input,
-      this.reset
+      this.reset,
     );
   }
   renderInputElem(_name) {
-    throw Error("SettingElement subclass must implement render()");
+    throw Error('SettingElement subclass must implement render()');
   }
   attributeChangedCallback(name, oldValue, newValue) {
     this[name] = newValue;
@@ -47,10 +47,10 @@ export class SettingElement extends HTMLElement {
     return this.input.name;
   }
   get value() {
-    throw Error("SettingElement subclass must implement get value()");
+    throw Error('SettingElement subclass must implement get value()');
   }
   set value(newValue) {
-    throw Error("SettingElement subclass must implement set value(newValue)");
+    throw Error('SettingElement subclass must implement set value(newValue)');
   }
   resetValue() {
     this.value = defaultConfig[this.name] ?? null;
@@ -59,21 +59,21 @@ export class SettingElement extends HTMLElement {
     // console.log('changed', this.name, 'to', this.value, '(default', defaultConfig[this.name] ?? null, ')');
     if (this.value !== (defaultConfig[this.name] ?? null)) {
       this.reset.disabled = false;
-      this.reset.innerText = "Reset";
+      this.reset.innerText = 'Reset';
     } else {
       this.reset.disabled = true;
-      this.reset.innerText = "Default";
+      this.reset.innerText = 'Default';
     }
   }
 }
 class SettingNumber extends SettingElement {
   static get observedAttributes() {
-    return ["name", "min", "max", "step"];
+    return ['name', 'min', 'max', 'step'];
   }
   renderInputElem(name) {
-    return jsxCreateElement("input", {
-      part: "input",
-      type: "number",
+    return jsxCreateElement('input', {
+      part: 'input',
+      type: 'number',
       name: name,
       oninput: () => {
         this.valueChanged();
@@ -109,9 +109,9 @@ class SettingNumber extends SettingElement {
 }
 class SettingBoolean extends SettingElement {
   renderInputElem(name) {
-    return jsxCreateElement("input", {
-      part: "input",
-      type: "checkbox",
+    return jsxCreateElement('input', {
+      part: 'input',
+      type: 'checkbox',
       name: name,
       oninput: () => {
         this.valueChanged();
@@ -129,9 +129,9 @@ class SettingBoolean extends SettingElement {
 }
 class SettingToken extends SettingElement {
   renderInputElem(name) {
-    return jsxCreateElement("input", {
-      part: "input",
-      type: "text",
+    return jsxCreateElement('input', {
+      part: 'input',
+      type: 'text',
       name: name,
       oninput: () => {
         this.valueChanged();
@@ -140,20 +140,20 @@ class SettingToken extends SettingElement {
     });
   }
   get value() {
-    return this.input.value ?? "";
+    return this.input.value ?? '';
   }
   set value(newValue) {
-    this.input.value = newValue ?? "";
+    this.input.value = newValue ?? '';
     this.valueChanged();
   }
 }
 class SettingDeckId extends SettingElement {
   renderInputElem(name) {
-    return jsxCreateElement("input", {
-      part: "input",
-      type: "text",
+    return jsxCreateElement('input', {
+      part: 'input',
+      type: 'text',
       name: name,
-      pattern: "\\d+|forq|blacklist|never-forget",
+      pattern: '\\d+|forq|blacklist|never-forget',
       oninput: () => {
         this.valueChanged();
         markUnsavedChanges();
@@ -165,14 +165,14 @@ class SettingDeckId extends SettingElement {
     return isNaN(n) ? this.input.value || null : n;
   }
   set value(newValue) {
-    this.input.value = newValue === null ? "" : newValue.toString();
+    this.input.value = newValue === null ? '' : newValue.toString();
     this.valueChanged();
   }
 }
 class SettingString extends SettingElement {
   renderInputElem(name) {
-    return jsxCreateElement("textarea", {
-      part: "input",
+    return jsxCreateElement('textarea', {
+      part: 'input',
       name: name,
       rows: 8,
       oninput: () => {
@@ -194,25 +194,19 @@ class SettingString extends SettingElement {
     this.input.rows = this.input.value.split(/\n/g).length;
   }
 }
-const MODIFIERS = ["Control", "Alt", "AltGraph", "Meta", "Shift"];
-const MOUSE_BUTTONS = [
-  "Left Mouse Button",
-  "Middle Mouse Button",
-  "Right Mouse Button",
-];
+const MODIFIERS = ['Control', 'Alt', 'AltGraph', 'Meta', 'Shift'];
+const MOUSE_BUTTONS = ['Left Mouse Button', 'Middle Mouse Button', 'Right Mouse Button'];
 function keybindToString(bind) {
-  return bind === null
-    ? "None"
-    : `${bind.key} (${[...bind.modifiers, bind.code].join("+")})`;
+  return bind === null ? 'None' : `${bind.key} (${[...bind.modifiers, bind.code].join('+')})`;
 }
 class SettingKeybind extends SettingElement {
   #value = null;
   static active;
   renderInputElem(name) {
     return jsxCreateElement(
-      "button",
+      'button',
       {
-        part: "input",
+        part: 'input',
         name: name,
         onmousedown: (event) => {
           event.preventDefault();
@@ -220,7 +214,7 @@ class SettingKeybind extends SettingElement {
           this.chooseKey();
         },
       },
-      "Loading..."
+      'Loading...',
     );
   }
   chooseKey() {
@@ -228,9 +222,9 @@ class SettingKeybind extends SettingElement {
       // If there's currently another SettingKeybind waiting for input, stop it
       const [other, listener] = SettingKeybind.active;
       other.input.innerText = keybindToString(other.#value);
-      document.removeEventListener("keydown", listener);
-      document.removeEventListener("keyup", listener);
-      document.removeEventListener("mousedown", listener);
+      document.removeEventListener('keydown', listener);
+      document.removeEventListener('keyup', listener);
+      document.removeEventListener('mousedown', listener);
       if (other === this) {
         SettingKeybind.active = undefined;
         return;
@@ -241,34 +235,28 @@ class SettingKeybind extends SettingElement {
       event.stopPropagation();
       // We ignore the keydown event for modifiers, and only register them on keyup.
       // This allows pressing and holding modifiers before pressing the main hotkey.
-      if (event.type === "keydown" && MODIFIERS.includes(event.key)) {
+      if (event.type === 'keydown' && MODIFIERS.includes(event.key)) {
         return;
       }
       // .code: Layout-independent key identifier (usually equal to whatever that key means in qwerty)
       // .key: Key character in the current layout (respecting modifiers like shift or altgr)
       // .button: Mouse button number
-      const code =
-        event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
-      const key =
-        event instanceof KeyboardEvent
-          ? event.key
-          : MOUSE_BUTTONS[event.button] ?? code;
-      const modifiers = MODIFIERS.filter(
-        (name) => name !== key && event.getModifierState(name)
-      );
-      this.#value = code === "Escape" ? null : { key, code, modifiers };
+      const code = event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
+      const key = event instanceof KeyboardEvent ? event.key : MOUSE_BUTTONS[event.button] ?? code;
+      const modifiers = MODIFIERS.filter((name) => name !== key && event.getModifierState(name));
+      this.#value = code === 'Escape' ? null : { key, code, modifiers };
       this.input.innerText = keybindToString(this.#value);
       markUnsavedChanges();
       this.valueChanged();
       SettingKeybind.active = undefined;
-      document.removeEventListener("keydown", keyListener);
-      document.removeEventListener("keyup", keyListener);
-      document.removeEventListener("mousedown", keyListener);
+      document.removeEventListener('keydown', keyListener);
+      document.removeEventListener('keyup', keyListener);
+      document.removeEventListener('mousedown', keyListener);
     };
-    this.input.innerText = "Press a key, click to cancel";
-    document.addEventListener("keydown", keyListener);
-    document.addEventListener("keyup", keyListener);
-    document.addEventListener("mousedown", keyListener);
+    this.input.innerText = 'Press a key, click to cancel';
+    document.addEventListener('keydown', keyListener);
+    document.addEventListener('keyup', keyListener);
+    document.addEventListener('mousedown', keyListener);
     SettingKeybind.active = [this, keyListener];
   }
   get value() {
@@ -281,11 +269,11 @@ class SettingKeybind extends SettingElement {
   }
 }
 export function defineCustomElements() {
-  customElements.define("setting-number", SettingNumber);
-  customElements.define("setting-boolean", SettingBoolean);
-  customElements.define("setting-token", SettingToken);
-  customElements.define("setting-deck-id", SettingDeckId);
-  customElements.define("setting-string", SettingString);
-  customElements.define("setting-keybind", SettingKeybind);
-  document.body.classList.add("ready");
+  customElements.define('setting-number', SettingNumber);
+  customElements.define('setting-boolean', SettingBoolean);
+  customElements.define('setting-token', SettingToken);
+  customElements.define('setting-deck-id', SettingDeckId);
+  customElements.define('setting-string', SettingString);
+  customElements.define('setting-keybind', SettingKeybind);
+  document.body.classList.add('ready');
 }
