@@ -1,0 +1,39 @@
+{
+  "name": "jpdb-anki.breader",
+  "version": "0.0.1",
+  "description": "Mine from JPDB directly into Anki",
+  "private": true,
+  "scripts": {
+    "build": "webpack --mode production --config webpack.prod.js",
+    "watch": "webpack --watch --mode development --config webpack.dev.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kagu-chan/jpd-breader.git"
+  },
+  "keywords": [
+    "anki",
+    "jpdb",
+    "mining",
+    "parser"
+  ],
+  "author": "Kagu-chan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kagu-chan/jpd-breader/issues"
+  },
+  "homepage": "https://github.com/Kagu-chan/jpd-breader#readme",
+  "browserslist": [
+    "chrome >= 116"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "browserlist": "^1.0.1",
+    "chrome-types": "^0.1.287",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.1"
+  }
+}

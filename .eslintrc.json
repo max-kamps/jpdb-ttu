@@ -1,0 +1,168 @@
+{
+  "root": true,
+  "env": {
+    "commonjs": true,
+    "browser": true
+  },
+  "extends": [
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "plugin:@typescript-eslint/stylistic-type-checked",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".ts"],
+        "moduleDirectory": ["node_modules", "src/"]
+      }
+    }
+  },
+  "ignorePatterns": ["webpack.*.js", "dist/**/*.js"],
+  "plugins": ["@typescript-eslint", "eslint-plugin-jsdoc", "import"],
+  "rules": {
+    "curly": ["error"],
+    "require-await": ["error"],
+    "arrow-parens": ["error", "always"],
+    "no-console": ["error"],
+    "no-debugger": ["error"],
+    "semi": ["error", "always"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "max-len": [
+      "error",
+      {
+        "code": 100,
+        "ignorePattern": "^import",
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true,
+        "ignoreComments": true
+      }
+    ],
+    "comma-dangle": ["error", "always-multiline"],
+    "no-plusplus": ["off"],
+    "import/extensions": ["off"],
+    "import/prefer-default-export": ["off"],
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "index",
+          "internal",
+          "parent",
+          "sibling",
+          "type"
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "pathGroups": [
+          {
+            "pattern": "@/**",
+            "group": "internal"
+          }
+        ]
+      }
+    ],
+    "no-parameter-properties": ["off"],
+    "no-unused-vars": ["off"],
+    "lines-between-class-members": ["off"],
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": ["return", "continue", "throw"]
+      },
+      {
+        "blankLine": "always",
+        "prev": ["const", "let"],
+        "next": "*"
+      },
+      {
+        "blankLine": "any",
+        "prev": ["const", "let"],
+        "next": ["const", "let"]
+      },
+      {
+        "blankLine": "never",
+        "prev": "break",
+        "next": ["case", "default"]
+      },
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "break"
+      },
+      {
+        "blankLine": "always",
+        "prev": ["expression", "block-like"],
+        "next": ["if", "for", "do", "while", "try"]
+      }
+    ],
+    "@typescript-eslint/unbound-method": ["off"],
+    "@typescript-eslint/lines-between-class-members": ["off"],
+    "@typescript-eslint/no-explicit-any": ["off"],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-unsafe-return": ["warn"],
+    "@typescript-eslint/explicit-member-accessibility": [
+      "error",
+      {
+        "overrides": {
+          "constructors": "off"
+        }
+      }
+    ],
+    "@typescript-eslint/member-ordering": [
+      "warn",
+      {
+        "default": [
+          "decorated-field",
+          "public-field",
+          "protected-field",
+          "private-field",
+          "public-method",
+          "protected-method",
+          "private-method"
+        ]
+      }
+    ],
+    "@typescript-eslint/no-inferrable-types": ["off"],
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "object": false,
+          "Record": false,
+          "Function": false
+        },
+        "extendDefaults": true
+      }
+    ],
+    "@typescript-eslint/explicit-function-return-type": ["error"],
+    "@typescript-eslint/prefer-nullish-coalescing": ["off"],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": ["**/../**/*"],
+            "message": "Use @/* instead."
+          }
+        ]
+      }
+    ]
+  }
+}

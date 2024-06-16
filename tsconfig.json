@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "./jpdb-anki.breader/",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es2015",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "baseUrl": "./"
+  }
+}
