@@ -1,6 +1,6 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 const views = ['background', 'settings', 'popup'];
 const integrations = [
@@ -19,24 +19,24 @@ module.exports = {
     return {
       mode: env,
       entry: {
-        ...views.reduce(
-          (acc, view) =>
-            Object.assign(acc, {
-              [`views/${view}`]: {
-                import: `./src/views/${view}/${view}.js`,
-              },
-            }),
-          {},
-        ),
-        ...integrations.reduce(
-          (acc, integration) =>
-            Object.assign(acc, {
-              [`integrations/${integration}`]: {
-                import: `./src/integrations/${integration}.js`,
-              },
-            }),
-          {},
-        ),
+        // ...views.reduce(
+        //   (acc, view) =>
+        //     Object.assign(acc, {
+        //       [`views/${view}`]: {
+        //         import: `./src/views/${view}/${view}.js`,
+        //       },
+        //     }),
+        //   {},
+        // ),
+        // ...integrations.reduce(
+        //   (acc, integration) =>
+        //     Object.assign(acc, {
+        //       [`integrations/${integration}`]: {
+        //         import: `./src/integrations/${integration}.js`,
+        //       },
+        //     }),
+        //   {},
+        // ),
         // 'service-worker': {
         //   import: './src/service-worker.ts',
         //   runtime: false,
@@ -51,8 +51,7 @@ module.exports = {
         //     }),
         //   {},
         // ),
-        theme: './src/styles/theme.scss',
-        common: './src/styles/common.scss',
+        // styles: ['./src/styles/theme.scss', './src/styles/common.scss'],
       },
       resolve: {
         extensions: ['.tsx', '.ts', '.js'],
@@ -75,32 +74,66 @@ module.exports = {
             { from: 'manifest.json', to: 'manifest.json' },
           ],
         }),
+        new HtmlBundlerPlugin({
+          entry: [
+            ...views.map((view) => ({
+              filename: `views/${view}/${view}.html`,
+              import: `src/views/${view}/${view}.html`,
+            })),
+            ...integrations.map((integration) => ({
+              filename: `integrations/${integration}.js`,
+              import: `./src/integrations/${integration}.js`,
+            })),
+          ],
+          js: {
+            filename: (source) => {
+              const root = path.relative(
+                path.join(__dirname, 'src'),
+                path.dirname(source.filename),
+              );
+
+              return path.join(root, '[name].js');
+            },
+          },
+          css: {
+            filename: (source) => {
+              const root = path.relative(
+                path.join(__dirname, 'src'),
+                path.dirname(source.filename),
+              );
+
+              return path.join(root, '[name].css');
+            },
+          },
+        }),
         // new DefinePlugin({
         //   __VERSION__: JSON.stringify(version),
         //   __ENV__: JSON.stringify(),
         //   __PRODUCTION__: JSON.stringify(env === 'production'),
         //   __DEVELOPMENT__: JSON.stringify(env === 'development'),
         // }),
-        ...views.map(
-          (view) =>
-            new HtmlWebpackPlugin({
-              filename: `views/${view}.html`,
-              template: `src/views/${view}/${view}.html`,
-              chunks: ['theme', 'common', `views/${view}`],
-            }),
-        ),
+        // ...views.map(
+        //   (view) =>
+        //     new HtmlWebpackPlugin({
+        //       filename: `views/${view}.html`,
+        //       template: `src/views/${view}/${view}.html`,
+        //       chunks: [`views/${view}`],
+        //     }),
+        // ),
       ],
       module: {
         rules: [
           {
-            test: /\.(scss)$/,
-            include: [path.resolve(__dirname, 'src/styles'), path.resolve(__dirname, 'src/views')],
-            use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
+            test: /\.(css|sass|scss)$/,
+            use: ['css-loader', 'sass-loader'],
           },
-          //   {
-          //     test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
-          //     type: 'asset/resource',
-          //   },
+          {
+            test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
+            type: 'asset/resource',
+            generator: {
+              filename: '[path][name][ext]',
+            },
+          },
           //   {
           //     test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
           //     type: 'asset/resource',
@@ -120,7 +153,6 @@ module.exports = {
         ],
       },
       output: {
-        // filename: 'runtime/[name].js',
         path: path.resolve(__dirname, 'anki-jpdb.reader'),
         clean: true,
       },

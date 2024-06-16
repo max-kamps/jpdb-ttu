@@ -5,7 +5,7 @@ import { showError } from '../../content/toast.js';
 import { assert, nonNull, wrap } from '../../util.js';
 import { defineCustomElements } from './elements.js';
 
-import './settings.scss';
+// import './settings.scss';
 
 // Custom element definitions
 // Common behavior shared for all settings elements
