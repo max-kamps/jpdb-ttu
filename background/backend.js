@@ -77,84 +77,12 @@ const ankiWords = {};
 const ankiJpdbIDs = {};
 const jpdbCards = {};
 
-function invokeAnki(action, params = {}) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener("error", () => reject("failed to issue request"));
-    xhr.addEventListener("load", () => {
-      try {
-        const response = JSON.parse(xhr.responseText);
-        if (Object.getOwnPropertyNames(response).length != 2) {
-          throw "response has an unexpected number of fields";
-        }
-        if (!response.hasOwnProperty("error")) {
-          throw "response is missing required error field";
-        }
-        if (!response.hasOwnProperty("result")) {
-          throw "response is missing required result field";
-        }
-        if (response.error) {
-          throw response.error;
-        }
-        resolve(response.result);
-      } catch (e) {
-        reject(e);
-      }
-    });
-
-    xhr.open("POST", config.ankiUrl);
-    xhr.send(JSON.stringify({ action, version: 6, params }));
-  });
-}
-
-function getAnkiCardState(card) {
-  const {
-    isDue,
-    isSuspended,
-    isMature,
-    isNew,
-    isLearning,
-    isBlacklisted,
-    isNeverForget,
-    isUserBuried,
-    isSchedBuried,
-  } = card;
-
-  if (isBlacklisted) return "blacklisted";
-  if (isNeverForget) return "never-forget";
-  if (isSuspended) return "leeched";
-  if (isUserBuried || isSchedBuried) return "buried";
-  if (isNew) return "new";
-  if (isDue) return "due";
-  if (isMature) return "known";
-  if (isLearning) return "learning";
-  return "unknown";
-}
-
-function getAnkiStatePriority(card) {
-  const state = getAnkiCardState(card);
-  const map = {
-    blacklisted: Infinity,
-    "never-forget": Infinity,
-    known: Infinity,
-    due: 3,
-    learning: 2,
-    new: 1,
-    buried: 0,
-    suspended: 0,
-  };
-
-  if (map[state] === Infinity) return Infinity;
-
-  return map[state] * 1000 + card.interval;
-}
-
 async function loadCardsFromQuery(query) {
   const cardIDs = await anki.invoke("findCards", { query });
-  const suspended = await invokeAnki("areSuspended", { cards: cardIDs });
-  const due = await invokeAnki("areDue", { cards: cardIDs });
+  const suspended = await anki.invoke("areSuspended", { cards: cardIDs });
+  const due = await anki.invoke("areDue", { cards: cardIDs });
 
-  const cardsInfo = await invokeAnki("cardsInfo", {
+  const cardsInfo = await anki.invoke("cardsInfo", {
     cards: cardIDs,
   });
 
@@ -198,8 +126,8 @@ async function loadCardsFromQuery(query) {
     }
 
     ankiCards[cardId] = Object.assign(cardItem, {
-      state: getAnkiCardState(cardItem),
-      priority: getAnkiStatePriority(cardItem),
+      state: anki.getCardState(cardItem),
+      priority: anki.getStatePriority(cardItem),
     });
 
     if (ankiCards[cardId].state === "unknown") {
@@ -271,7 +199,7 @@ export async function openInAnki(vid, sid, spelling) {
   const card = ankiJpdbIDs[`${vid}-${sid}`];
   const query = card.note ? `nid:${card.note}` : `word:${spelling}`;
 
-  await invokeAnki("guiBrowse", { query });
+  await anki.invoke("guiBrowse", { query });
 }
 
 function sanitizeSentence(sentence) {
@@ -484,7 +412,7 @@ export async function addToDeck(vid, sid, sentence, deckId) {
 
   const tags =
     deckId === config.miningDeckId ? ["breader", "check"] : ["breader"];
-  const note = await invokeAnki("addNote", {
+  const note = await anki.invoke("addNote", {
     note: {
       deckName: deckId,
       modelName: "JP Mining Note",
@@ -516,7 +444,7 @@ export async function removeFromDeck(vid, sid) {
   const jpdbCard = jpdbCards[`${vid}-${sid}`];
 
   if (ankiCard.note) {
-    await invokeAnki("deleteNotes", {
+    await anki.invoke("deleteNotes", {
       notes: [ankiCard.note],
     });
   }
