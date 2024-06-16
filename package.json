@@ -31,9 +31,11 @@
     "@types/node": "^20.14.0",
     "browserlist": "^1.0.1",
     "chrome-types": "^0.1.287",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "webpack": "^5.92.0"
   },
   "dependencies": {
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "webpack-copy-plugin": "^0.0.4"
   }
 }
