@@ -2,10 +2,7 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const sites = [
-  // 'settings',
-  'popup',
-];
+const sites = ['settings', 'popup'];
 const apps = [
   // 'ttu',
   // 'anacreon',
@@ -99,6 +96,10 @@ module.exports = {
             generator: {
               filename: '[path][name][ext]',
             },
+          },
+          {
+            test: /\.(woff|woff2|eot|ttf|otf)$/,
+            type: 'asset/resource',
           },
           {
             test: /.([cm]?ts|tsx)$/,

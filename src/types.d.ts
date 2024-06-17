@@ -13,6 +13,7 @@ declare type Configuration = {
   showPopupOnHover: boolean;
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
+  showPopupKey: string;
 };
 
 declare interface DOMElementBaseOptions {

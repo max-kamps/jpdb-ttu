@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="dark-mode">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-language" content="en" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="theme-color" content="#181818" />
+    <title>Settings - Anki JPDB Reader</title>
+
+    <link rel="stylesheet" media="screen" href="@styles/theme.scss" />
+    <link rel="stylesheet" media="screen" href="@styles/common.scss" />
+    <link rel="stylesheet" media="screen" href="./settings.scss" />
+
+    <link rel="icon" type="image/png" sizes="48x48" href="../../../assets/48.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../../../assets/16.png" />
+
+    <script async type="text/javascript" src="./settings.ts"></script>
+  </head>
+
+  <body style="font-size: 100%">
+    <div class="container" style="padding-top: 1rem">
+      <h4 style="text-align: center; opacity: 0.85">Settings</h4>
+      <form>
+        <h6>Connectivity</h6>
+        <div class="form-box-parent">
+          <div class="form-box">
+            <div>
+              <label for="apiToken">JPDB API Token</label>
+              <input type="text" id="apiToken" name="apiToken" />
+              <p style="opacity: 0.8">
+                To find your API token, visit the
+                <a
+                  href="https://jpdb.io/settings#:~:text=in%20the%20future.-,Account%20information,-Username"
+                  target="_blank"
+                  >jpdb settings page</a
+                >
+                and scroll to the very bottom.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-box">
+            <div>
+              <label for="ankiUrl">Anki Connect Endpoint URL</label>
+              <input type="text" id="ankiUrl" name="ankiUrl" />
+              <p style="opacity: 0.8">
+                To find your Anki Connect endpoint URL, go to Anki -> Tools -> Add-ons ->
+                AnkiConnect -> Config. <br />
+                Enter the webBindAddress as well as the webBindPort as
+                <code>webBindAddress:webBindPort</code> - the default is <code>127.0.0.1:8765</code>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div style="padding-bottom: 1.5rem"></div>
+
+        <h6>Mining</h6>
+        <div class="form-box-parent">
+          <div class="form-box">
+            <div>
+              <label for="miningDeckId">Mining Deck</label>
+              <input type="text" id="miningDeckId" name="miningDeckId" />
+              <p style="opacity: 0.8">
+                Your target deck in Anki. Enter the full name of the deck including sub deck
+                delimeters.
+              </p>
+            </div>
+
+            <div>
+              <label for="neverForgetDeckId">Never Forget</label>
+              <input
+                style="width: 100%"
+                type="text"
+                id="neverForgetDeckId"
+                name="neverForgetDeckId"
+              />
+              <p style="opacity: 0.8">
+                Your deck for cards you wont ever forget. Words from this deck will be displayed as
+                known in japanese texts and subs.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-box">
+            <div>
+              <label for="blacklistDeckId">Blacklist</label>
+              <input type="text" id="blacklistDeckId" name="blacklistDeckId" />
+              <p style="opacity: 0.8">
+                Your deck for cards you dont want to learn. Words from this deck wont be minable.
+              </p>
+            </div>
+
+            <div>
+              <label for="contextWidth">Number of context sentences</label>
+              <input
+                style="width: 100%"
+                type="number"
+                id="contextWidth"
+                name="contextWidth"
+                min="1"
+              />
+              <p style="opacity: 0.8">
+                Number of sentences for more context when mining from pure text content.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div style="padding-bottom: 1.5rem"></div>
+
+        <h6>Accessibility</h6>
+        <div class="form-box-parent">
+          <div class="form-box">
+            <div>
+              <label for="showPopupKey">Show popup</label>
+              <input type="text" id="showPopupKey" name="showPopupKey" />
+              <p style="opacity: 0.8">
+                Press escape to clear. Holding modifiers like shift or alt is supported. <br />
+                Hotkeys are based on key position and independent of your current keyboard layout.
+                <br />
+                Note: Keybinds currently always work on the word you are hovering your mouse over,
+                even if you have the popup for another word open.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-box" style="padding-top: 2rem">
+            <div>
+              <div class="checkbox">
+                <input type="checkbox" id="showPopupOnHover" name="showPopupOnHover" />
+                <label for="showPopupOnHover">Show the popup on hover</label>
+              </div>
+            </div>
+
+            <div>
+              <div class="checkbox">
+                <input type="checkbox" id="touchscreenSupport" name="touchscreenSupport" />
+                <label for="touchscreenSupport">Touchscreen support</label>
+              </div>
+            </div>
+
+            <div>
+              <div class="checkbox">
+                <input type="checkbox" id="disableFadeAnimation" name="disableFadeAnimation" />
+                <label for="disableFadeAnimation">Disable fade animation</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding-bottom: 1.5rem"></div>
+
+        <h6>Appearance</h6>
+        <div class="form-box-parent">
+          <div class="form-box">
+            <div>
+              <label for="customWordCSS">Custom Word CSS</label>
+              <textarea
+                id="customWordCSS"
+                name="customWordCSS"
+                placeholder="Custom Word CSS"
+                spellcheck="false"
+                style="height: 15rem; margin-bottom: 0"
+              ></textarea>
+              <p style="opacity: 0.8">This changes the appearance of words in text and subs.</p>
+            </div>
+
+            <div>
+              <label for="customPopupCSS">Custom Popup CSS</label>
+              <textarea
+                id="customPopupCSS"
+                name="customPopupCSS"
+                placeholder="Custom Popup CSS"
+                spellcheck="false"
+                style="height: 15rem; margin-bottom: 0"
+              ></textarea>
+              <p style="opacity: 0.8">
+                This changes the appearance of the popup shown when hovering over words.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 5rem;"></div>
+        <div id="save-all-settings-box">
+          <input
+            type="submit"
+            class="outline"
+            style="font-weight: bold"
+            value="Save settings"
+            id="save-all-settings"
+            disabled
+          />
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

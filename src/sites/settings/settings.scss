@@ -1,0 +1,47 @@
+h6 {
+  margin-top: 1rem;
+  font-size: 135%;
+  font-weight: bold;
+  text-align: center;
+}
+.subsection-header {
+  font-size: 103%;
+  margin-bottom: 0.5rem;
+}
+#save-all-settings-box {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: var(--background-color);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  padding-top: 1.2rem;
+}
+#save-all-settings-box > input {
+  margin-bottom: 1.2rem;
+}
+.explanation {
+  margin-left: 0.5rem;
+  margin-top: 0.75rem;
+  opacity: 0.8;
+}
+
+.form-box-parent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 1rem;
+
+  .form-box {
+    flex: 1;
+  }
+}
+
+#save-all-settings-box,
+.review-button-group {
+  border-top: 0;
+  box-shadow: 0 0 10px 2px var(--big-shadow-color);
+  -webkit-box-shadow: 0 0 10px 2px var(--big-shadow-color);
+}
