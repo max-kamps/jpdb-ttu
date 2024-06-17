@@ -1,5 +1,8 @@
 import { browser } from '../../../lib/util';
 import { jsxCreateElement } from '../../../lib/jsx';
+import { SettingsController } from '../settings-controller';
+import { cssURL } from '@lib/paths';
+import { DEFAULT_OPTIONS } from '../default-options';
 
 export abstract class SettingElement<
   TValue extends string | boolean | number,
@@ -31,7 +34,6 @@ export abstract class SettingElement<
         part: 'reset-button',
         onclick: () => {
           this.resetValue();
-          // markUnsavedChanges();
         },
       },
       'Reset',
@@ -42,12 +44,22 @@ export abstract class SettingElement<
     shadow.append(
       jsxCreateElement('link', {
         rel: 'stylesheet',
-        href: browser.runtime.getURL('styles/common.css'),
+        href: cssURL('common'),
       }),
       label,
       this.input,
       this.reset,
     );
+
+    SettingsController.getInstance()
+      .getValueFor(this.name as keyof Configuration)
+      .then((value) => {
+        this.value = value as TValue;
+      });
+  }
+
+  protected checkForChanges(): void {
+    SettingsController.getInstance().checkForChanges(this.name, this.value);
   }
 
   protected attributeChangedCallback(
@@ -67,18 +79,20 @@ export abstract class SettingElement<
   }
 
   protected resetValue(): void {
-    this.value = (({} as Configuration)[this.name as keyof Configuration] as TValue) ?? null;
+    this.value = DEFAULT_OPTIONS[this.name as keyof Configuration] as TValue;
+
+    this.checkForChanges();
   }
 
   protected valueChanged(): void {
-    if (
-      this.value !== ((({} as Configuration)[this.name as keyof Configuration] as TValue) ?? null)
-    ) {
+    if (this.value !== (DEFAULT_OPTIONS[this.name as keyof Configuration] as TValue)) {
       this.reset.disabled = false;
       this.reset.innerText = 'Reset';
     } else {
       this.reset.disabled = true;
       this.reset.innerText = 'Default';
     }
+
+    this.checkForChanges();
   }
 }

@@ -9,7 +9,6 @@ export class SettingBoolean extends SettingElement<boolean, HTMLInputElement> {
       name: name,
       oninput: () => {
         this.valueChanged();
-        // markUnsavedChanges();
       },
     });
   }
@@ -18,6 +17,7 @@ export class SettingBoolean extends SettingElement<boolean, HTMLInputElement> {
   }
   protected set value(newValue) {
     this.input.checked = newValue;
+
     this.valueChanged();
   }
 }

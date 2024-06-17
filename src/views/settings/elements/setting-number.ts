@@ -3,14 +3,12 @@ import { SettingElement } from './setting-element.abstract';
 
 export class SettingNumber extends SettingElement<number, HTMLInputElement> {
   protected renderInputElem(name: string): HTMLInputElement {
-    console.log('SettingNumber.renderInputElem');
     return jsxCreateElement('input', {
       part: 'input',
       type: 'number',
       name: name,
       oninput: () => {
         this.valueChanged();
-        // markUnsavedChanges();
       },
     });
   }

@@ -9,7 +9,6 @@ export class SettingString extends SettingElement<string, HTMLInputElement> {
       name: name,
       oninput: () => {
         this.valueChanged();
-        // markUnsavedChanges();
       },
     });
   }

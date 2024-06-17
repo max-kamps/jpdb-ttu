@@ -9,7 +9,6 @@ export class SettingText extends SettingElement<string, HTMLTextAreaElement> {
       rows: 8,
       oninput: () => {
         this.valueChanged();
-        // markUnsavedChanges();
       },
     });
   }
