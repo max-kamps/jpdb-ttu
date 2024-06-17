@@ -1,4 +1,4 @@
-import { readLocalStorage } from '@lib/messaging';
+import { readLocalStorage } from 'src/unsorted/messaging';
 import { Observable, Subject } from 'rxjs';
 import { DEFAULT_OPTIONS } from './default-options';
 

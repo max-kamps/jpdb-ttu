@@ -1,4 +1,4 @@
-import { parse } from '@lib/parser/parse';
+import { parse } from 'src/unsorted/parser/parse';
 
 const contextId = chrome.contextMenus.create({
   id: 'parse',

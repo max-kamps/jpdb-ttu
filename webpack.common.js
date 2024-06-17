@@ -3,8 +3,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 const views = ['settings', 'popup'];
-const integrations = [
-  'parse_selection',
+const apps = [
   // 'ttu',
   // 'anacreon',
   // 'mokuro',
@@ -49,9 +48,9 @@ module.exports = {
               filename: `views/${view}/${view}.html`,
               import: `src/views/${view}/${view}.html`,
             })),
-            ...integrations.map((integration) => ({
-              filename: `integrations/${integration}.js`,
-              import: `./src/integrations/${integration}.ts`,
+            ...apps.map((integration) => ({
+              filename: `apps/${integration}.js`,
+              import: `./src/apps/${integration}.ts`,
             })),
             ...globalStyles.map((style) => ({
               filename: `styles/${style}.css`,

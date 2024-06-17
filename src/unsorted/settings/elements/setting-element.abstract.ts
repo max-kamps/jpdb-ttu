@@ -1,7 +1,7 @@
-import { browser } from '../../../lib/util';
+import { browser } from '../../../unsorted/util';
 import { jsxCreateElement } from '../../../lib/jsx';
 import { SettingsController } from '../settings-controller';
-import { cssURL } from '@lib/paths';
+import { cssURL } from 'src/unsorted/paths';
 import { DEFAULT_OPTIONS } from '../default-options';
 
 export abstract class SettingElement<

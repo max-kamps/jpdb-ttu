@@ -1,8 +1,8 @@
 import { loadConfig, migrateSchema, saveConfig } from '../../___/background/config.js';
 import { requestUpdateConfig } from '../../content/background_comms.js';
 import { Popup } from '../../content/popup.js';
-import { showError } from '../../lib/toast.ts/index.js';
-import { assert, nonNull, wrap } from '../../lib/util.js';
+import { showError } from '../../unsorted/toast.ts/index.js';
+import { assert, nonNull, wrap } from '../../unsorted/util.js';
 import { defineCustomElements } from './elements.js';
 
 // Custom element definitions

@@ -1,5 +1,5 @@
 import { jsxCreateElement } from '@lib/jsx';
-import { getCallable, requestParse } from '@lib/messaging';
+import { getCallable, requestParse } from 'src/unsorted/messaging';
 
 chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
   const buttonContainer = document.querySelector('article');

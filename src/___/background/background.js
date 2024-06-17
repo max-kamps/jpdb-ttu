@@ -1,5 +1,5 @@
 import { loadConfig } from './config.js';
-import { browser, isChrome } from '../../lib/util.js';
+import { browser, isChrome } from '../../unsorted/util.js';
 import * as backend from './backend.js';
 import { serialQueue } from './lib/serial-queue.js';
 export let config = loadConfig();

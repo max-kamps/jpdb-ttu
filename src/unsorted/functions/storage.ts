@@ -1,4 +1,4 @@
-import { registerListener } from '@lib/messaging';
+import { registerListener } from 'src/unsorted/messaging';
 
 registerListener('lsr', async (key: string, defaultValue?: string): Promise<string> => {
   const result = await chrome.storage.local.get(key);
