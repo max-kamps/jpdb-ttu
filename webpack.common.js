@@ -51,7 +51,7 @@ module.exports = {
             })),
             ...integrations.map((integration) => ({
               filename: `integrations/${integration}.js`,
-              import: `./src/integrations/${integration}.js`,
+              import: `./src/integrations/${integration}.ts`,
             })),
             ...globalStyles.map((style) => ({
               filename: `styles/${style}.css`,
