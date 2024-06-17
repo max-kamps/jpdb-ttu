@@ -12,10 +12,10 @@ class Settings {
       this._updateChangesStatus();
     });
 
-    customElements.define('setting-number', SettingNumber);
-    customElements.define('setting-boolean', SettingBoolean);
-    customElements.define('setting-string', SettingString);
-    customElements.define('setting-text', SettingText);
+    // customElements.define('setting-number', SettingNumber);
+    // customElements.define('setting-boolean', SettingBoolean);
+    // customElements.define('setting-string', SettingString);
+    // customElements.define('setting-text', SettingText);
     // customElements.define('setting-keybind', SettingKeybind);
   }
 
