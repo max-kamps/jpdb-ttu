@@ -2,7 +2,10 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const views = ['settings', 'popup'];
+const sites = [
+  // 'settings',
+  'popup',
+];
 const apps = [
   // 'ttu',
   // 'anacreon',
@@ -13,6 +16,7 @@ const apps = [
   // 'youtube',
   // 'bunpro',
 ];
+const integrations = ['toast'];
 const globalStyles = ['toast', 'word'];
 
 module.exports = {
@@ -44,13 +48,17 @@ module.exports = {
               filename: 'service-worker/service-worker.js',
               import: './src/service-worker/service-worker.ts',
             },
-            ...views.map((view) => ({
-              filename: `views/${view}/${view}.html`,
-              import: `src/views/${view}/${view}.html`,
+            ...sites.map((site) => ({
+              filename: `sites/${site}/${site}.html`,
+              import: `src/sites/${site}/${site}.html`,
             })),
-            ...apps.map((integration) => ({
-              filename: `apps/${integration}.js`,
-              import: `./src/apps/${integration}.ts`,
+            ...apps.map((app) => ({
+              filename: `apps/${app}.js`,
+              import: `./src/apps/${app}.ts`,
+            })),
+            ...integrations.map((integration) => ({
+              filename: `integrations/${integration}.js`,
+              import: `./src/integrations/${integration}.ts`,
             })),
             ...globalStyles.map((style) => ({
               filename: `styles/${style}.css`,

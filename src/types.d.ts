@@ -14,3 +14,23 @@ declare type Configuration = {
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
 };
+
+declare interface DOMElementBaseOptions {
+  id?: string;
+  class?: string | string[];
+  attributes?: Record<string, string | boolean>;
+  style?: Partial<CSSStyleDeclaration>;
+  innerText?: string | number;
+  innerHTML?: string;
+  handler?: (ev?: MouseEvent) => void;
+}
+
+declare type DOMElementOptions = DOMElementBaseOptions & {
+  children?: (undefined | false | DOMElementTagOptions | HTMLElement)[];
+};
+
+declare type DOMElementTagOptions<
+  K extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap,
+> = DOMElementOptions & {
+  tag: K;
+};

@@ -8,7 +8,7 @@
     "service_worker": "service-worker/service-worker.js"
   },
   "action": {
-    "default_popup": "views/popup/popup.html",
+    "default_popup": "sites/popup/popup.html",
     "default_icon": {
       "16": "assets/16.png",
       "48": "assets/48.png",
@@ -21,6 +21,12 @@
     "128": "assets/128.png"
   },
   "permissions": ["tabs", "activeTab", "contextMenus", "scripting", "storage"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["integrations/toast.js"]
+    }
+  ],
   "host_permissions": [
     "*://reader.ttsu.app/*",
     "*://ttu-ebook.web.app/*",
@@ -37,5 +43,11 @@
     "*://*.crunchyroll.com/*",
     "*://bunpro.jp/*",
     "*://*.nhk.or.jp/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "styles/*"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }
