@@ -16,6 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="../../../assets/16.png" />
 
     <script async type="text/javascript" src="./settings.ts"></script>
+    <script async type="text/javascript" src="./keybind.ts"></script>
   </head>
 
   <body style="font-size: 100%">
@@ -27,7 +28,12 @@
           <div class="form-box">
             <div>
               <label for="apiToken">JPDB API Token</label>
-              <input type="password" id="apiToken" name="apiToken" />
+              <div class="inline-group">
+                <input type="password" id="apiToken" name="apiToken" />
+                <div>
+                  <input type="button" id="apiTokenButton" class="button outline small" value="⭯"></input>
+                </div>
+              </div>
               <p style="opacity: 0.8">
                 To find your API token, visit the
                 <a
@@ -39,81 +45,137 @@
               </p>
             </div>
           </div>
-
-          <div class="form-box">
-            <div>
-              <label for="ankiUrl">Anki Connect Endpoint URL</label>
-              <input type="text" id="ankiUrl" name="ankiUrl" />
-              <p style="opacity: 0.8">
-                To find your Anki Connect endpoint URL, go to Anki -> Tools -> Add-ons ->
-                AnkiConnect -> Config. <br />
-                Enter the webBindAddress as well as the webBindPort as
-                <code>webBindAddress:webBindPort</code> - the default is <code>127.0.0.1:8765</code>
-              </p>
-            </div>
-          </div>
         </div>
-        <div style="padding-bottom: 1.5rem"></div>
 
-        <h6>Mining</h6>
         <div class="form-box-parent">
           <div class="form-box">
             <div>
-              <label for="miningDeckId">Mining Deck</label>
-              <input type="text" id="miningDeckId" name="miningDeckId" />
-              <p style="opacity: 0.8">
-                Your target deck in Anki. Enter the full name of the deck including sub deck
-                delimeters.
+              <label for="ankiUrl">Anki Connect Endpoint URL</label>
+              <div class="inline-group">
+                <input type="text" id="ankiUrl" name="ankiUrl" />
+                <div>
+                  <input type="button" id="ankiUrlButton" class="button outline small" value="⭯"></input>
+                </div>
+              </div>
+              <p style="opacity: 0.8; margin-bottom: 0;">
+                To find your Anki Connect endpoint URL, go to Anki -> Tools -> Add-ons ->
+                AnkiConnect -> Config.
               </p>
-            </div>
-
-            <div>
-              <label for="neverForgetDeckId">Never Forget</label>
-              <input
-                style="width: 100%"
-                type="text"
-                id="neverForgetDeckId"
-                name="neverForgetDeckId"
-              />
-              <p style="opacity: 0.8">
-                Your deck for cards you wont ever forget. Words from this deck will be displayed as
-                known in japanese texts and subs.
+              <p style="opacity: 0.8; margin-bottom: 0;">
+                Enter the webBindAddress as well as the webBindPort as
+                <code>webBindAddress:webBindPort</code> - the default is <code>127.0.0.1:8765</code>.
+              </p>
+              <p style="opacity: 0.8; margin-bottom: 0;">
+                Install the <a href="https://ankiweb.net/shared/info/2055492159" target="_blank">AnkiConnect</a> Add-on if you haven't already.
               </p>
             </div>
           </div>
 
           <div class="form-box">
             <div>
-              <label for="blacklistDeckId">Blacklist</label>
-              <input type="text" id="blacklistDeckId" name="blacklistDeckId" />
-              <p style="opacity: 0.8">
-                Your deck for cards you dont want to learn. Words from this deck wont be minable.
+              <label for="ankiProxyUrl">Anki Connect Endpoint Proxy</label>
+              <div class="inline-group">
+                <input type="text" id="ankiProxyUrl" name="ankiProxyUrl" />
+                <div>
+                  <input type="button" id="ankiProxyUrlButton" class="button outline small" value="⭯"></input>
+                </div>
+              </div>
+              <p style="opacity: 0.8; margin-bottom: 0;">
+                You can define an additional proxy for the Anki Connect endpoint. This is useful if
+                you are using asbplayers <a href="https://github.com/killergerbah/asbplayer?tab=readme-ov-file#advanced-features" target="_blank">auto capture option</a> for example.
               </p>
-            </div>
-
-            <div>
-              <label for="contextWidth">Number of context sentences</label>
-              <input
-                style="width: 100%"
-                type="number"
-                id="contextWidth"
-                name="contextWidth"
-                min="1"
-              />
-              <p style="opacity: 0.8">
-                Number of sentences for more context when mining from pure text content.
+              <p style="opacity: 0.8; margin-bottom: 0;">
+                With this you can tunnel only a select few requests through the proxy to avoid triggering captures on blacklist items for example.
               </p>
             </div>
           </div>
         </div>
         <div style="padding-bottom: 1.5rem"></div>
+
+        <div id="requires-anki" hidden>
+          <h6>Mining</h6>
+          <p style="opacity: 0.8;">
+            <h5>Configure your mining setup.</h5>
+            <ul>
+              <li>
+                <b>Mining Deck</b> - The deck where mined cards are added to.
+                <p>
+                  Mining cards go into this deck. If your have one-click-mining setup, it is recommended
+                  to tunnel cards for this deck through the proxy.
+                </p>
+                <p>
+                  Cards from this deck will be displayed according to your recognition state in anki.
+                </p>
+              </li>
+              <li>
+                <b>Never Forget Deck</b> - The deck where cards you never want to forget are added to.
+                <p>
+                  Words found in this deck will be displayed as if you knew them.
+                </p>
+              </li>
+              <li>
+                <b>Blacklist Deck</b> - The deck where cards you never want to learn are added to.
+                <p>
+                  Words found in this deck will be displayed as suspended.
+                </p>
+              </li>
+            </ul>
+            <h5>Configuring mining decks</h5>
+            <p>
+              You can skip the blacklist and never forget deck if you dont want to use them.
+            </p>
+            <p>
+              You can configure the model, word field and reading field for each deck. The model is the
+              note type in Anki. The word field is the field where the word is persisted and the reading
+              field is the field where the reading is persisted.
+            </p>
+            <p>
+              At least a model and a word field is required for each deck. The reading field is optional.
+            </p>
+            <p>
+              If the reading field is omitted, a macthing for kanji with diffrerent readings will not be possible. This may lead to unknown readings showing up as known.
+            </p>
+            <h5>Configuring lookups</h5>
+            <p>
+              You can configure lookups. Lookups are used to find words accross different decks and note types. Every mining deck is also considered a lookup.
+            </p>
+            <p>
+              You can configure the model, word field and reading field for each lookup. <br />
+              The deck is optional and respects only occurences in the specified deck. Otherwise it will search in all decks containing cards of the specified model.
+            </p>
+          </p>
+          <h5>Mining Decks</h5>
+          <div id="decks"></div>
+
+          <div class="form-box-parent">
+            <div class="form-box">
+              <div>
+                <label for="contextWidth">Number of context sentences</label>
+                <input
+                  style="width: 100%"
+                  type="number"
+                  id="contextWidth"
+                  name="contextWidth"
+                  min="1"
+                />
+                <p style="opacity: 0.8">
+                  Number of sentences for more context when mining from pure text content.
+                </p>
+              </div>
+            </div>
+
+            <div class="form-box"></div>
+          </div>
+          <div style="padding-bottom: 1.5rem"></div>
+        </div>
 
         <h6>Accessibility</h6>
         <div class="form-box-parent">
           <div class="form-box">
             <div>
               <label for="showPopupKey">Show popup</label>
-              <input type="text" id="showPopupKey" name="showPopupKey" />
+              <input type="text" id="showPopupKey" name="showPopupKey" style="display: nonee;" />
+              <input type="button" id="showPopupKeyButton" class="keybind-button outline" value="Loading..."></button>
               <p style="opacity: 0.8">
                 Press escape to clear. Holding modifiers like shift or alt is supported. <br />
                 Hotkeys are based on key position and independent of your current keyboard layout.

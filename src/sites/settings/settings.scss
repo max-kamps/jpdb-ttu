@@ -36,6 +36,21 @@ h6 {
 
   .form-box {
     flex: 1;
+
+    .inline-group {
+      display: flex;
+      gap: 0.5rem;
+
+      input {
+        margin-bottom: 0;
+
+        &.button.small {
+          height: 3rem;
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+    }
   }
 }
 
@@ -44,4 +59,47 @@ h6 {
   border-top: 0;
   box-shadow: 0 0 10px 2px var(--big-shadow-color);
   -webkit-box-shadow: 0 0 10px 2px var(--big-shadow-color);
+}
+
+input.v1 {
+  border: 1px solid var(--outline-v1-color);
+}
+
+select {
+  margin-bottom: 0;
+  font-family: monospace;
+}
+
+#requires-anki {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height ease-out 0.3s;
+
+  &.is-open {
+    max-height: 1000px;
+  }
+
+  &.rem-height {
+    max-height: unset;
+  }
+}
+
+.form-box-parent {
+  &.border {
+    border: 1px solid var(--big-shadow-border);
+    box-shadow: 0 0 16px var(--big-shadow-color);
+    border-radius: 8px;
+    padding: 1.35rem;
+    padding-top: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+ul {
+  li {
+    p {
+      margin-left: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+  }
 }

@@ -1,19 +1,40 @@
 /// <reference types="chrome-types" />
 
+declare type Keybind = { key: string; code: string; modifiers: string[] };
+
+declare type AnkiFieldTemplateName = 'sentence' | 'sentenceSanitized';
+declare type AnkiFieldTemplate = Record<AnkiFieldTemplateName, () => string>;
+
+declare type TemplateTarget = {
+  template: AnkiFieldTemplateName;
+  field: string;
+};
+
+declare type DeckConfiguration = {
+  deck: string;
+  model: string;
+  proxy: boolean;
+  wordField: string;
+  readingField: string;
+  templateTargets: TemplateTarget[];
+};
+
 declare type Configuration = {
   schemaVersion: number;
   apiToken: string;
   ankiUrl: string;
-  miningDeckId: string;
-  blacklistDeckId: string;
-  neverForgetDeckId: string;
+  ankiProxyUrl: string;
+  miningConfig: DeckConfiguration;
+  blacklistConfig: DeckConfiguration;
+  neverForgetConfig: DeckConfiguration;
+  readonlyConfigs: DeckConfiguration[];
   contextWidth: number;
   customWordCSS: string;
   customPopupCSS: string;
   showPopupOnHover: boolean;
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
-  showPopupKey: string;
+  showPopupKey: Keybind;
 };
 
 declare interface DOMElementBaseOptions {
