@@ -6,7 +6,19 @@ declare type Filter<T, TF extends T[keyof T]> = keyof {
 
 declare type Keybind = { key: string; code: string; modifiers: string[] };
 
-declare type AnkiFieldTemplateName = 'sentence' | 'sentenceSanitized';
+declare type AnkiFieldTemplateName =
+  | 'empty'
+  | 'spelling'
+  | 'reading'
+  | 'isKanji'
+  | 'meaning'
+  | 'sentence'
+  | 'sentenceSanitized'
+  | 'sound:silence'
+  | 'hiragana'
+  | 'frequency'
+  | 'frequencyStylized';
+
 declare type AnkiFieldTemplate = Record<AnkiFieldTemplateName, () => string>;
 
 declare type TemplateTarget = {

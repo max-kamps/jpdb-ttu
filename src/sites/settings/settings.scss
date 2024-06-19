@@ -101,3 +101,19 @@ ul {
     }
   }
 }
+
+#template-list {
+  div {
+    display: flex;
+    gap: 1rem;
+  }
+}
+
+.controls-list {
+  display: flex;
+  gap: 1rem;
+
+  input {
+    margin-bottom: 0;
+  }
+}

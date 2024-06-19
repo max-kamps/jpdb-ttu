@@ -5,6 +5,20 @@ import { createElement } from '@lib/renderer';
 const observedAttributes = ['value', 'name', 'fetch-url'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];
 
+const TemplateTargetTranslations: Record<AnkiFieldTemplateName, string> = {
+  empty: '[Empty]',
+  spelling: 'Word',
+  reading: 'Word with Reading',
+  hiragana: 'Word in Hiragana',
+  meaning: 'Definition',
+  sentence: 'Sentence',
+  sentenceSanitized: 'Sanitized Sentence',
+  isKanji: 'Is Kanji?',
+  frequency: 'Frquecy',
+  frequencyStylized: 'Frequency Stylized',
+  'sound:silence': '[sound:_silence.wav]',
+};
+
 export class HTMLMiningInputElement extends HTMLElement {
   static observedAttributes = observedAttributes;
 
@@ -14,6 +28,7 @@ export class HTMLMiningInputElement extends HTMLElement {
 
   protected _shadow: ShadowRoot;
   protected _input: HTMLInputElement;
+  protected _templateContainer = createElement('div', { id: 'template-list' });
   protected _selects = {
     deckInput: createElement('select'),
     modelInput: createElement('select'),
@@ -26,6 +41,16 @@ export class HTMLMiningInputElement extends HTMLElement {
       type: 'checkbox',
     },
   });
+
+  protected _templateTargets: TemplateTarget[] = [];
+
+  protected get _availableFields(): string[] {
+    return this._fields.filter(
+      (field) =>
+        !this._fieldSelects.some((select) => select.value === field) &&
+        !this._templateTargets.some((target) => target.field === field),
+    );
+  }
 
   public get value(): DeckConfiguration {
     return JSON.parse(this.getAttribute('value'));
@@ -51,14 +76,13 @@ export class HTMLMiningInputElement extends HTMLElement {
 
   connectedCallback() {
     this._shadow = this.attachShadow({ mode: 'open' });
-    console.log('Custom element added to page.');
 
     this.installStyles();
 
-    this.createInputElements();
+    this.buildInputElements();
     this.registerSelectElementListeners();
 
-    this.createDOM();
+    this.buildDOM();
   }
 
   attributeChangedCallback(name: ObservedAttributes, oldValue: unknown, newValue: unknown) {
@@ -86,7 +110,21 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected createInputElements() {
+  protected registerSelectElementListeners() {
+    Object.values(this._selects).forEach((select) => {
+      select.addEventListener('change', () => {
+        this.packDeck();
+      });
+    });
+
+    this._selects.modelInput.addEventListener('change', async () => {
+      await this.updateFields(this.getAttribute('fetch-url'), this.value.model);
+
+      this.packDeck();
+    });
+  }
+
+  protected buildInputElements() {
     this._input = createElement('input', {
       attributes: {
         // @TODO: Change to hidden
@@ -101,24 +139,10 @@ export class HTMLMiningInputElement extends HTMLElement {
       this.dispatchEvent(new Event('change'));
     });
 
-    this._proxyInput.addEventListener('change', () => this.buildDeck());
+    this._proxyInput.addEventListener('change', () => this.packDeck());
   }
 
-  protected registerSelectElementListeners() {
-    Object.values(this._selects).forEach((select) => {
-      select.addEventListener('change', () => {
-        this.buildDeck();
-      });
-    });
-
-    this._selects.modelInput.addEventListener('change', async () => {
-      await this.updateFields(this.getAttribute('fetch-url'), this.value.model);
-
-      this.buildDeck();
-    });
-  }
-
-  protected createDOM() {
+  protected buildDOM() {
     this._shadow.appendChild(this._input);
 
     const container = createElement('div', {
@@ -130,15 +154,16 @@ export class HTMLMiningInputElement extends HTMLElement {
           class: ['form-box-parent'],
           children: [
             this.buildColumn([
-              this.createSelectBlock('Deck', this._selects.deckInput),
-              this.createSelectBlock('Word Field', this._selects.wordInput),
+              this.buildSelectBlock('Deck', this._selects.deckInput),
+              this.buildSelectBlock('Word Field', this._selects.wordInput),
             ]),
             this.buildColumn([
-              this.createSelectBlock('Model', this._selects.modelInput),
-              this.createSelectBlock('Reading Field', this._selects.readingInput),
+              this.buildSelectBlock('Model', this._selects.modelInput),
+              this.buildSelectBlock('Reading Field', this._selects.readingInput),
             ]),
           ],
         },
+        this.buildTemplateBlock(),
       ],
     });
 
@@ -154,7 +179,7 @@ export class HTMLMiningInputElement extends HTMLElement {
       },
       children: [
         { tag: 'p', style: { flex: '1', opacity: '0.8' }, children: [{ tag: 'slot' }] },
-        this.createProxyBlock(),
+        this.buildProxyBlock(),
       ],
     });
   }
@@ -163,20 +188,12 @@ export class HTMLMiningInputElement extends HTMLElement {
     return createElement('div', {
       class: ['form-box'],
       children: inputs
-        .map((input, index) => {
-          const result = [input];
-
-          if (index < inputs.length - 1) {
-            result.push(createElement('div', { style: { height: '1rem' } }));
-          }
-
-          return result;
-        })
+        .map((input) => [input, createElement('div', { style: { height: '1rem' } })])
         .flat(),
     });
   }
 
-  protected createSelectBlock(label: string, input: HTMLSelectElement) {
+  protected buildSelectBlock(label: string, input: HTMLSelectElement) {
     return createElement('div', {
       children: [
         {
@@ -189,7 +206,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected createProxyBlock() {
+  protected buildProxyBlock() {
     return createElement('div', {
       style: { flex: '1' },
       children: [
@@ -207,6 +224,103 @@ export class HTMLMiningInputElement extends HTMLElement {
         },
       ],
     });
+  }
+
+  protected buildTemplateBlock() {
+    return createElement('div', {
+      children: [
+        { tag: 'p', innerText: 'Template Fields' },
+        this._templateContainer,
+        this.buildTemplateList(),
+        this.buildTemplateControls(),
+      ],
+    });
+  }
+
+  protected buildTemplateList() {
+    if (!this.value) {
+      return this._templateContainer;
+    }
+
+    const childs = this._templateTargets.map((target, index) => {
+      const fieldSelect = createElement('select', {
+        attributes: { name: 'field' },
+        children: [...new Set(['', ...this._availableFields, target.field])].map((field) => {
+          return createElement('option', { innerText: field, attributes: { value: field } });
+        }),
+      });
+      const templateSelect = createElement('select', {
+        attributes: { name: 'template' },
+        children: Object.keys(TemplateTargetTranslations).map(
+          (template: keyof typeof TemplateTargetTranslations) => {
+            return createElement('option', {
+              innerText: TemplateTargetTranslations[template],
+              attributes: { value: template },
+            });
+          },
+        ),
+      });
+
+      [fieldSelect, templateSelect].forEach((select) => {
+        console.log(select.name, target, target[select.name as keyof TemplateTarget]);
+
+        select.value = target[select.name as keyof TemplateTarget];
+        select.addEventListener('change', () => {
+          target[select.name as keyof TemplateTarget] = select.value as any;
+
+          this.validateTemplatesThenPackDeck();
+        });
+      });
+
+      const removeButton = createElement('input', {
+        class: ['outline', 'v1'],
+        attributes: { type: 'button', value: '-' },
+        handler: () => {
+          this._templateTargets.splice(index, 1);
+
+          this.validateTemplatesThenPackDeck();
+          this.buildTemplateList();
+        },
+      });
+
+      return createElement('div', {
+        children: [fieldSelect, templateSelect, removeButton],
+      });
+    });
+
+    this._templateContainer.replaceChildren(...childs);
+
+    return this._templateContainer;
+  }
+
+  protected buildTemplateControls() {
+    return createElement('div', {
+      class: ['controls-list'],
+      children: [
+        {
+          tag: 'input',
+          class: 'outline',
+          attributes: { type: 'button', value: 'Add' },
+          handler: () => this.addTemplate(),
+        },
+      ],
+    });
+  }
+
+  protected addTemplate() {
+    const newTemplate: TemplateTarget = { template: 'empty', field: '' };
+
+    this._templateTargets.push(newTemplate);
+
+    this.buildTemplateList();
+  }
+
+  protected validateTemplatesThenPackDeck() {
+    this._templateTargets = this._templateTargets.filter(
+      (target) => target.field && this._fields.includes(target.field) && target.template,
+    );
+
+    this.packDeck();
   }
 
   protected onValueChanged(_: string, newValue: string) {
@@ -227,7 +341,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     await this.updateFields(ankiConnectUrl, this.value.model);
 
     this.unpackDeck();
-    this.buildDeck();
+    this.packDeck();
   }
 
   protected async updateDecks(ankiConnectUrl: string) {
@@ -263,14 +377,14 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected buildDeck() {
+  protected packDeck() {
     this.value = {
       deck: this._selects.deckInput.value,
       model: this._selects.modelInput.value,
       wordField: this._selects.wordInput.value,
       readingField: this._selects.readingInput.value,
       proxy: this._proxyInput.checked,
-      templateTargets: [],
+      templateTargets: this._templateTargets,
     };
   }
 
@@ -285,5 +399,8 @@ export class HTMLMiningInputElement extends HTMLElement {
     propagate('readingInput', this._fields, this.value.readingField);
 
     this._proxyInput.checked = this.value.proxy;
+    this._templateTargets = this.value.templateTargets;
+
+    this.buildTemplateList();
   }
 }
