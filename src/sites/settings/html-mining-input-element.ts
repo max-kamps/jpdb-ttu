@@ -1,6 +1,7 @@
 import { getAnkiDecks, getAnkiModels } from '@lib/anki';
 import { getAnkiFields } from '@lib/anki/get-anki-fields';
 import { createElement } from '@lib/renderer';
+import { displayToast } from '@lib/toast';
 
 const observedAttributes = ['value', 'name', 'fetch-url'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];
@@ -20,7 +21,8 @@ const TemplateTargetTranslations: Record<AnkiFieldTemplateName, string> = {
 };
 
 export class HTMLMiningInputElement extends HTMLElement {
-  static observedAttributes = observedAttributes;
+  public static observedAttributes = observedAttributes;
+  public static copiedDeckConfiguration: Pick<DeckConfiguration, 'model' | 'templateTargets'>;
 
   protected _decks: string[] = [];
   protected _models: string[] = [];
@@ -120,15 +122,14 @@ export class HTMLMiningInputElement extends HTMLElement {
     this._selects.modelInput.addEventListener('change', async () => {
       await this.updateFields(this.getAttribute('fetch-url'), this.value.model);
 
-      this.packDeck();
+      this.validateTemplatesThenPackDeck();
     });
   }
 
   protected buildInputElements() {
     this._input = createElement('input', {
       attributes: {
-        // @TODO: Change to hidden
-        type: 'text',
+        type: 'hidden',
         name: this.name,
       },
     });
@@ -303,6 +304,24 @@ export class HTMLMiningInputElement extends HTMLElement {
           attributes: { type: 'button', value: 'Add' },
           handler: () => this.addTemplate(),
         },
+        {
+          tag: 'input',
+          class: ['outline', 'v1'],
+          attributes: { type: 'button', value: 'Clear' },
+          handler: () => this.clearTemplates(),
+        },
+        {
+          tag: 'input',
+          class: ['outline', 'v3'],
+          attributes: { type: 'button', value: 'Copy' },
+          handler: () => this.copyTemplate(),
+        },
+        {
+          tag: 'input',
+          class: ['outline', 'v4'],
+          attributes: { type: 'button', value: 'Paste' },
+          handler: () => this.pasteTemplate(),
+        },
       ],
     });
   }
@@ -315,11 +334,49 @@ export class HTMLMiningInputElement extends HTMLElement {
     this.buildTemplateList();
   }
 
+  protected clearTemplates() {
+    this._templateTargets = [];
+
+    this.buildTemplateList();
+    this.packDeck();
+  }
+
+  protected copyTemplate() {
+    HTMLMiningInputElement.copiedDeckConfiguration = {
+      model: this._selects.modelInput.value,
+      templateTargets: this._templateTargets,
+    };
+
+    displayToast('success', 'Template copied');
+  }
+
+  protected pasteTemplate() {
+    if (!HTMLMiningInputElement.copiedDeckConfiguration?.model?.length) {
+      displayToast('error', 'No template copied');
+
+      return;
+    }
+
+    if (this._selects.modelInput.value !== HTMLMiningInputElement.copiedDeckConfiguration.model) {
+      displayToast('error', 'Models do not match');
+
+      return;
+    }
+
+    if (HTMLMiningInputElement.copiedDeckConfiguration) {
+      this._templateTargets = HTMLMiningInputElement.copiedDeckConfiguration.templateTargets;
+
+      this.buildTemplateList();
+      this.packDeck();
+    }
+  }
+
   protected validateTemplatesThenPackDeck() {
     this._templateTargets = this._templateTargets.filter(
       (target) => target.field && this._fields.includes(target.field) && target.template,
     );
 
+    this.buildTemplateList();
     this.packDeck();
   }
 
