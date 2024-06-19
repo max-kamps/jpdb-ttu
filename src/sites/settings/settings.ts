@@ -3,24 +3,12 @@ import {
   getConfigurationValue,
   setConfigurationValue,
 } from '@lib/configuration';
-import {
-  destroyElement,
-  findElement,
-  findElements,
-  withElement,
-  withElements,
-} from '@lib/renderer';
-import { keybindToString } from './keybind-to-string';
+import { findElement, withElement, withElements } from '@lib/renderer';
 import { displayToast } from '@lib/toast';
 import { registerListener } from '@lib/messaging';
-import { getAnkiApiVersion, getAnkiDecks, getAnkiModels } from '@lib/anki';
+import { getAnkiApiVersion } from '@lib/anki';
 import { pingJPDB } from '@lib/jpdb';
-import { getAnkiFields } from '@lib/anki/get-anki-fields';
-import { DecksController } from './decks-controller';
 import { HTMLMiningInputElement } from './html-mining-input-element';
-
-type Decks = 'miningDeck' | 'neverForgetDeck' | 'blacklistDeck';
-type Models = 'miningModel' | 'neverForgetModel' | 'blacklistModel';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -31,18 +19,12 @@ class SettingsController {
     keyof Configuration,
     Configuration[keyof Configuration]
   >();
-  // private _localSelectFields = new Map<Decks | Models, string>();
   private _localChanges = new Set<keyof Configuration>();
   private _invalidFields = new Set<keyof Configuration>();
-
-  private _decks = new Set<string>();
-  private _models = new Map<string, string[]>();
 
   private _saveButton = findElement<'button'>('#save-all-settings');
   private _keybindInput = findElement<'input'>('#showPopupKey');
   private _keybindButton = findElement<'button'>('#showPopupKeyButton');
-
-  private _decksController = new DecksController();
 
   constructor() {
     registerListener('toast', displayToast);
@@ -52,7 +34,6 @@ class SettingsController {
     (async () => {
       await this._setupSimpleInputs();
       await this._setupSelectFields();
-      // await this._setupFieldLoaders();
 
       this._setupJPDBInteraction();
       this._setupAnkiInteraction();
@@ -125,46 +106,6 @@ class SettingsController {
       }),
     );
   }
-
-  // private _setupFieldLoaders(): void {
-  //   withElements('select[type="model"]', (inputElement: HTMLSelectElement) => {
-  //     inputElement.addEventListener('change', async () => {
-  //       const target = inputElement.getAttribute('for');
-  //       const targetFields = findElements<'select'>(`select[for="${target}"][type="field"]`);
-  //       const ankiConnectUrl = this._currentConfiguration.get('ankiUrl') as string;
-  //       const model = inputElement.value;
-
-  //       const fields: string[] = [];
-
-  //       if (model) {
-  //         const knownFields = this._models.get(model);
-
-  //         fields.push(
-  //           ...(knownFields.length > 0
-  //             ? knownFields
-  //             : await getAnkiFields(model, { ankiConnectUrl })),
-  //         );
-
-  //         this._models.set(model, fields);
-  //       }
-
-  //       targetFields.forEach((targetField) => {
-  //         withElements(targetField, 'option', (e) => e.remove());
-
-  //         fields.forEach((field) => {
-  //           const option = document.createElement('option');
-  //           option.value = field;
-  //           option.text = field;
-
-  //           targetField.appendChild(option);
-  //         });
-
-  //         targetField.value = this._currentConfiguration.get(targetField.name as Models) as string;
-  //         targetField.dispatchEvent(new Event('change'));
-  //       });
-  //     });
-  //   });
-  // }
 
   /**
    * Setup the save button. When clicked, it will save the local changes to the storage.
@@ -296,35 +237,6 @@ class SettingsController {
     }
 
     this._updateSaveButton();
-  }
-
-  private async _loadAnkiDecks(ankiConnectUrl: string): Promise<void> {
-    // this._decks = new Set(await getAnkiDecks({ ankiConnectUrl }));
-    // withElements('select[type="deck"]', (selectElement: HTMLSelectElement) => {
-    //   for (const name of this._decks.values()) {
-    //     const option = document.createElement('option');
-    //     option.value = name;
-    //     option.text = name;
-    //     selectElement.appendChild(option);
-    //   }
-    //   selectElement.value = this._currentConfiguration.get(selectElement.name as Decks) as string;
-    //   selectElement.dispatchEvent(new Event('change'));
-    // });
-  }
-
-  private async _loadNoteTypes(ankiConnectUrl: string): Promise<void> {
-    // const noteTypes = await getAnkiNoteTypes({ ankiConnectUrl });
-    // this._models = new Map(noteTypes.map((name) => [name, []]));
-    // withElements('select[type="model"]', (selectElement: HTMLSelectElement) => {
-    //   for (const name of noteTypes) {
-    //     const option = document.createElement('option');
-    //     option.value = name;
-    //     option.text = name;
-    //     selectElement.appendChild(option);
-    //   }
-    //   selectElement.value = this._currentConfiguration.get(selectElement.name as Models) as string;
-    //   selectElement.dispatchEvent(new Event('change'));
-    // });
   }
 
   private _animateMiningSection(show: boolean): void {

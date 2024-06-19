@@ -35,6 +35,13 @@ declare type DeckConfiguration = {
   templateTargets: TemplateTarget[];
 };
 
+declare type DiscoverWordConfiguration = {
+  model: string;
+  wordField: string;
+  deck?: string;
+  readingField?: string;
+};
+
 declare type Configuration = {
   schemaVersion: number;
   apiToken: string;
@@ -43,7 +50,7 @@ declare type Configuration = {
   miningConfig: DeckConfiguration;
   blacklistConfig: DeckConfiguration;
   neverForgetConfig: DeckConfiguration;
-  readonlyConfigs: DeckConfiguration[];
+  readonlyConfigs: DiscoverWordConfiguration[];
   contextWidth: number;
   customWordCSS: string;
   customPopupCSS: string;

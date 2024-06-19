@@ -2,7 +2,10 @@ import { getCallable } from '@lib/messaging';
 
 type NumberKeys = Filter<Configuration, number>[];
 type BooleanKeys = Filter<Configuration, boolean>[];
-type ObjectKeys = Filter<Configuration, Keybind | DeckConfiguration | DeckConfiguration[]>[];
+type ObjectKeys = Filter<
+  Configuration,
+  Keybind | DeckConfiguration | DiscoverWordConfiguration[]
+>[];
 
 const numberKeys: NumberKeys = ['schemaVersion', 'contextWidth'];
 const booleanKeys: BooleanKeys = ['showPopupOnHover', 'touchscreenSupport', 'disableFadeAnimation'];
