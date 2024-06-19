@@ -94,17 +94,20 @@
 
         <div id="requires-anki" hidden>
           <h6>Mining</h6>
-          <mining-input id="miningConfig" name="miningConfig">
+          <mining-input id="miningConfig" name="miningConfig" title="Mining Deck">
             <p>This is your <b>mining deck</b>. Cards you mine will be saved here.</p>
             <p>Words from this deck will be displayed according to its learning state in anki.</p>
+            <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
           </mining-input>
-          <mining-input id="neverForgetConfig" name="neverForgetConfig">
+          <mining-input id="neverForgetConfig" name="neverForgetConfig" title="Never Forget Deck">
             <p>This is your <b>never forget deck</b>. Cards you won't ever forget will be saved here.</p>
             <p>Words from this deck will be displayed as known.</p>
+            <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
           </mining-input>
-          <mining-input id="blacklistConfig" name="blacklistConfig">
+          <mining-input id="blacklistConfig" name="blacklistConfig" title="Blacklist Deck">
             <p>This is your <b>blacklist deck</b>. Cards you don't want to learn will be saved here.</p>
             <p>Words from this deck will be displayed as suspended.</p>
+            <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
           </mining-input>
 
           <div class="form-box-parent">

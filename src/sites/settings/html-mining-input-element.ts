@@ -3,7 +3,7 @@ import { getAnkiFields } from '@lib/anki/get-anki-fields';
 import { createElement } from '@lib/renderer';
 import { displayToast } from '@lib/toast';
 
-const observedAttributes = ['value', 'name', 'fetch-url'] as const;
+const observedAttributes = ['value', 'name', 'fetch-url', 'title'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];
 
 const TemplateTargetTranslations: Record<AnkiFieldTemplateName, string> = {
@@ -70,6 +70,10 @@ export class HTMLMiningInputElement extends HTMLElement {
 
   public set fetchUrl(value: string) {
     this.setAttribute('fetch-url', value);
+  }
+
+  public set title(value: string) {
+    this.setAttribute('title', value);
   }
 
   constructor() {
@@ -147,7 +151,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     this._shadow.appendChild(this._input);
 
     const container = createElement('div', {
-      class: ['mining-input', 'border'],
+      class: ['mining-input'],
       children: [
         this.buildHeaderBlock(),
         {
@@ -168,7 +172,14 @@ export class HTMLMiningInputElement extends HTMLElement {
       ],
     });
 
-    this._shadow.appendChild(container);
+    this._shadow.appendChild(this.buildAccordionBlock(container));
+  }
+
+  protected buildAccordionBlock(contents: HTMLElement) {
+    return createElement('details', {
+      class: ['accordion'],
+      children: [{ tag: 'summary', innerText: this.getAttribute('title') }, contents],
+    });
   }
 
   protected buildHeaderBlock() {
@@ -202,7 +213,7 @@ export class HTMLMiningInputElement extends HTMLElement {
           attributes: { for: input.id },
           innerText: label,
         },
-        input,
+        { tag: 'div', class: ['select'], children: [input] },
       ],
     });
   }
@@ -263,8 +274,6 @@ export class HTMLMiningInputElement extends HTMLElement {
       });
 
       [fieldSelect, templateSelect].forEach((select) => {
-        console.log(select.name, target, target[select.name as keyof TemplateTarget]);
-
         select.value = target[select.name as keyof TemplateTarget];
         select.addEventListener('change', () => {
           target[select.name as keyof TemplateTarget] = select.value as any;

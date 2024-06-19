@@ -84,15 +84,6 @@ select {
   }
 }
 
-.border {
-  border: 1px solid var(--big-shadow-border);
-  box-shadow: 0 0 16px var(--big-shadow-color);
-  border-radius: 8px;
-  padding: 1.35rem;
-  padding-top: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
 ul {
   li {
     p {
@@ -102,18 +93,30 @@ ul {
   }
 }
 
-#template-list {
-  div {
+// In accordions inputs are not displayed correctly
+details {
+  select {
+    margin: 0 0 0.5rem 0;
+    padding: 0 1rem;
+  }
+
+  .select {
+    display: flex;
+  }
+
+  #template-list {
+    div {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+
+  .controls-list {
     display: flex;
     gap: 1rem;
-  }
-}
 
-.controls-list {
-  display: flex;
-  gap: 1rem;
-
-  input {
-    margin-bottom: 0;
+    input {
+      margin-bottom: 0;
+    }
   }
 }
