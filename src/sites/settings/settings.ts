@@ -17,6 +17,7 @@ import { getAnkiApiVersion, getAnkiDecks, getAnkiModels } from '@lib/anki';
 import { pingJPDB } from '@lib/jpdb';
 import { getAnkiFields } from '@lib/anki/get-anki-fields';
 import { DecksController } from './decks-controller';
+import { HTMLMiningInputElement } from './html-mining-input-element';
 
 type Decks = 'miningDeck' | 'neverForgetDeck' | 'blacklistDeck';
 type Models = 'miningModel' | 'neverForgetModel' | 'blacklistModel';
@@ -46,6 +47,8 @@ class SettingsController {
   constructor() {
     registerListener('toast', displayToast);
 
+    customElements.define('mining-input', HTMLMiningInputElement);
+
     (async () => {
       await this._setupSimpleInputs();
       await this._setupSelectFields();
@@ -67,7 +70,7 @@ class SettingsController {
    * Also, install listeners to keep track of the local changes.
    */
   private async _setupSimpleInputs(): Promise<void> {
-    await this._setupFields('input, textarea', ['', 'showPopupKey'], (type) =>
+    await this._setupFields('input, textarea, mining-input', ['', 'showPopupKey'], (type) =>
       type === 'checkbox' ? 'checked' : 'value',
     );
   }
@@ -85,7 +88,7 @@ class SettingsController {
       withElements(selector, async (inputElement: HTMLInputElement) => {
         const name = inputElement.name as keyof Configuration;
 
-        if (filter.includes(name)) {
+        if (filter.includes(name) || inputElement.type === 'hidden') {
           return;
         }
 
@@ -234,11 +237,9 @@ class SettingsController {
       (ankiConnectUrl) => getAnkiApiVersion({ ankiConnectUrl }),
       false,
       async (ankiConnectUrl: string) => {
-        try {
-          await this._decksController.ankiReached(ankiConnectUrl);
-        } catch (error) {
-          console.log(error);
-        }
+        withElements('mining-input', (element: HTMLMiningInputElement) => {
+          element.fetchUrl = ankiConnectUrl;
+        });
 
         this._animateMiningSection(true);
       },

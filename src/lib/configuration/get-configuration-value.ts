@@ -1,9 +1,5 @@
 import { getCallable } from '@lib/messaging';
 
-type Filter<T extends object, TF extends T[keyof T]> = keyof {
-  [K in keyof T as T[K] extends TF ? K : never]: T[K];
-};
-
 type NumberKeys = Filter<Configuration, number>[];
 type BooleanKeys = Filter<Configuration, boolean>[];
 type ObjectKeys = Filter<Configuration, Keybind | DeckConfiguration | DeckConfiguration[]>[];

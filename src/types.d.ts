@@ -1,5 +1,9 @@
 /// <reference types="chrome-types" />
 
+declare type Filter<T, TF extends T[keyof T]> = keyof {
+  [K in keyof T as T[K] extends TF ? K : never]: T[K];
+};
+
 declare type Keybind = { key: string; code: string; modifiers: string[] };
 
 declare type AnkiFieldTemplateName = 'sentence' | 'sentenceSanitized';
