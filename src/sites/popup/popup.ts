@@ -1,19 +1,16 @@
-// import { jsxCreateElement } from '@lib/jsx';
-// import { getCallable, requestParse } from 'src/unsorted/messaging';
-
+import { requestParsePage } from '@lib/parser';
 import { appendElement } from '@lib/renderer';
 import { sendToast } from '@lib/toast';
-import { requestParse } from 'src/unsorted/messaging';
 
 chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
   tabs.forEach((tab) => {
     appendElement<'a'>('.container', {
       tag: 'a',
       class: ['outline', 'parse'],
-      handler: () => {
-        sendToast('success', 'Parsing...');
-        // alert('parse ' + tab.id + ' is-foreground: ' + (isForeground() ? 'fg' : 'bg'));
-        // requestParse(tab.id).then(() => window.close())
+      handler: async () => {
+        await requestParsePage(tab.id);
+
+        window.close();
       },
       innerText: `Parse "${tab.title ?? 'Untitled'}"`,
     });

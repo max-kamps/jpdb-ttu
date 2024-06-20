@@ -18,6 +18,8 @@ chrome.runtime.onMessage.addListener(
               sendResponse({ success: true, result });
             })
             .catch((_error) => {
+              console.log('Error in extension script:', _error);
+
               sendResponse({ success: false, result: undefined });
             });
 
@@ -26,6 +28,8 @@ chrome.runtime.onMessage.addListener(
 
         sendResponse({ success: true, result: fnResult });
       } catch (error) {
+        console.log('Error in extension script:', error);
+
         sendResponse({ success: false, result: undefined });
       }
     }

@@ -14,6 +14,7 @@ const apps = [
   // 'bunpro',
 ];
 const integrations = ['toast'];
+const scripts = ['install-parser'];
 const globalStyles = ['toast', 'word'];
 
 module.exports = {
@@ -56,6 +57,10 @@ module.exports = {
             ...integrations.map((integration) => ({
               filename: `integrations/${integration}.js`,
               import: `./src/integrations/${integration}.ts`,
+            })),
+            ...scripts.map((script) => ({
+              filename: `scripts/${script}.js`,
+              import: `./src/scripts/${script}.ts`,
             })),
             ...globalStyles.map((style) => ({
               filename: `styles/${style}.css`,
