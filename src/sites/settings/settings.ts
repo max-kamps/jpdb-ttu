@@ -24,8 +24,6 @@ class SettingsController {
   private _invalidFields = new Set<keyof Configuration>();
 
   private _saveButton = findElement<'button'>('#save-all-settings');
-  private _keybindInput = findElement<'input'>('#showPopupKey');
-  private _keybindButton = findElement<'button'>('#showPopupKeyButton');
 
   constructor() {
     registerListener('toast', displayToast);
@@ -53,10 +51,8 @@ class SettingsController {
    * Also, install listeners to keep track of the local changes.
    */
   private async _setupSimpleInputs(): Promise<void> {
-    await this._setupFields(
-      'input, textarea, mining-input, keybind-input',
-      ['', 'showPopupKey'],
-      (type) => (type === 'checkbox' ? 'checked' : 'value'),
+    await this._setupFields('input, textarea, mining-input, keybind-input', [''], (type) =>
+      type === 'checkbox' ? 'checked' : 'value',
     );
   }
 
@@ -119,9 +115,19 @@ class SettingsController {
       event.stopPropagation();
       event.preventDefault();
 
+      // We only save the fields that are not invalid.
+      // The save button would not activate if there are invalid fields except for the ankiProxyUrl.
+      const itemsToSave = Array.from(this._localChanges).filter(
+        (key) => !this._invalidFields.has(key),
+      );
+
+      if (itemsToSave.length === 0) {
+        return;
+      }
+
       this._saveButton.disabled = true;
 
-      for (const key of this._localChanges) {
+      for (const key of itemsToSave) {
         const inputElement = findElement<'input'>(`[name="${key}"]`);
         const value = inputElement.type === 'checkbox' ? inputElement.checked : inputElement.value;
 
@@ -136,7 +142,15 @@ class SettingsController {
   }
 
   private _updateSaveButton(): void {
-    this._saveButton.disabled = this._localChanges.size === 0 || this._invalidFields.size > 0;
+    // Invalid fields are not considered changed fields.
+    const localChanges = Array.from(this._localChanges).filter(
+      (key) => !this._invalidFields.has(key),
+    );
+    // We allow the ankiProxyUrl to be invalid, otherwise one would have to start the proxy every time the settings are opened.
+    const invalidFields = Array.from(this._invalidFields).filter((key) => key !== 'ankiProxyUrl');
+
+    console.log(localChanges, invalidFields);
+    this._saveButton.disabled = localChanges.length === 0 || invalidFields.length > 0;
   }
 
   private _setupJPDBInteraction(): void {

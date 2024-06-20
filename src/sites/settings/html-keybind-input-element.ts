@@ -5,13 +5,22 @@ type ObservedAttributes = (typeof observedAttributes)[number];
 
 export class HTMLKeybindInputElement extends HTMLElement {
   public static observedAttributes = observedAttributes;
-  protected static active?: [Keybind, (event: KeyboardEvent) => void];
 
-  protected MODIFIERS = ['Control', 'Alt', 'AltGraph', 'Meta', 'Shift'];
-  protected MOUSE_BUTTONS = ['Left Mouse Button', 'Middle Mouse Button', 'Right Mouse Button'];
+  protected static active?: HTMLKeybindInputElement;
+  protected static MODIFIERS = ['Control', 'Alt', 'AltGraph', 'Meta', 'Shift'];
+  protected static MOUSE_BUTTONS = [
+    'Left Mouse Button',
+    'Middle Mouse Button',
+    'Right Mouse Button',
+  ];
 
   protected _shadow: ShadowRoot;
   protected _input: HTMLInputElement;
+  protected _button: HTMLInputElement = createElement('input', {
+    class: ['outline'],
+    attributes: { type: 'button' },
+    style: { width: '100%', marginBottom: '0' },
+  });
 
   public get value(): Keybind {
     return JSON.parse(this.getAttribute('value'));
@@ -68,8 +77,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
   protected buildInputElements() {
     this._input = createElement('input', {
       attributes: {
-        // @TODO: CHange to hidden
-        type: 'text',
+        type: 'hidden',
         name: this.name,
       },
     });
@@ -79,43 +87,118 @@ export class HTMLKeybindInputElement extends HTMLElement {
 
       this.dispatchEvent(new Event('change'));
     });
+
+    // We use mousedown instead of click to allow the left mouse button being used as keybind.
+    // If we would use click, the event propagation cannot be stopped and the button would activate again immediately after the keybind was chosen.
+    this._button.addEventListener('mousedown', (event) => this.initChooseKey(event));
   }
 
   protected buildDOM() {
     this._shadow.appendChild(this._input);
-
-    // const container = createElement('div', {
-    //   class: ['mining-input'],
-    //   children: [
-    //     this.buildHeaderBlock(),
-    //     {
-    //       tag: 'div',
-    //       class: ['form-box-parent'],
-    //       children: [
-    //         this.buildColumn([
-    //           this.buildSelectBlock('Deck', this._selects.deckInput),
-    //           this.buildSelectBlock('Word Field', this._selects.wordInput),
-    //         ]),
-    //         this.buildColumn([
-    //           this.buildSelectBlock('Model', this._selects.modelInput),
-    //           this.buildSelectBlock('Reading Field', this._selects.readingInput),
-    //         ]),
-    //       ],
-    //     },
-    //     this.buildTemplateBlock(),
-    //   ],
-    // });
+    this._shadow.appendChild(this._button);
   }
 
-  protected keybindToString(keybind: Keybind) {
-    return keybind === null
-      ? 'None'
-      : `${keybind.key} (${[...keybind.modifiers, keybind.code].join('+')})`;
+  protected initChooseKey(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (HTMLKeybindInputElement.active) {
+      if (HTMLKeybindInputElement.active !== this) {
+        HTMLKeybindInputElement.active.deactivate();
+
+        return this.activate();
+      }
+
+      return;
+    }
+
+    if (event.button !== 0) {
+      return;
+    }
+
+    this.activate();
+  }
+
+  protected activate() {
+    this._button.value = 'Press a key, escape to cancel';
+
+    document.addEventListener('keydown', HTMLKeybindInputElement.keyListener);
+    document.addEventListener('keyup', HTMLKeybindInputElement.keyListener);
+    document.addEventListener('mousedown', HTMLKeybindInputElement.keyListener);
+
+    HTMLKeybindInputElement.active = this;
+  }
+
+  protected deactivate() {
+    this._button.value = this.keybindToString(this.value);
+
+    document.removeEventListener('keydown', HTMLKeybindInputElement.keyListener);
+    document.removeEventListener('keyup', HTMLKeybindInputElement.keyListener);
+    document.removeEventListener('mousedown', HTMLKeybindInputElement.keyListener);
+
+    HTMLKeybindInputElement.active = undefined;
+  }
+
+  protected static keyListener(event: KeyboardEvent | MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    // We ignore the keydown event for modifiers, and only register them on keyup.
+    // This allows pressing and holding modifiers before pressing the main hotkey.
+    if (
+      event instanceof KeyboardEvent &&
+      event.type === 'keydown' &&
+      HTMLKeybindInputElement.MODIFIERS.includes(event.key)
+    ) {
+      return;
+    }
+
+    // .code: Layout-independent key identifier (usually equal to whatever that key means in qwerty)
+    // .key: Key character in the current layout (respecting modifiers like shift or altgr)
+    // .button: Mouse button number
+    const code = event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
+    const key =
+      event instanceof KeyboardEvent
+        ? event.key
+        : HTMLKeybindInputElement.MOUSE_BUTTONS[event.button] ?? code;
+    const modifiers = HTMLKeybindInputElement.MODIFIERS.filter(
+      (name) => name !== key && event.getModifierState(name),
+    );
+
+    if (!modifiers.length && code === 'Mouse0') {
+      // We don't want to allow the left mouse button as keybind, as it would be impossible to click on anything.
+      return;
+    }
+
+    if (code === 'Mouse2') {
+      // We don't want to allow the right mouse button as keybind, as it would interfere with the context menu, which is another event
+      return;
+    }
+
+    HTMLKeybindInputElement.active.value =
+      code === 'Escape'
+        ? {
+            key: '',
+            code: '',
+            modifiers: [],
+          }
+        : { key, code, modifiers };
+
+    HTMLKeybindInputElement.active.deactivate();
+  }
+
+  protected keybindToString({ key, modifiers, code }: Keybind) {
+    return !key.length && !code.length ? 'None' : `${key} (${[...modifiers, code].join('+')})`;
   }
 
   protected onValueChanged(_: string, newValue: string) {
     if (this._input && this._input.value !== newValue) {
       this._input.value = newValue;
+
+      if (!HTMLKeybindInputElement.active) {
+        this._button.value = this.keybindToString(this.value);
+      }
 
       this.dispatchEvent(new Event('change'));
     }
