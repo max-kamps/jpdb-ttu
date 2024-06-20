@@ -80,7 +80,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     super();
   }
 
-  connectedCallback() {
+  public connectedCallback() {
     this._shadow = this.attachShadow({ mode: 'open' });
 
     this.installStyles();
@@ -91,7 +91,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     this.buildDOM();
   }
 
-  attributeChangedCallback(name: ObservedAttributes, oldValue: unknown, newValue: unknown) {
+  public attributeChangedCallback(name: ObservedAttributes, oldValue: unknown, newValue: unknown) {
     const pascalCaseName = name.replace(/(^\w|-\w)/g, (a) => a.replace(/-/, '').toUpperCase());
     const functionName = `on${pascalCaseName}Changed`;
     const changeHandler = this[functionName as keyof this] as

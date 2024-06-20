@@ -9,6 +9,7 @@ import { registerListener } from '@lib/messaging';
 import { getAnkiApiVersion } from '@lib/anki';
 import { pingJPDB } from '@lib/jpdb';
 import { HTMLMiningInputElement } from './html-mining-input-element';
+import { HTMLKeybindInputElement } from './html-keybind-input-element';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -30,6 +31,7 @@ class SettingsController {
     registerListener('toast', displayToast);
 
     customElements.define('mining-input', HTMLMiningInputElement);
+    customElements.define('keybind-input', HTMLKeybindInputElement);
 
     (async () => {
       await this._setupSimpleInputs();
@@ -51,8 +53,10 @@ class SettingsController {
    * Also, install listeners to keep track of the local changes.
    */
   private async _setupSimpleInputs(): Promise<void> {
-    await this._setupFields('input, textarea, mining-input', ['', 'showPopupKey'], (type) =>
-      type === 'checkbox' ? 'checked' : 'value',
+    await this._setupFields(
+      'input, textarea, mining-input, keybind-input',
+      ['', 'showPopupKey'],
+      (type) => (type === 'checkbox' ? 'checked' : 'value'),
     );
   }
 
