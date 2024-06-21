@@ -1,4 +1,4 @@
-import { parsePage, parseSelection } from '@lib/parser';
+import { getParseSelector, parsePage, parseSelection } from '@lib/parser';
 import { prepareParser } from '../lib/prepare-parser';
 
 chrome.contextMenus.create({
@@ -12,18 +12,27 @@ chrome.contextMenus.create({
   contexts: ['page'],
 });
 
-const listeners = {
-  'parse-selection': parseSelection,
-  'parse-page': parsePage,
-};
+const listeners: string[] = ['parse-selection', 'parse-page'];
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  const id = info.menuItemId as keyof typeof listeners;
+  const id = info.menuItemId as string;
 
-  if (!tab || !listeners[id]) {
+  if (!tab || !listeners.includes(id)) {
     return;
   }
 
   await prepareParser(tab.id);
-  await listeners[id](tab);
+
+  switch (id) {
+    case 'parse-page':
+      const selector = await getParseSelector(tab);
+
+      await parsePage(tab, selector);
+
+      break;
+    case 'parse-selection':
+      await parseSelection(tab);
+
+      break;
+  }
 });
