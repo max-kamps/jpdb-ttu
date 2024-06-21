@@ -1,4 +1,10 @@
-import { getParseSelector, parsePage, parseSelection } from '@lib/parser';
+import {
+  getParseSelector,
+  isParsingDisabledOnThisPage,
+  parsePage,
+  parseSelection,
+  requestParsePage,
+} from '@lib/parser';
 import { prepareParser } from '../lib/prepare-parser';
 
 chrome.contextMenus.create({
@@ -21,13 +27,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
-  await prepareParser(tab.id);
+  // await prepareParser(tab.id);
 
   switch (id) {
     case 'parse-page':
-      const selector = await getParseSelector(tab);
+      await requestParsePage(tab.id);
+      // const selector = await getParseSelector(tab);
+      // const isParsingDisabled = await isParsingDisabledOnThisPage(tab);
 
-      await parsePage(tab, selector);
+      // await parsePage(tab, isParsingDisabled ? '.ajb-auto-parse-disable' : selector);
 
       break;
     case 'parse-selection':

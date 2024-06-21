@@ -1,6 +1,5 @@
 import { requestParsePage } from '@lib/parser';
 import { appendElement } from '@lib/renderer';
-import { sendToast } from '@lib/toast';
 
 chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
   tabs.forEach((tab) => {

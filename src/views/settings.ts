@@ -8,8 +8,8 @@ import { displayToast } from '@lib/toast';
 import { registerListener } from '@lib/messaging';
 import { getAnkiApiVersion } from '@lib/anki';
 import { pingJPDB } from '@lib/jpdb';
-import { HTMLMiningInputElement } from './html-mining-input-element';
-import { HTMLKeybindInputElement } from './html-keybind-input-element';
+import { HTMLMiningInputElement } from './elements/html-mining-input-element';
+import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<

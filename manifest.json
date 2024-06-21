@@ -5,10 +5,10 @@
   "description": "Mine from JPDB directly into Anki",
   "minimum_chrome_version": "116",
   "background": {
-    "service_worker": "service-worker/service-worker.js"
+    "service_worker": "service-worker.js"
   },
   "action": {
-    "default_popup": "sites/popup/popup.html",
+    "default_popup": "views/popup.html",
     "default_icon": {
       "16": "assets/16.png",
       "48": "assets/48.png",
@@ -24,11 +24,15 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["integrations/toast.js"]
+      "js": ["foreground/global/toast.js"]
     },
     {
       "matches": ["*://*.nhk.or.jp/*"],
-      "js": ["apps/nhk.or.jp.js"]
+      "js": ["foreground/apps/nhk.or.jp.js"]
+    },
+    {
+      "matches": ["*://*.crunchyroll.com/*"],
+      "js": ["foreground/apps/crunchyroll.com.js"]
     }
   ],
   "host_permissions": [

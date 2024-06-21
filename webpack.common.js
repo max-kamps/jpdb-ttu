@@ -2,21 +2,18 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const sites = ['settings', 'popup'];
-const apps = [
-  'nhk.or.jp',
-  // 'ttu',
-  // 'anacreon',
-  // 'mokuro',
-  // 'asbplayer',
-  // 'readwok',
-  // 'wikipedia',
-  // 'youtube',
-  // 'bunpro',
-];
-const integrations = ['toast'];
-const scripts = ['install-parser'];
-const globalStyles = ['toast', 'word'];
+const views = ['settings', 'popup'];
+const styles = ['toast', 'word'];
+
+const foregroundGlobal = ['toast'];
+const foregroundApps = ['nhk.or.jp', 'crunchyroll.com'];
+const foregroundScripts = ['install-parser'];
+
+const fromArray = (array, prefix, source = 'ts', target = 'js') =>
+  array.map((item) => ({
+    import: `./src/${prefix}/${item}.${source}`,
+    filename: `${prefix}/${item}.${target}`,
+  }));
 
 module.exports = {
   async config(env) {
@@ -32,6 +29,7 @@ module.exports = {
         alias: {
           '@lib': path.resolve(__dirname, 'src/lib'),
           '@styles': path.resolve(__dirname, 'src/styles'),
+          '@fg': path.resolve(__dirname, 'src/foreground/lib/index.ts'),
         },
       },
       plugins: [
@@ -43,30 +41,18 @@ module.exports = {
         }),
         new HtmlBundlerPlugin({
           entry: [
+            // service-worker
             {
-              filename: 'service-worker/service-worker.js',
-              import: './src/service-worker/service-worker.ts',
+              filename: 'service-worker.js',
+              import: './src/service-worker.ts',
             },
-            ...sites.map((site) => ({
-              filename: `sites/${site}/${site}.html`,
-              import: `src/sites/${site}/${site}.html`,
-            })),
-            ...apps.map((app) => ({
-              filename: `apps/${app}.js`,
-              import: `./src/apps/${app}.ts`,
-            })),
-            ...integrations.map((integration) => ({
-              filename: `integrations/${integration}.js`,
-              import: `./src/integrations/${integration}.ts`,
-            })),
-            ...scripts.map((script) => ({
-              filename: `scripts/${script}.js`,
-              import: `./src/scripts/${script}.ts`,
-            })),
-            ...globalStyles.map((style) => ({
-              filename: `styles/${style}.css`,
-              import: `./src/styles/${style}.scss`,
-            })),
+            ...fromArray(views, 'views', 'html', 'html'),
+            ...fromArray(styles, 'styles', 'scss', 'css'),
+
+            // foreground (everything that is not a background script)
+            ...fromArray(foregroundGlobal, 'foreground/global'),
+            ...fromArray(foregroundApps, 'foreground/apps'),
+            ...fromArray(foregroundScripts, 'foreground/scripts'),
           ],
           js: {
             filename: (source) => {

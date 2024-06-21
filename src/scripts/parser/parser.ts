@@ -90,6 +90,10 @@ export class Parser {
   }
 
   private parseParagraphs(paragraphs: Paragraph[]) {
+    if (!paragraphs.length) {
+      return;
+    }
+
     const text = paragraphs
       .map((paragraph) => paragraph.map((fragment) => fragment.node.data).join(''))
       .join('');
