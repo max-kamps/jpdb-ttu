@@ -1,4 +1,4 @@
-import { getConfigurationValue } from '@lib/configuration';
+import { getConfigurationValue } from '@lib/configuration/get-configuration-value';
 import { AnkiRequestOptions } from './anki.types';
 
 export const ankiRequest = async <TResult>(

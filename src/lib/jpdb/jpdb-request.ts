@@ -1,4 +1,4 @@
-import { getConfigurationValue } from '@lib/configuration';
+import { getConfigurationValue } from '@lib/configuration/get-configuration-value';
 import { JPDBRequestOptions } from './jpdb.types';
 
 export const jpdbRequest = async <TResult extends object>(

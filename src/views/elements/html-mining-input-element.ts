@@ -1,6 +1,7 @@
-import { getAnkiDecks, getAnkiModels } from '@lib/anki';
+import { getAnkiDecks } from '@lib/anki/get-anki-decks';
 import { getAnkiFields } from '@lib/anki/get-anki-fields';
-import { createElement } from '@lib/renderer';
+import { getAnkiModels } from '@lib/anki/get-anki-models';
+import { createElement } from '@lib/renderer/create-element';
 import { displayToast } from '@lib/toast';
 
 const observedAttributes = ['value', 'name', 'fetch-url', 'title'] as const;

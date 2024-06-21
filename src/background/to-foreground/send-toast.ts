@@ -1,4 +1,4 @@
-import { getTabCallable } from '@lib/messaging';
+import { getTabCallable } from '@lib/messaging/get-tab-callable';
 import { install } from '../lib/install';
 
 export const sendToast = async (

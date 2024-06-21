@@ -1,4 +1,4 @@
-import { createElement } from '@lib/renderer';
+import { createElement } from '@lib/renderer/create-element';
 
 const observedAttributes = ['value', 'name'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];

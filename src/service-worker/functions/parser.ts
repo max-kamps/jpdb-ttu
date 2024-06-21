@@ -1,6 +1,8 @@
-import { registerListener } from '@lib/messaging';
-import { getParseSelector, parsePage, parseSelection } from '@lib/parser';
+import { getParseSelector } from '@lib/parser/get-parse-selector';
 import { prepareParser } from '../lib/prepare-parser';
+import { registerListener } from '@lib/messaging/register-listener';
+import { parsePage } from '@lib/parser/parse-page';
+import { parseSelection } from '@lib/parser/parse-selection';
 
 registerListener('requestParsePage', async (tabId: number): Promise<void> => {
   const tab = await chrome.tabs.get(tabId);

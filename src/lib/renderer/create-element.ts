@@ -12,13 +12,19 @@ export function createElement(
   p0: string | DOMElementTagOptions,
   p1?: DOMElementOptions,
 ): HTMLElement {
+  if (!('ajb' in document)) {
+    Object.assign(document, { ajb: { id: 0 } });
+  }
+
+  (document as any).ajb.id++;
+
   const tag = typeof p0 === 'string' ? p0 : p0.tag;
   const options = (p1 ?? p0 ?? {}) as DOMElementOptions;
 
   const e = document.createElement(tag);
+  const id = options.id ?? `${tag}-${(document as any).ajb.id}`;
 
-  document.ajb.id++;
-  e.setAttribute('id', options.id ?? `${tag}-${document.ajb.id}`);
+  e.setAttribute('id', id);
 
   if (options.innerText !== undefined) {
     e.innerText = String(options.innerText);

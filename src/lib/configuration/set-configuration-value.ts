@@ -1,4 +1,4 @@
-import { getCallable } from '@lib/messaging';
+import { getCallable } from '@lib/messaging/get-callable';
 
 const loadCfg = getCallable<[key: string, value: string], string>('lsw');
 

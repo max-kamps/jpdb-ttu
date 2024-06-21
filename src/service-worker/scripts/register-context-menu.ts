@@ -1,12 +1,3 @@
-import {
-  getParseSelector,
-  isParsingDisabledOnThisPage,
-  parsePage,
-  parseSelection,
-  requestParsePage,
-} from '@lib/parser';
-import { prepareParser } from '../lib/prepare-parser';
-
 chrome.contextMenus.create({
   id: 'parse-selection',
   title: 'Parse selected text',
@@ -20,27 +11,27 @@ chrome.contextMenus.create({
 
 const listeners: string[] = ['parse-selection', 'parse-page'];
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  const id = info.menuItemId as string;
+// chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+//   const id = info.menuItemId as string;
 
-  if (!tab || !listeners.includes(id)) {
-    return;
-  }
+//   if (!tab || !listeners.includes(id)) {
+//     return;
+//   }
 
-  // await prepareParser(tab.id);
+//   // await prepareParser(tab.id);
 
-  switch (id) {
-    case 'parse-page':
-      await requestParsePage(tab.id);
-      // const selector = await getParseSelector(tab);
-      // const isParsingDisabled = await isParsingDisabledOnThisPage(tab);
+//   switch (id) {
+//     case 'parse-page':
+//       await requestParsePage(tab.id);
+//       // const selector = await getParseSelector(tab);
+//       // const isParsingDisabled = await isParsingDisabledOnThisPage(tab);
 
-      // await parsePage(tab, isParsingDisabled ? '.ajb-auto-parse-disable' : selector);
+//       // await parsePage(tab, isParsingDisabled ? '.ajb-auto-parse-disable' : selector);
 
-      break;
-    case 'parse-selection':
-      await parseSelection(tab);
+//       break;
+//     case 'parse-selection':
+//       await parseSelection(tab);
 
-      break;
-  }
-});
+//       break;
+//   }
+// });

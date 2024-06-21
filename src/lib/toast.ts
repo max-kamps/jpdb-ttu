@@ -1,4 +1,5 @@
-import { createElement, findElement } from '@lib/renderer';
+import { createElement } from './renderer/create-element';
+import { findElement } from './renderer/find-element';
 
 const getOrCreateToastContainer = (): HTMLDivElement => {
   let shadowRoot: ShadowRoot = findElement<'div'>('#ajb-toast-container')?.shadowRoot;

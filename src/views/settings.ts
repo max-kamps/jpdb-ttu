@@ -1,15 +1,14 @@
-import {
-  DEFAULT_CONFIGURATION,
-  getConfigurationValue,
-  setConfigurationValue,
-} from '@lib/configuration';
-import { findElement, withElement, withElements } from '@lib/renderer';
 import { displayToast } from '@lib/toast';
-import { registerListener } from '@lib/messaging';
-import { getAnkiApiVersion } from '@lib/anki';
-import { pingJPDB } from '@lib/jpdb';
 import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
+import { findElement } from '@lib/renderer/find-element';
+import { withElements } from '@lib/renderer/with-elements';
+import { getConfigurationValue } from '@lib/configuration/get-configuration-value';
+import { DEFAULT_CONFIGURATION } from '@lib/configuration/default-configuration';
+import { setConfigurationValue } from '@lib/configuration/set-configuration-value';
+import { withElement } from '@lib/renderer/with-element';
+import { pingJPDB } from '@lib/jpdb/ping-jpdb';
+import { getAnkiApiVersion } from '@lib/anki/get-anki-api-version';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -26,8 +25,6 @@ class SettingsController {
   private _saveButton = findElement<'button'>('#save-all-settings');
 
   constructor() {
-    registerListener('toast', displayToast);
-
     customElements.define('mining-input', HTMLMiningInputElement);
     customElements.define('keybind-input', HTMLKeybindInputElement);
 

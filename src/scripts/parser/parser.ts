@@ -1,4 +1,4 @@
-import { registerListener } from '@lib/messaging';
+import { registerListener } from '@lib/messaging/register-listener';
 import { ParagraphResolver } from './paragraph-resolver';
 
 // normales parse:

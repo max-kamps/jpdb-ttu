@@ -1,6 +1,5 @@
-import { getCallable } from '@lib/messaging';
-import { requestParsePage } from '@lib/parser';
-import { appendElement } from '@lib/renderer';
+import { getCallable } from '@lib/messaging/get-callable';
+import { appendElement } from '@lib/renderer/append-element';
 
 chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
   tabs.forEach((tab) => {

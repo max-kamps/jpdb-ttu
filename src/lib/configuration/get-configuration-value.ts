@@ -1,4 +1,4 @@
-import { getCallable } from '@lib/messaging';
+import { getCallable } from '@lib/messaging/get-callable';
 
 type NumberKeys = Filter<Configuration, number>[];
 type BooleanKeys = Filter<Configuration, boolean>[];
