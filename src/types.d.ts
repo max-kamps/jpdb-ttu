@@ -79,3 +79,18 @@ declare type DOMElementTagOptions<
 > = DOMElementOptions & {
   tag: K;
 };
+
+declare type Fragment = {
+  start: number;
+  length: number;
+  end: number;
+  node: Text;
+  hasRuby: boolean;
+};
+
+/**
+ * A Paragraph is a collection of fragments that are semantically connected.
+ * Every sequence of inline elements not interrupted by a block element
+ * in the source html corresponds to their own Paragraph.
+ */
+declare type Paragraph = Fragment[];

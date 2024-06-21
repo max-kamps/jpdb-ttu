@@ -1,18 +1,19 @@
 import { registerListener } from '@lib/messaging';
-import { parsePage } from '@lib/parser/parse-page';
+import { getParseSelector, parsePage, parseSelection } from '@lib/parser';
+import { prepareParser } from '../lib/prepare-parser';
 
 registerListener('requestParsePage', async (tabId: number): Promise<void> => {
   const tab = await chrome.tabs.get(tabId);
 
-  await chrome.scripting.insertCSS({
-    target: { tabId },
-    files: ['styles/word.css'],
-  });
+  const parseFilter = await getParseSelector(tab);
 
-  await chrome.scripting.executeScript({
-    target: { tabId },
-    files: ['scripts/install-parser.js'],
-  });
+  await prepareParser(tabId);
+  await parsePage(tab, parseFilter);
+});
 
-  await parsePage(tab);
+registerListener('requestParseSelection', async (tabId: number): Promise<void> => {
+  const tab = await chrome.tabs.get(tabId);
+
+  await prepareParser(tabId);
+  await parseSelection(tab);
 });

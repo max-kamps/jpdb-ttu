@@ -4,6 +4,7 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 const sites = ['settings', 'popup'];
 const apps = [
+  'nhk.or.jp',
   // 'ttu',
   // 'anacreon',
   // 'mokuro',

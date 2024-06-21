@@ -25,6 +25,10 @@
     {
       "matches": ["<all_urls>"],
       "js": ["integrations/toast.js"]
+    },
+    {
+      "matches": ["*://*.nhk.or.jp/*"],
+      "js": ["apps/nhk.or.jp.js"]
     }
   ],
   "host_permissions": [

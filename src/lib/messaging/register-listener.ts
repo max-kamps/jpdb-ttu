@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener(
   (
     request: { key: string; args?: unknown[] },
     _sender,
-    sendResponse: (response: { success: boolean; result: unknown }) => void,
+    sendResponse: (response: { success: boolean; exists: boolean; result: unknown }) => void,
   ): boolean => {
     if (globalCallbacks.has(request.key)) {
       const fn = globalCallbacks.get(request.key) as (...args: unknown[]) => unknown;
@@ -15,22 +15,22 @@ chrome.runtime.onMessage.addListener(
         if (fnResult instanceof Promise) {
           fnResult
             .then((result: unknown) => {
-              sendResponse({ success: true, result });
+              sendResponse({ success: true, exists: true, result });
             })
             .catch((_error) => {
               console.log('Error in extension script:', _error);
 
-              sendResponse({ success: false, result: undefined });
+              sendResponse({ success: false, exists: true, result: undefined });
             });
 
           return true;
         }
 
-        sendResponse({ success: true, result: fnResult });
+        sendResponse({ success: true, exists: true, result: fnResult });
       } catch (error) {
         console.log('Error in extension script:', error);
 
-        sendResponse({ success: false, result: undefined });
+        sendResponse({ success: false, exists: true, result: undefined });
       }
     }
 
