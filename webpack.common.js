@@ -5,7 +5,7 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const views = ['settings', 'popup'];
 const styles = ['toast', 'word'];
 
-const foregroundApps = ['nhk.or.jp', 'crunchyroll.com'];
+const foregroundApps = ['asbplayer', 'nhk.or.jp', 'crunchyroll.com'];
 const foregroundScripts = ['install-parser', 'install-toaster'];
 
 const fromArray = (array, prefix, source = 'ts', target = 'js') =>

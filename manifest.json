@@ -23,6 +23,11 @@
   "permissions": ["tabs", "activeTab", "contextMenus", "scripting", "storage"],
   "content_scripts": [
     {
+      "matches": ["<all_urls>"],
+      "js": ["foreground/apps/asbplayer.js"],
+      "all_frames": true
+    },
+    {
       "matches": ["*://*.nhk.or.jp/*"],
       "js": ["foreground/apps/nhk.or.jp.js"]
     },

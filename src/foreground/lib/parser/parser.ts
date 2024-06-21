@@ -1,5 +1,6 @@
 import { registerListener } from '@lib/messaging/register-listener';
 import { ParagraphResolver } from './paragraph-resolver';
+import { ParagraphParser } from './paragraph-parser';
 
 // normales parse:
 // parsed document body und parsed alles was in den paragraphs ist
@@ -50,43 +51,6 @@ export class Parser {
     const paragraphs = new ParagraphResolver(rootNode).resolve();
 
     this.parseParagraphs(paragraphs);
-
-    // console.log(this.getParagraphs(document.body));
-
-    // player-timedtext-text-container
-
-    // console.log('test addedObserver for netflix');
-
-    // const cb = (elements: Element[]) => {
-    //   elements.forEach((element) => this.getParagraphs(element));
-    // };
-
-    // const cls = '.player-timedtext-text-container';
-
-    // const existingElements = document.querySelectorAll(cls);
-    // if (existingElements.length > 0) {
-    //   cb([...existingElements]);
-    // }
-
-    // const newParagraphObserver = new MutationObserver((mutations, _observer) => {
-    //   for (const mutation of mutations) {
-    //     if (mutation.type !== 'childList') continue;
-    //     const filteredNodes = [];
-    //     for (const node of mutation.addedNodes) {
-    //       // TODO support non-elements (like text nodes)
-    //       if (node instanceof HTMLElement) {
-    //         if (node.matches(cls)) {
-    //           filteredNodes.push(node);
-    //         }
-    //         // TODO support non-html elements
-    //         filteredNodes.push(...node.querySelectorAll(cls));
-    //       }
-    //     }
-    //     if (filteredNodes.length) cb(filteredNodes);
-    //   }
-    // });
-
-    // newParagraphObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   private parseParagraphs(paragraphs: Paragraph[]) {
@@ -94,9 +58,6 @@ export class Parser {
       return;
     }
 
-    const text = paragraphs
-      .map((paragraph) => paragraph.map((fragment) => fragment.node.data).join(''))
-      .join('');
-    console.log(text);
+    new ParagraphParser(paragraphs).parse();
   }
 }
