@@ -18,10 +18,6 @@ Common styles for UI elements
 
 Shared code accross all participants. Mainly certain services or data classes
 
-## bridge
-
-Contains functions which are goig _from foreground to background_ or vice versa
-
 ## foreground
 
 Scripts that run in the context of the currently opened tab.

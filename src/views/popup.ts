@@ -1,3 +1,4 @@
+import { getCallable } from '@lib/messaging';
 import { requestParsePage } from '@lib/parser';
 import { appendElement } from '@lib/renderer';
 
@@ -7,9 +8,10 @@ chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
       tag: 'a',
       class: ['outline', 'parse'],
       handler: async () => {
-        await requestParsePage(tab.id);
+        getCallable('t')();
+        // await requestParsePage(tab.id);
 
-        window.close();
+        // window.close();
       },
       innerText: `Parse "${tab.title ?? 'Untitled'}"`,
     });

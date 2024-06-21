@@ -5,9 +5,8 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const views = ['settings', 'popup'];
 const styles = ['toast', 'word'];
 
-const foregroundGlobal = ['toast'];
 const foregroundApps = ['nhk.or.jp', 'crunchyroll.com'];
-const foregroundScripts = ['install-parser'];
+const foregroundScripts = ['install-parser', 'install-toaster'];
 
 const fromArray = (array, prefix, source = 'ts', target = 'js') =>
   array.map((item) => ({
@@ -50,7 +49,6 @@ module.exports = {
             ...fromArray(styles, 'styles', 'scss', 'css'),
 
             // foreground (everything that is not a background script)
-            ...fromArray(foregroundGlobal, 'foreground/global'),
             ...fromArray(foregroundApps, 'foreground/apps'),
             ...fromArray(foregroundScripts, 'foreground/scripts'),
           ],

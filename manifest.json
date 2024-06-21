@@ -23,10 +23,6 @@
   "permissions": ["tabs", "activeTab", "contextMenus", "scripting", "storage"],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["foreground/global/toast.js"]
-    },
-    {
       "matches": ["*://*.nhk.or.jp/*"],
       "js": ["foreground/apps/nhk.or.jp.js"]
     },
