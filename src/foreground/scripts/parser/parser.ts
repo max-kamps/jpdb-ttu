@@ -27,8 +27,8 @@ import { ParagraphResolver } from './paragraph-resolver';
 
 export class Parser {
   public install() {
-    registerListener('parsePage', (selector?: string) => this.parsePage(selector));
-    registerListener('parseSelection', () => this.parseSelection());
+    registerListener('parse-page', (selector?: string) => this.parsePage(selector));
+    registerListener('parse-selection', () => this.parseSelection());
   }
 
   private parseSelection() {

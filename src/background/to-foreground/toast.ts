@@ -1,7 +1,7 @@
 import { getTabCallable } from '@lib/messaging/get-tab-callable';
 import { install } from '../lib/install';
 
-export const sendToast = async (
+export const sendToastRequest = async (
   type: 'error' | 'success',
   message: string,
   timeout: number = 5000,

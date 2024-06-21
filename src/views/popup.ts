@@ -7,10 +7,9 @@ chrome.tabs.query({ active: true }, (tabs: chrome.tabs.Tab[]) => {
       tag: 'a',
       class: ['outline', 'parse'],
       handler: async () => {
-        getCallable('t')();
-        // await requestParsePage(tab.id);
+        await getCallable('request-parse-page')(tab.id);
 
-        // window.close();
+        window.close();
       },
       innerText: `Parse "${tab.title ?? 'Untitled'}"`,
     });

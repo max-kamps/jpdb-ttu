@@ -1,3 +1,3 @@
-import { skipParseOnThisPage } from '../lib/skip-parse-on-this-page';
+import { disableAutoParsing } from '../lib/disable-auto-parse';
 
-skipParseOnThisPage();
+disableAutoParsing();
