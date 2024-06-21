@@ -28,7 +28,8 @@ module.exports = {
         alias: {
           '@lib': path.resolve(__dirname, 'src/lib'),
           '@styles': path.resolve(__dirname, 'src/styles'),
-          '@fg': path.resolve(__dirname, 'src/foreground/lib/index.ts'),
+          '@foreground': path.resolve(__dirname, 'src/foreground'),
+          '@background': path.resolve(__dirname, 'src/background'),
         },
       },
       plugins: [

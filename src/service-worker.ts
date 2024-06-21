@@ -1,1 +1,1 @@
-import './background/storage.ts';
+import '@background/storage.ts';

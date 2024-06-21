@@ -12,7 +12,8 @@
     "paths": {
       "@lib/*": ["src/lib/*"],
       "@styles/*": ["src/styles/*"],
-      "@fg": ["src/foreground/lib/index.ts"]
+      "@foreground/*": ["src/foreground/*"],
+      "@background/*": ["src/background/*"]
     }
   }
 }
