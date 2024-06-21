@@ -1,6 +1,7 @@
-import { ObservableParser } from '@foreground/lib/parser/observable-parser';
+import { AddedObserver } from '@foreground/lib/parser/added-observer';
 import { ParagraphParser } from '@foreground/lib/parser/paragraph-parser';
 import { ParagraphResolver } from '@foreground/lib/parser/paragraph-resolver';
+import { VisibleParser } from '@foreground/lib/parser/visible-parser';
 import { appendElement } from '@lib/renderer/append-element';
 
 const addStyles = () => {
@@ -15,17 +16,36 @@ const addStyles = () => {
   });
 };
 
-new ObservableParser(
-  '.asbplayer-offscreen',
-  (elements: Node[]) => {
-    const paragraphs = elements.flatMap((element) => new ParagraphResolver(element).resolve());
+const visibleObserver = new VisibleParser();
 
-    if (!paragraphs.length) {
-      return;
-    }
+new AddedObserver(
+  '.asbplayer-offscreen div',
+  (elements: Element[]) => {
+    // console.log(elements);
+    elements.forEach((e) => visibleObserver.observe(e));
+    // const paragraphs = elements.flatMap((element) => new ParagraphResolver(element).resolve());
 
-    new ParagraphParser(paragraphs).parse();
+    // if (!paragraphs.length) {
+    //   return;
+    // }
+
+    // new ParagraphParser(paragraphs).parse();
   },
   document.body,
   { childList: true, subtree: true },
 ).onFirstMatch(() => addStyles());
+
+// new ObservableParser(
+//   '.asbplayer-offscreen',
+//   (elements: Node[]) => {
+//     const paragraphs = elements.flatMap((element) => new ParagraphResolver(element).resolve());
+
+//     if (!paragraphs.length) {
+//       return;
+//     }
+
+//     new ParagraphParser(paragraphs).parse();
+//   },
+//   document.body,
+//   { childList: true, subtree: true },
+// ).onFirstMatch(() => addStyles());

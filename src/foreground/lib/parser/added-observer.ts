@@ -1,10 +1,10 @@
-export class ObservableParser {
-  protected _onFirstMatchCallback?: (nodes: Node[]) => void;
+export class AddedObserver {
+  protected _onFirstMatchCallback?: (nodes: Element[]) => void;
   protected _hasMatched = false;
 
   constructor(
     protected _selector: string,
-    protected _callback: (nodes: Node[]) => void,
+    protected _callback: (elements: Element[]) => void,
     protected _observableTarget: Node,
     protected _observerOptions?: MutationObserverInit,
   ) {
@@ -15,13 +15,13 @@ export class ObservableParser {
     this._onFirstMatchCallback = callback;
   }
 
-  protected matchFound(nodes: Node[]): void {
+  protected matchFound(elements: Element[]): void {
     if (this._hasMatched) {
       return;
     }
 
     this._hasMatched = true;
-    this._onFirstMatchCallback?.(nodes);
+    this._onFirstMatchCallback?.(elements);
   }
 
   protected install(): void {
