@@ -1,5 +1,3 @@
-import { getCallable } from '@lib/messaging/get-callable';
-
 type NumberKeys = Filter<Configuration, number>[];
 type BooleanKeys = Filter<Configuration, boolean>[];
 type ObjectKeys = Filter<
@@ -17,13 +15,17 @@ const objectKeys: ObjectKeys = [
   'readonlyConfigs',
 ];
 
-const loadCfg = getCallable<[key: string, defaultValue?: string], string>('lsr');
+const readStorage = async (key: string, defaultValue?: string): Promise<string> => {
+  const result = await chrome.storage.local.get(key);
+
+  return ((result?.[key] ?? defaultValue) as string) ?? undefined;
+};
 
 export const getConfigurationValue = async <K extends keyof Configuration>(
   key: K,
   defaultValue?: Configuration[K],
 ): Promise<Configuration[K]> => {
-  const value: string = await loadCfg(key, defaultValue?.toString());
+  const value: string = await readStorage(key, defaultValue?.toString());
 
   if (numberKeys.includes(key as Filter<Configuration, number>)) {
     return parseInt(value, 10) as Configuration[K];
