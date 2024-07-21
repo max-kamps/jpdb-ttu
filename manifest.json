@@ -34,6 +34,10 @@
     {
       "matches": ["*://*.crunchyroll.com/*"],
       "js": ["foreground/apps/crunchyroll.com.js"]
+    },
+    {
+      "matches": ["*://*.netflix.com/*"],
+      "js": ["foreground/apps/netflix.com.js"]
     }
   ],
   "host_permissions": [

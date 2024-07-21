@@ -32,7 +32,3 @@ ruby:not(:hover):has(.jpdb-word:is(.never-forget, .known, .redundant)) rt {
 .jpdb-word:is(.not-in-deck) {
   border-bottom: 1px solid;
 }
-
-ruby {
-  font-weight: bold !important;
-}

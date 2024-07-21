@@ -1,9 +1,9 @@
-import { ParagraphParser } from './paragraph-parser';
-import { ParagraphResolver } from './paragraph-resolver';
+import { ParagraphParseInitializer } from './paragraph-parse-initializer';
+import { parseElements } from './parse-elements';
 
 export class VisibleParser {
   protected _observer: IntersectionObserver;
-  protected _parsers = new Map<Element, ParagraphParser>();
+  protected _parsers = new Map<Element, ParagraphParseInitializer>();
 
   constructor() {
     this._observer = new IntersectionObserver(
@@ -31,33 +31,20 @@ export class VisibleParser {
 
   protected _onEnter(elements: Element[]): void {
     elements.forEach(async (element) => {
-      const paragraphs = new ParagraphResolver(element).resolve();
+      const cb = () => {
+        this._parsers.delete(element);
+        this._observer.unobserve(element);
+      };
+      const parser = parseElements(elements, cb, cb);
 
-      if (!paragraphs.length) {
+      if (!parser) {
         this._observer.unobserve(element);
 
         return;
       }
 
-      const cb = () => {
-        this._parsers.delete(element);
-        this._observer.unobserve(element);
-      };
-      const parser = new ParagraphParser(paragraphs, cb, cb);
-
       this._parsers.set(element, parser);
-
-      const text = await parser.parse();
-
-      if (text) {
-        console.log(text);
-      }
     });
-    const paragraphs = elements.flatMap((element) => new ParagraphResolver(element).resolve());
-
-    if (!paragraphs.length) {
-      return;
-    }
   }
 
   protected _onExit(elements: Element[]): void {

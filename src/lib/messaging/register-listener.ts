@@ -1,36 +1,41 @@
-const globalCallbacks = new Map<string, Function>();
+const globalCallbacks = new Map<string, { sendTab: boolean; fn: Function }>();
 
 chrome.runtime.onMessage.addListener(
   (
     request: { key: string; args?: unknown[] },
-    _sender,
-    sendResponse: (response: { success: boolean; exists: boolean; result: unknown }) => void,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response: { success: boolean; result: unknown }) => void,
   ): boolean => {
     if (globalCallbacks.has(request.key)) {
-      const fn = globalCallbacks.get(request.key) as (...args: unknown[]) => unknown;
+      const { fn, sendTab } = globalCallbacks.get(request.key);
 
       try {
-        const fnResult = fn(...(request.args ?? []));
+        if (sendTab && !sender.tab) {
+          throw new Error(`Did not receive tab ID from extension script: ${request.key}`);
+        }
+
+        const args = sendTab ? [...(request.args ?? []), sender.tab?.id] : request.args;
+        const fnResult = fn(...args);
 
         if (fnResult instanceof Promise) {
           fnResult
             .then((result: unknown) => {
-              sendResponse({ success: true, exists: true, result });
+              sendResponse({ success: true, result });
             })
             .catch((_error) => {
               console.log('Error in extension script:', _error);
 
-              sendResponse({ success: false, exists: true, result: undefined });
+              sendResponse({ success: false, result: undefined });
             });
 
           return true;
         }
 
-        sendResponse({ success: true, exists: true, result: fnResult });
+        sendResponse({ success: true, result: fnResult });
       } catch (error) {
         console.log('Error in extension script:', error);
 
-        sendResponse({ success: false, exists: true, result: undefined });
+        sendResponse({ success: false, result: undefined });
       }
     }
 
@@ -38,6 +43,20 @@ chrome.runtime.onMessage.addListener(
   },
 );
 
-export function registerListener(name: string, fn: Function): void {
-  globalCallbacks.set(name, fn);
+export function registerTabListener<TArgs extends any[], TResult = void>(
+  name: string,
+  fn: (...args: [...TArgs, senderTabId: number]) => TResult,
+): void {
+  if (!globalCallbacks.has(name)) {
+    globalCallbacks.set(name, { fn, sendTab: true });
+  }
+}
+
+export function registerListener<TArgs extends any[] = [], TResult = void>(
+  name: string,
+  fn: (...args: TArgs) => TResult,
+): void {
+  if (!globalCallbacks.has(name)) {
+    globalCallbacks.set(name, { fn, sendTab: false });
+  }
 }

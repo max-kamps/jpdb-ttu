@@ -1,4 +1,7 @@
 export class ParagraphResolver {
+  public static readonly paragraphMap = new Map<number, IdentifyableParagraph>();
+  protected static _id = 0;
+
   protected _offset = 0;
 
   protected _fragments: Fragment[] = [];
@@ -6,10 +9,20 @@ export class ParagraphResolver {
 
   constructor(private _root: Node, private _filter: (node: Node) => boolean = () => true) {}
 
-  public resolve(): Paragraph[] {
+  public resolve(): IdentifyableParagraph[] {
     this.resolveRecursive(this._root, false);
 
-    return this._paragraphs;
+    return this.makeIdentifyableAndRegister(this._paragraphs);
+  }
+
+  private makeIdentifyableAndRegister(paragraphs: Paragraph[]): IdentifyableParagraph[] {
+    return paragraphs.map((paragraph) => {
+      const id = ++ParagraphResolver._id;
+
+      ParagraphResolver.paragraphMap.set(id, { id, paragraph });
+
+      return { id, paragraph };
+    });
   }
 
   private resolveRecursive(node: Node, hasRuby: boolean): void {

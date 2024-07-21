@@ -1,6 +1,4 @@
-import { AddedObserver } from '@foreground/lib/parser/added-observer';
-import { ParagraphParser } from '@foreground/lib/parser/paragraph-parser';
-import { ParagraphResolver } from '@foreground/lib/parser/paragraph-resolver';
+import { AddedObserver } from '@foreground/lib/added-observer';
 import { VisibleParser } from '@foreground/lib/parser/visible-parser';
 import { appendElement } from '@lib/renderer/append-element';
 
@@ -16,13 +14,13 @@ const addStyles = () => {
   });
 };
 
-const visibleObserver = new VisibleParser();
+const visibleParser = new VisibleParser();
 
 new AddedObserver(
   '.asbplayer-offscreen div',
   (elements: Element[]) => {
     // console.log(elements);
-    elements.forEach((e) => visibleObserver.observe(e));
+    elements.forEach((e) => visibleParser.observe(e));
     // const paragraphs = elements.flatMap((element) => new ParagraphResolver(element).resolve());
 
     // if (!paragraphs.length) {

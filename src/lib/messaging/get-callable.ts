@@ -12,19 +12,34 @@ export function getCallable<TArgs extends any[], TOut>(
   allowNonExistent?: boolean,
 ): (...args: TArgs) => Promise<TOut> | Promise<TOut | undefined> {
   return async (...args: TArgs): Promise<TOut> | Promise<TOut | undefined> => {
-    const intermediate = (await chrome.runtime.sendMessage({ key, args })) as {
-      success: boolean;
-      result: TOut;
-    };
+    try {
+      const intermediate = (await chrome.runtime.sendMessage({ key, args })) as {
+        success: boolean;
+        result: TOut;
+      };
 
-    if (intermediate === undefined && allowNonExistent) {
-      return undefined;
+      if (!intermediate && allowNonExistent) {
+        return undefined;
+      }
+
+      if (!intermediate?.success) {
+        throw new Error(`Failed to execute callable '${key}'`);
+      }
+
+      return intermediate.result;
+    } catch (error) {
+      if (
+        (error.message as string).includes(
+          'Could not establish connection. Receiving end does not exist',
+        )
+      ) {
+        if (allowNonExistent) {
+          return undefined;
+        }
+      }
+
+      console.error(`Failed to execute callable '${key}'`);
+      throw error;
     }
-
-    if (!intermediate?.success) {
-      throw new Error(`Failed to execute callable '${key}'`);
-    }
-
-    return intermediate.result;
   };
 }
