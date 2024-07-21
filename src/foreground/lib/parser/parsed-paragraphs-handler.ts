@@ -59,8 +59,9 @@ export class ParsedParagraphsHandler {
         }
 
         if (currentToken.length > node.data.length) {
-          // This is mostly caused by a misparse where jpdb connexts words that are not connected in the source text
+          // This is mostly caused by a misparse where jpdb connects words that are not connected in the source text
           // It may also happen if the source text is not correctly split into paragraphs
+          // We could probaply fix this by splitting the elements accordingly, but this would either break the original text or require a lot of additional logic
           currentToken = tokens.pop();
 
           continue;
