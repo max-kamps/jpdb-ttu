@@ -2,8 +2,7 @@ import { paragraphParsed } from '@background/to-foreground/parse';
 import { parseJPDBText } from '@lib/jpdb/parse-jpdb-text';
 
 export class ParagraphParser {
-  private _batchSize = 50;
-  // private _batchSize = 100;
+  private _batchSize = 100;
   private _batches: IdentifyableTextBatch[] = [];
 
   constructor(

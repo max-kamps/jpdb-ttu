@@ -1,3 +1,3 @@
-import { setParseSelector } from '../lib/set-parse-selector';
+import { DefaultParser } from '@foreground/lib/parsers/default-parser';
 
-setParseSelector('article');
+DefaultParser.instance.selector = 'article';

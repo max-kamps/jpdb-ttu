@@ -1,6 +1,10 @@
-import { ParagraphParseInitializer } from './paragraph-parse-initializer';
-import { parseElements } from './parse-elements';
+import { ParagraphParseInitializer } from '../parser/paragraph-parse-initializer';
+import { parseElements } from '../parser/parse-elements';
 
+/**
+ * Parser that parses elements when they become visible in the viewport.
+ * Cancels parsing when elements are no longer visible.
+ */
 export class VisibleParser {
   protected _observer: IntersectionObserver;
   protected _parsers = new Map<Element, ParagraphParseInitializer>();

@@ -1,2 +1,3 @@
-import '@background/context-menu';
-import '@background/register-parse-listeners';
+import '@background/scripts/context-menu';
+import '@background/scripts/parse-filter';
+import '@background/scripts/register-parse-listeners';

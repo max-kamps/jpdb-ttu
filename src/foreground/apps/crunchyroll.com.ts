@@ -1,3 +1,3 @@
-import { disableAutoParsing } from '../lib/disable-auto-parse';
+import { disableOnThisPage } from '@foreground/to-background/disable-on-this-page';
 
-disableAutoParsing();
+disableOnThisPage();

@@ -1,9 +1,8 @@
 import { registerListener } from '@lib/messaging/register-listener';
-import { parsePage } from './lib/parse/parse-page';
-import { parseSelection } from './lib/parse/parse-selection';
-import { parseJPDBText } from '@lib/jpdb/parse-jpdb-text';
-import { AbortableController } from './lib/abortable-controller';
-import { ParagraphParser } from './lib/parse/paragraph-parser';
+import { parsePage } from '../lib/parse/parse-page';
+import { parseSelection } from '../lib/parse/parse-selection';
+import { AbortableController } from '../lib/abortable-controller';
+import { ParagraphParser } from '../lib/parse/paragraph-parser';
 
 registerListener('request-parse-page', async (targetTabId: number) => {
   const tab = await chrome.tabs.get(targetTabId);

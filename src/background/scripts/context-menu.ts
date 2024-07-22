@@ -1,5 +1,5 @@
-import { parsePage } from './lib/parse/parse-page';
-import { parseSelection } from './lib/parse/parse-selection';
+import { parsePage } from '../lib/parse/parse-page';
+import { parseSelection } from '../lib/parse/parse-selection';
 
 chrome.contextMenus.create({
   id: 'parse-selection',

@@ -281,3 +281,20 @@ class SettingsController {
 }
 
 new SettingsController();
+
+/**
+ * ,
+    {
+      "matches": ["<all_urls>"],
+      "js": ["foreground/apps/asbplayer.js"],
+      "all_frames": true
+    },
+    {
+      "matches": ["*://*.nhk.or.jp/*"],
+      "js": ["foreground/apps/nhk.or.jp.js"]
+    },
+    {
+      "matches": ["*://*.netflix.com/*"],
+      "js": ["foreground/apps/netflix.com.js"]
+    }
+ */

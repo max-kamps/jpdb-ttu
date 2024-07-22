@@ -24,20 +24,11 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["foreground/apps/asbplayer.js"],
-      "all_frames": true
-    },
-    {
-      "matches": ["*://*.nhk.or.jp/*"],
-      "js": ["foreground/apps/nhk.or.jp.js"]
+      "js": ["foreground/apps/ajb.js"]
     },
     {
       "matches": ["*://*.crunchyroll.com/*"],
       "js": ["foreground/apps/crunchyroll.com.js"]
-    },
-    {
-      "matches": ["*://*.netflix.com/*"],
-      "js": ["foreground/apps/netflix.com.js"]
     }
   ],
   "host_permissions": [
