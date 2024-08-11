@@ -1,6 +1,16 @@
-<script>function settings() {
-  runtime.openOptionsPage();
-}
-document.getElementById('s').addEventListener('click', settings);
-</script>
-<a id="#s">Settings</a>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="@styles/theme.scss" />
+    <link rel="stylesheet" href="@styles/common.scss" />
+    <link rel="stylesheet" href="./popup.scss" />
+    <script src="./popup.ts"></script>
+  </head>
+  <body>
+    <div class="container">
+      <a id="settings-link" class="button outline">Settings</a>
+      <h5>Parse currently open tabs:</h5>
+    </div>
+  </body>
+</html>

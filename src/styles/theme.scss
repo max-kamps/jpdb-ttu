@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap');
+
+:root {
+  --focused-arrow-color: #2b6ddf;
+  --what-is-this-color: #aaa;
+  --what-is-this-focus-color: #2b6ddf;
+  --what-is-this-focus-shadow-color: #4b8dff;
+  --checkbox-color: #3b7def;
+  --checkbox-focused-text-underline-color: #aaa;
+  --button-focused-border-color: #3b7def;
+  --button-hover-border-color: #3b7def;
+  --outline-input-shadow-color: #4b8dff;
+  --outline-v2-color: #a0a0a0;
+  --outline-v3-color: #df6d2b;
+  --outline-v4-color: #4fa825;
+  --subsection-label-color: #777;
+  --table-header-color: #777;
+  --input-focused-border-color: #3b7def;
+  --property-text-color: #666;
+  --state-new: #4b8dff;
+  --state-blacklisted: #777;
+  --state-known: #70c000;
+  --state-overdue: orangered;
+  --state-failed: red;
+  --pitch-high-s: rgb(232, 104, 123);
+  --pitch-high-e: rgba(232, 104, 123, 0);
+  --pitch-low-s: rgb(78, 134, 202);
+  --pitch-low-e: rgb(78, 134, 202, 0);
+  --text-color: #bbb;
+  --text-strong-color: #fff;
+  --background-color: #181818;
+  --deeper-background-color: #111;
+  --foreground-background-color: #282828;
+  --part-of-speech-color: #888;
+  --part-of-speech-comma-color: #555;
+  --link-underline-color: #555;
+  --link-color: #4b8dff;
+  --highlight-color: #1b3368;
+  --english-translation-color: #aaa;
+  --kanji-keyword-missing-color: #555;
+  --unfocused-arrow-color: #444;
+  --footer-color: #444;
+  --checkbox-border-color: #444;
+  --checkbox-focused-border-color: #3b7def;
+  --checkbox-background-color: #111;
+  --checkbox-box-shadow-color: #000;
+  --checkbox-focused-box-shadow-color: #3b7def;
+  --checkbox-border-size: 2px;
+  --button-background-color: #214177;
+  --button-text-color: #ddd;
+  --button-shadow-color: #000;
+  --button-focused-shadow-color: transparent;
+  --button-hover-shadow-color: transparent;
+  --outline-input-color: #4b8dff;
+  --outline-input-background-color-review: #111;
+  --outline-input-background-color: #171717;
+  --outline-v1-color: #ff3b3b;
+  --deck-index-color: #444;
+  --answer-box-color: #333;
+  --table-border-color: #444;
+  --spelling-box-background-color: #004bbd;
+  --spelling-box-text-color: #d7d7d7;
+  --input-text-color: #aaa;
+  --input-border-color: #3a3a3a;
+  --input-background-color: #191919;
+  --input-box-shadow-color: #111;
+  --input-focused-box-shadow-color: transparent;
+  --resize-handle-color: #666;
+  --scrollbar-color: #3b7def;
+  --scrollbar-background-color: #111;
+  --visible-hr-background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0)
+  );
+  --burger-color: #999;
+  --mnemonic-main: #1b3368;
+  --mnemonic-component: #333;
+  --background-button-color: #666;
+  --background-button-border-color: #333;
+  --big-shadow-border: #444;
+  --big-shadow-color: #0f0f0f;
+  --kanji-fill-color: #555;
+  --kanji-stroke-color: #000;
+  --progress-bar-background: #333;
+  --progress-bar-foreground: linear-gradient(#3266bf, #3a76bf);
+  --progress-bar-in-progress: #58362f;
+  --progress-bar-in-progress: #555;
+  --progress-bar-text-shadow: #444;
+  --progress-bar-target-coverage: #000;
+  --review-button-group-shadow: #000;
+  --review-button-group-border: #424242;
+}

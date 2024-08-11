@@ -11,9 +11,7 @@
     "baseUrl": "./",
     "paths": {
       "@lib/*": ["src/lib/*"],
-      "@styles/*": ["src/styles/*"],
-      "@foreground/*": ["src/foreground/*"],
-      "@background/*": ["src/background/*"]
+      "@styles/*": ["src/styles/*"]
     }
   }
 }

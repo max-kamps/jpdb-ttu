@@ -1,0 +1,23 @@
+body {
+  min-width: 300px;
+  max-height: 600px;
+
+  .container {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin: 1rem 0;
+    gap: 0.5rem;
+
+    h5 {
+      margin-top: 0.5rem;
+      padding-bottom: 0;
+    }
+
+    .parse {
+      cursor: pointer;
+      font-size: 1rem;
+    }
+  }
+}

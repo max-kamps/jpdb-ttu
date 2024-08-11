@@ -1,0 +1,3 @@
+class BackgroundWorker {}
+
+new BackgroundWorker();

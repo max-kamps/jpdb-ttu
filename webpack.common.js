@@ -27,8 +27,6 @@ module.exports = {
         alias: {
           '@lib': path.resolve(__dirname, 'src/lib'),
           '@styles': path.resolve(__dirname, 'src/styles'),
-          '@foreground': path.resolve(__dirname, 'src/foreground'),
-          '@background': path.resolve(__dirname, 'src/background'),
         },
       },
       plugins: [
@@ -42,14 +40,14 @@ module.exports = {
           entry: [
             // service-worker
             {
-              filename: 'background/service-worker.js',
-              import: './src/background/service-worker.ts',
+              filename: 'background-worker/background-worker.js',
+              import: './src/background-worker/background-worker.ts',
             },
             ...fromArray(views, 'views', 'html', 'html'),
             ...fromArray(styles, 'styles', 'scss', 'css'),
 
             // foreground (everything that is not a background script)
-            ...fromArray(foregroundApps, 'foreground/apps'),
+            ...fromArray(foregroundApps, 'apps'),
           ],
           js: {
             filename: (source) => {
