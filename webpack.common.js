@@ -2,10 +2,10 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const views = ['settings', 'popup'];
-const styles = ['toast', 'word'];
+const views = []; // ['settings', 'popup'];
+const styles = []; // ['toast', 'word'];
 
-const foregroundApps = ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
+const foregroundApps = []; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
 const fromArray = (array, prefix, source = 'ts', target = 'js') =>
   array.map((item) => ({
