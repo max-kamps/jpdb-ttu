@@ -5,7 +5,7 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const views = []; // ['settings', 'popup'];
 const styles = []; // ['toast', 'word'];
 
-const foregroundApps = []; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
+const foregroundApps = ['ajb']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
 const fromArray = (array, prefix, source = 'ts', target = 'js') =>
   array.map((item) => ({
@@ -42,8 +42,8 @@ module.exports = {
           entry: [
             // service-worker
             {
-              filename: 'service-worker.js',
-              import: './src/service-worker.ts',
+              filename: 'background/service-worker.js',
+              import: './src/background/service-worker.ts',
             },
             ...fromArray(views, 'views', 'html', 'html'),
             ...fromArray(styles, 'styles', 'scss', 'css'),

@@ -5,19 +5,27 @@
   "description": "Mine from JPDB directly into Anki",
   "minimum_chrome_version": "116",
   "background": {
-    "service_worker": "service-worker.js"
+    "service_worker": "background/service-worker.js"
   },
   "action": {
     "default_popup": "views/popup.html",
     "default_icon": {
       "16": "assets/16.png",
+      "24": "assets/24.png",
+      "32": "assets/32.png",
       "48": "assets/48.png",
+      "64": "assets/64.png",
+      "96": "assets/96.png",
       "128": "assets/128.png"
     }
   },
   "icons": {
     "16": "assets/16.png",
+    "24": "assets/24.png",
+    "32": "assets/32.png",
     "48": "assets/48.png",
+    "64": "assets/64.png",
+    "96": "assets/96.png",
     "128": "assets/128.png"
   },
   "permissions": ["tabs", "activeTab", "contextMenus", "scripting", "storage"],
@@ -25,29 +33,9 @@
     {
       "matches": ["<all_urls>"],
       "js": ["foreground/apps/ajb.js"]
-    },
-    {
-      "matches": ["*://*.crunchyroll.com/*"],
-      "js": ["foreground/apps/crunchyroll.com.js"]
     }
   ],
-  "host_permissions": [
-    "*://reader.ttsu.app/*",
-    "*://ttu-ebook.web.app/*",
-    "*://anacreondjt.gitlab.io/texthooker.html",
-    "*://learnjapanese.moe/texthooker.html",
-    "*://kamwithk.github.io/exSTATic/tracker.html",
-    "*://renji-xd.github.io/texthooker-ui/",
-    "file:///*mokuro*.html",
-    "*://ja.wikipedia.org/*",
-    "*://ja.m.wikipedia.org/*",
-    "*://app.readwok.com/*",
-    "*://*.youtube.com/*",
-    "*://*.netflix.com/*",
-    "*://*.crunchyroll.com/*",
-    "*://bunpro.jp/*",
-    "*://*.nhk.or.jp/*"
-  ],
+  "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
       "resources": ["assets/*", "styles/*"],
