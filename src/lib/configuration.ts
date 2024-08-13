@@ -96,7 +96,7 @@ class Configuration {
     disableFadeAnimation: false,
 
     parseKey: { key: 'P', code: 'KeyP', modifiers: ['Control', 'Shift'] },
-    showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
+    showPopupKey: { key: 'Left Mouse Button', code: 'Mouse0', modifiers: ['Shift'] },
     showAdvancedDialogKey: { key: '', code: '', modifiers: [] },
     lookupSelectionKey: { key: 'L', code: 'KeyL', modifiers: ['Control', 'Shift'] },
     addToMiningKey: { key: '', code: '', modifiers: [] },
