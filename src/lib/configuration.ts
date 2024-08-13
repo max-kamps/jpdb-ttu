@@ -36,6 +36,7 @@ class Configuration {
     'parseKey',
     'showPopupKey',
     'showAdvancedDialogKey',
+    'lookupSelectionKey',
     'addToMiningKey',
     'addToBlacklistKey',
     'addToNeverForgetKey',
@@ -97,6 +98,7 @@ class Configuration {
     parseKey: { key: 'P', code: 'KeyP', modifiers: ['Control', 'Shift'] },
     showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
     showAdvancedDialogKey: { key: '', code: '', modifiers: [] },
+    lookupSelectionKey: { key: 'L', code: 'KeyL', modifiers: ['Control', 'Shift'] },
     addToMiningKey: { key: '', code: '', modifiers: [] },
     addToBlacklistKey: { key: '', code: '', modifiers: [] },
     addToNeverForgetKey: { key: '', code: '', modifiers: [] },
@@ -129,6 +131,12 @@ class Configuration {
     }
 
     return value as ConfigurationSchema[K];
+  }
+
+  public async getOrDefault<K extends keyof ConfigurationSchema>(
+    key: K,
+  ): Promise<ConfigurationSchema[K]> {
+    return this.get(key, this.DEFAULTS[key]);
   }
 
   public async set<K extends keyof ConfigurationSchema>(

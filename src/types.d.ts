@@ -1,4 +1,47 @@
-/// <reference types="chrome-types" />
+//#region Communications
+
+declare type BroadcastEvents = { 'configuration-updated': [[], void] };
+declare type BackgroundEvents = BroadcastEvents & {};
+declare type TabEvents = BroadcastEvents & {
+  parsePage: [[], void];
+  parseSelection: [[], void];
+};
+
+declare type BroadcastEventOptions<TEvent extends keyof BroadcastEvents> = {
+  event: TEvent;
+  target: 'all' | 'background' | 'tab';
+};
+declare type BackgroundEventOptions<TEvent extends keyof BackgroundEvents> = {
+  event: TEvent;
+  target?: 'background';
+};
+declare type TabEventOptions<TEvent extends keyof TabEvents> = {
+  event: TEvent;
+  tabId: number;
+  target?: 'tab';
+};
+
+type KeybindArgs = [e: KeyboardEvent | MouseEvent];
+declare type LocalEvents = {
+  'close-all-dialogs': [KeybindArgs, void];
+  jpdbReviewNothing: [KeybindArgs, void];
+  jpdbReviewSomething: [KeybindArgs, void];
+  jpdbReviewHard: [KeybindArgs, void];
+  jpdbReviewGood: [KeybindArgs, void];
+  jpdbReviewEasy: [KeybindArgs, void];
+  jpdbReviewFail: [KeybindArgs, void];
+  jpdbReviewPass: [KeybindArgs, void];
+  parseKey: [KeybindArgs, void];
+  showPopupKey: [KeybindArgs, void];
+  showAdvancedDialogKey: [KeybindArgs, void];
+  lookupSelectionKey: [KeybindArgs, void];
+  addToMiningKey: [KeybindArgs, void];
+  addToBlacklistKey: [KeybindArgs, void];
+  addToNeverForgetKey: [KeybindArgs, void];
+};
+
+//#endregion
+//#region Configuration
 
 declare type Keybind = { key: string; code: string; modifiers: string[] };
 
@@ -72,6 +115,7 @@ declare type ConfigurationSchema = {
   parseKey: Keybind;
   showPopupKey: Keybind;
   showAdvancedDialogKey: Keybind;
+  lookupSelectionKey: Keybind;
   addToMiningKey: Keybind;
   addToBlacklistKey: Keybind;
   addToNeverForgetKey: Keybind;
@@ -79,3 +123,5 @@ declare type ConfigurationSchema = {
   customWordCSS: string;
   customPopupCSS: string;
 };
+
+//#endregion

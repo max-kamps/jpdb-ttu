@@ -21,7 +21,7 @@ view.onLoaded(async () => {
       tag: 'a',
       class: ['outline', 'parse'],
       handler: async () => {
-        // await getCallable('request-parse-page')(tab.id);
+        await browser.sendToTab(tab.id, 'parsePage', false);
 
         window.close();
       },

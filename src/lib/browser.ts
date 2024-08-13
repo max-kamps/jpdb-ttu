@@ -47,8 +47,100 @@ class Browser {
     await chrome.storage.local.set({ [key]: value });
   }
 
+  public isWorker(): boolean {
+    return !!chrome.contextMenus;
+  }
+
+  public isExtensionScreen(): boolean {
+    return window.location.protocol === 'chrome-extension:';
+  }
+
+  public async sendToBackground<TEvent extends keyof BackgroundEvents>(
+    event: TEvent,
+    isBroadcast: boolean,
+    ...args: [...BackgroundEvents[TEvent][0]]
+  ): Promise<BackgroundEvents[TEvent][1]> {
+    return new Promise<BackgroundEvents[TEvent][1]>((resolve, reject) => {
+      chrome.runtime.sendMessage({ event, isBroadcast, args }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        }
+
+        resolve(response);
+      });
+    });
+  }
+
+  public async sendToTab<TEvent extends keyof TabEvents>(
+    tabId: number,
+    event: TEvent,
+    isBroadcast: boolean,
+    ...args: [...TabEvents[TEvent][0]]
+  ): Promise<TabEvents[TEvent][1]> {
+    return new Promise<TabEvents[TEvent][1]>((resolve, reject) => {
+      chrome.tabs.sendMessage(tabId, { event, isBroadcast, args }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        }
+
+        resolve(response);
+      });
+    });
+  }
+
+  public onBroadcast(
+    handler: (
+      event: keyof BroadcastEvents,
+      sender: chrome.runtime.MessageSender,
+      ...args: any[]
+    ) => void | Promise<void>,
+  ) {
+    return this.onAnyMessage(({ isBroadcast }) => isBroadcast, handler);
+  }
+
+  public onMessage(
+    handler: (
+      event: keyof BackgroundEvents | keyof TabEvents,
+      sender: chrome.runtime.MessageSender,
+      ...args: any[]
+    ) => void | Promise<void>,
+  ) {
+    return this.onAnyMessage(({ isBroadcast }) => !isBroadcast, handler);
+  }
+
+  private onAnyMessage<TEvent>(
+    filter: (event: { event: string; isBroadcast: boolean }) => boolean,
+    handler: (
+      event: TEvent,
+      sender: chrome.runtime.MessageSender,
+      ...args: any[]
+    ) => void | Promise<void>,
+  ): void {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse): boolean => {
+      const { event, isBroadcast, args } = request;
+
+      if (!filter({ event, isBroadcast })) {
+        return false;
+      }
+
+      const handlerResult = handler(event as TEvent, sender, ...args);
+      const promise =
+        handlerResult instanceof Promise ? handlerResult : Promise.resolve(handlerResult);
+
+      promise
+        .then((result) => {
+          sendResponse({ success: true, result });
+        })
+        .catch((error) => {
+          sendResponse({ success: false, error });
+        });
+
+      return true;
+    });
+  }
+
   private installContextMenuHandler(): void {
-    if (chrome.contextMenus) {
+    if (this.isWorker()) {
       chrome.contextMenus.onClicked.addListener((info, tab) => {
         const id = info.menuItemId as string;
 

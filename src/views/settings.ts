@@ -4,6 +4,7 @@ import { anki } from '@lib/anki';
 import { view } from '@lib/view';
 import { configuration } from '@lib/configuration';
 import { jpdb } from '@lib/jpdb';
+import { broadcaster } from '@lib/broadcaster';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -127,6 +128,7 @@ class SettingsController {
       }
 
       view.displayToast('success', 'Settings saved successfully');
+      broadcaster.broadcast({ event: 'configuration-updated', target: 'all' });
     };
   }
 
