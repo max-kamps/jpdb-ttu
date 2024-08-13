@@ -1,4 +1,4 @@
-import { Browser } from './browser';
+import { browser } from './browser';
 
 interface DOMElementBaseOptions {
   id?: string;
@@ -19,16 +19,16 @@ type DOMElementTagOptions<K extends keyof HTMLElementTagNameMap = keyof HTMLElem
     tag: K;
   };
 
-export class View {
-  public static onLoaded(listener: () => void | Promise<void>): void {
+class View {
+  public onLoaded(listener: () => void | Promise<void>): void {
     this.on('DOMContentLoaded', listener);
   }
 
-  public static on(event: string, listener: (event: Event) => void | Promise<void>): void {
+  public on(event: string, listener: (event: Event) => void | Promise<void>): void {
     document.addEventListener(event, listener);
   }
 
-  public static displayToast(
+  public displayToast(
     type: 'error' | 'success',
     message: string,
     timeoutDuration: number = 5000,
@@ -95,24 +95,24 @@ export class View {
 
   //#region appendElement
 
-  public static appendElement<TChild extends HTMLElement = HTMLElement>(
+  public appendElement<TChild extends HTMLElement = HTMLElement>(
     parent: string,
     element: TChild,
   ): TChild;
-  public static appendElement<
+  public appendElement<
     TParent extends HTMLElement = HTMLElement,
     TChild extends HTMLElement = HTMLElement,
   >(parent: TParent, element: TChild): TChild;
-  public static appendElement<K extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(
+  public appendElement<K extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(
     parent: string,
     element: DOMElementTagOptions<K>,
   ): HTMLElementTagNameMap[K];
-  public static appendElement<
+  public appendElement<
     TParent extends HTMLElement = HTMLElement,
     K extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap,
   >(parent: TParent, element: DOMElementTagOptions<K>): HTMLElementTagNameMap[K];
 
-  public static appendElement(
+  public appendElement(
     parent: string | HTMLElement,
     child: HTMLElement | DOMElementTagOptions,
   ): HTMLElement {
@@ -126,18 +126,15 @@ export class View {
   //#endregion appendElement
   //#region createElement
 
-  public static createElement<K extends keyof HTMLElementTagNameMap>(
+  public createElement<K extends keyof HTMLElementTagNameMap>(
     tag: K,
     options?: DOMElementOptions,
   ): HTMLElementTagNameMap[K];
-  public static createElement<K extends keyof HTMLElementTagNameMap>(
+  public createElement<K extends keyof HTMLElementTagNameMap>(
     options: DOMElementTagOptions<K>,
   ): HTMLElementTagNameMap[K];
 
-  public static createElement(
-    p0: string | DOMElementTagOptions,
-    p1?: DOMElementOptions,
-  ): HTMLElement {
+  public createElement(p0: string | DOMElementTagOptions, p1?: DOMElementOptions): HTMLElement {
     if (!('ajb' in document)) {
       Object.assign(document, { ajb: { id: 0 } });
     }
@@ -200,19 +197,19 @@ export class View {
   //#endregion createElement
   //#region findElement
 
-  public static findElement(selector: string): HTMLElement;
-  public static findElement<K extends keyof HTMLElementTagNameMap>(
+  public findElement(selector: string): HTMLElement;
+  public findElement<K extends keyof HTMLElementTagNameMap>(
     selector: string,
     resultTag?: K,
   ): HTMLElementTagNameMap[K];
-  public static findElement(domElement: HTMLElement, selector: string): HTMLElement;
-  public static findElement<K extends keyof HTMLElementTagNameMap>(
+  public findElement(domElement: HTMLElement, selector: string): HTMLElement;
+  public findElement<K extends keyof HTMLElementTagNameMap>(
     domElement: HTMLElement,
     selector: string,
     resultTag?: K,
   ): HTMLElementTagNameMap[K];
 
-  public static findElement(p0: string | HTMLElement, p1?: string, _?: string): HTMLElement | null {
+  public findElement(p0: string | HTMLElement, p1?: string, _?: string): HTMLElement | null {
     const root = typeof p0 === 'string' ? document : p0;
     const selector = typeof p0 === 'string' ? p0 : p1!;
 
@@ -222,19 +219,19 @@ export class View {
   //#endregion findElement
   //#region findElements
 
-  public static findElements(selector: string): HTMLElement[];
-  public static findElements<K extends keyof HTMLElementTagNameMap>(
+  public findElements(selector: string): HTMLElement[];
+  public findElements<K extends keyof HTMLElementTagNameMap>(
     selector: string,
     resultTag?: K,
   ): HTMLElementTagNameMap[K][];
-  public static findElements(domElement: HTMLElement, selector: string): HTMLElement[];
-  public static findElements<K extends keyof HTMLElementTagNameMap>(
+  public findElements(domElement: HTMLElement, selector: string): HTMLElement[];
+  public findElements<K extends keyof HTMLElementTagNameMap>(
     domElement: HTMLElement,
     selector: string,
     resultTag?: K,
   ): HTMLElementTagNameMap[K][];
 
-  public static findElements(p0: string | HTMLElement, p1?: string, _?: string): HTMLElement[] {
+  public findElements(p0: string | HTMLElement, p1?: string, _?: string): HTMLElement[] {
     const root = typeof p0 === 'string' ? document : p0;
     const selector = typeof p0 === 'string' ? p0 : p1!;
 
@@ -244,7 +241,7 @@ export class View {
   //#endregion findElements
   //#region resolveElement
 
-  public static resolveElement<TResult extends HTMLElement = HTMLElement>(
+  public resolveElement<TResult extends HTMLElement = HTMLElement>(
     element: string | TResult,
   ): TResult | null {
     return typeof element === 'string' ? document.querySelector(element) : element;
@@ -253,26 +250,23 @@ export class View {
   //#endregion resolveElement
   //#region withElement
 
-  public static withElement<TResult = void>(
-    selector: string,
-    fn: (e: HTMLElement) => TResult,
-  ): TResult;
-  public static withElement<K extends keyof HTMLElementTagNameMap, TResult = void>(
+  public withElement<TResult = void>(selector: string, fn: (e: HTMLElement) => TResult): TResult;
+  public withElement<K extends keyof HTMLElementTagNameMap, TResult = void>(
     selector: string,
     fn: (e: HTMLElementTagNameMap[K]) => TResult,
   ): TResult;
-  public static withElement<TResult = void>(
+  public withElement<TResult = void>(
     domElement: HTMLElement,
     selector: string,
     fn: (e: HTMLElement) => TResult,
   ): TResult;
-  public static withElement<K extends keyof HTMLElementTagNameMap, TResult = void>(
+  public withElement<K extends keyof HTMLElementTagNameMap, TResult = void>(
     domElement: HTMLElement,
     selector: string,
     fn: (e: HTMLElementTagNameMap[K]) => TResult,
   ): TResult;
 
-  public static withElement(
+  public withElement(
     p0: string | HTMLElement,
     p1: string | ((e: HTMLElement) => void),
     p2?: (e: HTMLElement) => unknown,
@@ -290,26 +284,23 @@ export class View {
   //#endregion withElement
   //#region withElements
 
-  public static withElements<TResult = void>(
-    selector: string,
-    fn: (e: HTMLElement) => TResult,
-  ): TResult[];
-  public static withElements<K extends keyof HTMLElementTagNameMap, TResult = void>(
+  public withElements<TResult = void>(selector: string, fn: (e: HTMLElement) => TResult): TResult[];
+  public withElements<K extends keyof HTMLElementTagNameMap, TResult = void>(
     selector: string,
     fn: (e: HTMLElementTagNameMap[K]) => TResult,
   ): TResult[];
-  public static withElements<TResult = void>(
+  public withElements<TResult = void>(
     domElement: HTMLElement,
     selector: string,
     fn: (e: HTMLElement) => TResult,
   ): TResult[];
-  public static withElements<K extends keyof HTMLElementTagNameMap, TResult = void>(
+  public withElements<K extends keyof HTMLElementTagNameMap, TResult = void>(
     domElement: HTMLElement,
     selector: string,
     fn: (e: HTMLElementTagNameMap[K]) => TResult,
   ): TResult[];
 
-  public static withElements(
+  public withElements(
     p0: string | HTMLElement,
     p1: string | ((e: HTMLElement) => unknown),
     p2?: (e: HTMLElement) => unknown,
@@ -326,7 +317,7 @@ export class View {
 
   //#endregion
 
-  private static getOrCreateToastContainer(): HTMLDivElement {
+  private getOrCreateToastContainer(): HTMLDivElement {
     let shadowRoot: ShadowRoot = this.findElement<'div'>('#ajb-toast-container')?.shadowRoot;
 
     if (!shadowRoot) {
@@ -337,7 +328,7 @@ export class View {
 
       shadowRoot.append(
         this.createElement('link', {
-          attributes: { rel: 'stylesheet', href: Browser.styleUrl('styles/toast') },
+          attributes: { rel: 'stylesheet', href: browser.styleUrl('styles/toast') },
         }),
         this.createElement('ul', { id: 'ajb-toast-item-container', class: 'notifications' }),
       );
@@ -348,3 +339,5 @@ export class View {
     return shadowRoot.getElementById('ajb-toast-item-container') as HTMLDivElement;
   }
 }
+
+export const view = new View();

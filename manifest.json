@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AnkiJPDBreader",
+  "name": "Anki JPDB Reader",
   "version": "0.1",
   "description": "Mine from JPDB directly into Anki",
   "minimum_chrome_version": "116",

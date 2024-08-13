@@ -1,1 +1,5 @@
-export class AJB {}
+export class AJB {
+  constructor() {}
+}
+
+new AJB();

@@ -1,15 +1,14 @@
 // import { getCallable } from '@lib/messaging/get-callable';
-// import { appendElement } from '@lib/renderer/append-element';
 
-import { Browser } from '@lib/browser';
-import { View } from '@lib/view';
+import { browser } from '@lib/browser';
+import { view } from '@lib/view';
 
-View.onLoaded(async () => {
+view.onLoaded(async () => {
   document.getElementById('settings-link').addEventListener('click', () => {
-    Browser.openOptionsPage();
+    browser.openOptionsPage();
   });
 
-  for (const tab of await Browser.getTabs({ currentWindow: true })) {
+  for (const tab of await browser.getTabs({ currentWindow: true })) {
     if (tab.url.startsWith('about://') || tab.url.startsWith('chrome://')) {
       continue;
     }
@@ -18,7 +17,7 @@ View.onLoaded(async () => {
     //   continue;
     // }
 
-    View.appendElement<'a'>('.container', {
+    view.appendElement<'a'>('.container', {
       tag: 'a',
       class: ['outline', 'parse'],
       handler: async () => {
@@ -32,6 +31,6 @@ View.onLoaded(async () => {
 });
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settings-link').addEventListener('click', () => {
-    Browser.openOptionsPage();
+    browser.openOptionsPage();
   });
 });

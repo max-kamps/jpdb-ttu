@@ -1,9 +1,9 @@
 import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
-import { Anki } from '@lib/anki';
-import { View } from '@lib/view';
-import { Configuration } from '@lib/configuration';
-import { JPDB } from '@lib/jpdb';
+import { anki } from '@lib/anki';
+import { view } from '@lib/view';
+import { configuration } from '@lib/configuration';
+import { jpdb } from '@lib/jpdb';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -17,7 +17,7 @@ class SettingsController {
   private _localChanges = new Set<keyof ConfigurationSchema>();
   private _invalidFields = new Set<keyof ConfigurationSchema>();
 
-  private _saveButton = View.findElement<'button'>('#save-all-settings');
+  private _saveButton = view.findElement<'button'>('#save-all-settings');
 
   constructor() {
     customElements.define('mining-input', HTMLMiningInputElement);
@@ -58,8 +58,8 @@ class SettingsController {
     getTargetProperty: (type: string) => keyof HTMLInputElement = () => 'value',
   ): Promise<void> {
     await Promise.all(
-      View.withElements(selector, async (inputElement: HTMLInputElement) => {
-        const name = inputElement.name as keyof Configuration;
+      view.withElements(selector, async (inputElement: HTMLInputElement) => {
+        const name = inputElement.name as keyof ConfigurationSchema;
 
         if (filter.includes(name) || inputElement.type === 'hidden') {
           return;
@@ -67,21 +67,19 @@ class SettingsController {
 
         const targetProperty: keyof HTMLInputElement = getTargetProperty(inputElement.type);
         const value = this._lastSavedConfiguration
-          .set(name, await Configuration.get(name, Configuration.DEFAULTS[name]))
-          .get(name) as Exclude<Configuration[keyof Configuration], Keybind>;
+          .set(name, await configuration.get(name, configuration.DEFAULTS[name]))
+          .get(name) as Exclude<ConfigurationSchema[keyof ConfigurationSchema], Keybind>;
 
         this._currentConfiguration.set(name, value);
 
-        (inputElement[targetProperty] as Configuration[keyof Configuration]) = value as Exclude<
-          Configuration[keyof Configuration],
-          Keybind
-        >;
+        (inputElement[targetProperty] as ConfigurationSchema[keyof ConfigurationSchema]) =
+          value as Exclude<ConfigurationSchema[keyof ConfigurationSchema], Keybind>;
 
         // We keep track of the local changes. We enable the save button if there are local changes.
         inputElement.addEventListener('change', () => {
           const lastSaved = this._lastSavedConfiguration.get(name);
           const current = inputElement[targetProperty] as Exclude<
-            Configuration[keyof Configuration],
+            ConfigurationSchema[keyof ConfigurationSchema],
             Keybind
           >;
 
@@ -120,16 +118,16 @@ class SettingsController {
       this._saveButton.disabled = true;
 
       for (const key of itemsToSave) {
-        const inputElement = View.findElement<'input'>(`[name="${key}"]`);
+        const inputElement = view.findElement<'input'>(`[name="${key}"]`);
         const value = inputElement.type === 'checkbox' ? inputElement.checked : inputElement.value;
 
-        await Configuration.set(key, value);
+        await configuration.set(key, value);
 
         this._lastSavedConfiguration.set(key, value);
         this._localChanges.delete(key);
       }
 
-      View.displayToast('success', 'Settings saved successfully');
+      view.displayToast('success', 'Settings saved successfully');
     };
   }
 
@@ -163,11 +161,11 @@ class SettingsController {
     buttonSelector: string,
     testFunction: () => void,
   ): void {
-    View.withElement(inputSelector, (inputElement: HTMLInputElement) => {
+    view.withElement(inputSelector, (inputElement: HTMLInputElement) => {
       inputElement.addEventListener('change', testFunction);
     });
 
-    View.withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
+    view.withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
       buttonElement.addEventListener('click', testFunction);
     });
   }
@@ -176,7 +174,7 @@ class SettingsController {
     await this._testEndpoint(
       '#apiTokenButton',
       '[name="apiToken"]',
-      (apiToken) => JPDB.ping({ apiToken }),
+      (apiToken) => jpdb.ping({ apiToken }),
       false,
     );
   }
@@ -185,10 +183,10 @@ class SettingsController {
     await this._testEndpoint(
       '#ankiUrlButton',
       '[name="ankiUrl"]',
-      (ankiConnectUrl) => Anki.getApiVersion({ ankiConnectUrl }),
+      (ankiConnectUrl) => anki.getApiVersion({ ankiConnectUrl }),
       false,
       async (ankiConnectUrl: string) => {
-        View.withElements('mining-input', (element: HTMLMiningInputElement) => {
+        view.withElements('mining-input', (element: HTMLMiningInputElement) => {
           element.fetchUrl = ankiConnectUrl;
         });
 
@@ -202,7 +200,7 @@ class SettingsController {
     await this._testEndpoint(
       '#ankiProxyUrlButton',
       '[name="ankiProxyUrl"]',
-      (ankiConnectUrl) => Anki.getApiVersion({ ankiConnectUrl }),
+      (ankiConnectUrl) => anki.getApiVersion({ ankiConnectUrl }),
       true,
     );
   }
@@ -215,14 +213,14 @@ class SettingsController {
     afterSuccess?: (value: string) => Promise<void>,
     afterFail?: () => void,
   ): Promise<void> {
-    const button = View.findElement<'button'>(buttonSelector);
-    const input = View.findElement<'input'>(inputSelector);
+    const button = view.findElement<'button'>(buttonSelector);
+    const input = view.findElement<'input'>(inputSelector);
 
     if (allowEmpty && !input.value) {
       button.classList.remove('v1');
       input.classList.remove('v1');
 
-      this._invalidFields.delete(input.name as keyof Configuration);
+      this._invalidFields.delete(input.name as keyof ConfigurationSchema);
 
       this._updateSaveButton();
       return;
@@ -234,14 +232,14 @@ class SettingsController {
       button.classList.remove('v1');
       input.classList.remove('v1');
 
-      this._invalidFields.delete(input.name as keyof Configuration);
+      this._invalidFields.delete(input.name as keyof ConfigurationSchema);
 
       await afterSuccess?.(input.value);
     } catch (error) {
       button.classList.add('v1');
       input.classList.add('v1');
 
-      this._invalidFields.add(input.name as keyof Configuration);
+      this._invalidFields.add(input.name as keyof ConfigurationSchema);
 
       afterFail?.();
     }
@@ -250,7 +248,7 @@ class SettingsController {
   }
 
   private _animateMiningSection(show: boolean): void {
-    const miningElement = View.findElement<'div'>('#requires-anki');
+    const miningElement = view.findElement<'div'>('#requires-anki');
 
     if (show) {
       miningElement.removeAttribute('hidden');

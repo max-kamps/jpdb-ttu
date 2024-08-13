@@ -1,4 +1,4 @@
-import { Browser } from './browser';
+import { browser } from './browser';
 
 type Filter<T, TF extends T[keyof T]> = keyof {
   [K in keyof T as T[K] extends TF ? K : never]: T[K];
@@ -11,14 +11,14 @@ type ObjectKeys = Filter<
   Keybind | DeckConfiguration | DiscoverWordConfiguration[]
 >[];
 
-export class Configuration {
-  private static NUMBER_KEYS: NumberKeys = ['schemaVersion', 'contextWidth'];
-  private static BOOLEAN_KEYS: BooleanKeys = [
+class Configuration {
+  private NUMBER_KEYS: NumberKeys = ['schemaVersion', 'contextWidth'];
+  private BOOLEAN_KEYS: BooleanKeys = [
     'showPopupOnHover',
     'touchscreenSupport',
     'disableFadeAnimation',
   ];
-  private static OBJECT_KEYS: ObjectKeys = [
+  private OBJECT_KEYS: ObjectKeys = [
     'showPopupKey',
     'miningConfig',
     'blacklistConfig',
@@ -26,7 +26,7 @@ export class Configuration {
     'readonlyConfigs',
   ];
 
-  public static readonly DEFAULTS: ConfigurationSchema = {
+  public readonly DEFAULTS: ConfigurationSchema = {
     schemaVersion: 1,
     apiToken: '',
     ankiUrl: 'http://localhost:8765',
@@ -65,11 +65,11 @@ export class Configuration {
     showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
   };
 
-  public static async get<K extends keyof ConfigurationSchema>(
+  public async get<K extends keyof ConfigurationSchema>(
     key: K,
     defaultValue?: ConfigurationSchema[K],
   ): Promise<ConfigurationSchema[K]> {
-    const value: string = await Browser.readStorage(key, defaultValue?.toString());
+    const value: string = await browser.readStorage(key, defaultValue?.toString());
 
     if (this.NUMBER_KEYS.includes(key as Filter<ConfigurationSchema, number>)) {
       return parseInt(value, 10) as ConfigurationSchema[K];
@@ -91,13 +91,15 @@ export class Configuration {
     return value as ConfigurationSchema[K];
   }
 
-  public static async set<K extends keyof ConfigurationSchema>(
+  public async set<K extends keyof ConfigurationSchema>(
     key: K,
     value: ConfigurationSchema[K],
   ): Promise<void> {
-    await Browser.writeStorage(
+    await browser.writeStorage(
       key,
       typeof value === 'object' ? JSON.stringify(value) : value.toString(),
     );
   }
 }
+
+export const configuration = new Configuration();

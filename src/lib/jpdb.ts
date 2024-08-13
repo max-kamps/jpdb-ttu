@@ -1,22 +1,22 @@
-import { Configuration } from './configuration';
+import { configuration } from './configuration';
 
 type JPDBRequestOptions = {
   apiToken?: string;
 };
 
-export class JPDB {
-  public static async ping(options?: JPDBRequestOptions): Promise<boolean> {
+class JPDB {
+  public async ping(options?: JPDBRequestOptions): Promise<boolean> {
     await this.request('ping', undefined, options);
 
     return true;
   }
 
-  private static async request<TResult extends object>(
+  private async request<TResult extends object>(
     action: string,
     params: any,
     options?: JPDBRequestOptions,
   ): Promise<TResult> {
-    const apiToken = options?.apiToken || (await Configuration.get('apiToken'));
+    const apiToken = options?.apiToken || (await configuration.get('apiToken'));
 
     if (!apiToken) {
       throw new Error('API Token is not set');
@@ -46,3 +46,5 @@ export class JPDB {
     return responseObject;
   }
 }
+
+export const jpdb = new JPDB();

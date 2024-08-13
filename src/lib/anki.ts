@@ -1,32 +1,32 @@
-import { Configuration } from './configuration';
+import { configuration } from './configuration';
 
 type AnkiRequestOptions = {
   ankiConnectUrl?: string;
 };
 
-export class Anki {
-  public static getApiVersion(options?: AnkiRequestOptions): Promise<number> {
+class Anki {
+  public getApiVersion(options?: AnkiRequestOptions): Promise<number> {
     return this.request('version', {}, options);
   }
 
-  public static getDecks(options?: AnkiRequestOptions): Promise<string[]> {
+  public getDecks(options?: AnkiRequestOptions): Promise<string[]> {
     return this.request('deckNames', {}, options);
   }
 
-  public static getFields(modelName: string, options?: AnkiRequestOptions): Promise<string[]> {
+  public getFields(modelName: string, options?: AnkiRequestOptions): Promise<string[]> {
     return this.request('modelFieldNames', { modelName }, options);
   }
 
-  public static getModels(options?: AnkiRequestOptions): Promise<string[]> {
+  public getModels(options?: AnkiRequestOptions): Promise<string[]> {
     return this.request('modelNames', {}, options);
   }
 
-  private static async request<TResult>(
+  private async request<TResult>(
     action: string,
     params: any,
     options?: AnkiRequestOptions,
   ): Promise<TResult> {
-    const ankiUrl = options?.ankiConnectUrl || (await Configuration.get('ankiUrl'));
+    const ankiUrl = options?.ankiConnectUrl || (await configuration.get('ankiUrl'));
 
     if (!ankiUrl) {
       throw new Error('Anki URL is not set');
@@ -57,3 +57,5 @@ export class Anki {
     return responseObject.result;
   }
 }
+
+export const anki = new Anki();
