@@ -1,7 +1,7 @@
-import { createParseBatch, requestParse } from '../content/background_comms.js';
-import { applyTokens, displayCategory } from '../content/parse.js';
-import { showError } from '../background/lib/toast.ts/index.js';
-import { Canceled } from '../../unsorted/util.js';
+import { createParseBatch, requestParse } from "../content/background_comms.js";
+import { applyTokens, displayCategory } from "../content/parse.js";
+import { showError } from "../content/toast.js";
+import { Canceled } from "../util.js";
 export function paragraphsInNode(node, filter = () => true) {
   let offset = 0;
   const fragments = [];
@@ -22,7 +22,10 @@ export function paragraphsInNode(node, filter = () => true) {
   }
   function pushText(text, hasRuby) {
     // Ignore empty text nodes, as well as whitespace at the beginning of the run
-    if (text.data.length > 0 && !(fragments.length === 0 && text.data.trim().length === 0)) {
+    if (
+      text.data.length > 0 &&
+      !(fragments.length === 0 && text.data.trim().length === 0)
+    ) {
       fragments.push({
         start: offset,
         length: text.length,
@@ -34,20 +37,21 @@ export function paragraphsInNode(node, filter = () => true) {
   }
   function recurse(node, hasRuby) {
     const display = displayCategory(node);
-    if (display === 'block') {
+    if (display === "block") {
       breakParagraph();
     }
-    if (display === 'none' || display === 'ruby-text' || filter(node) === false) return;
-    if (display === 'text') {
+    if (display === "none" || display === "ruby-text" || filter(node) === false)
+      return;
+    if (display === "text") {
       pushText(node, hasRuby);
     } else {
-      if (display === 'ruby') {
+      if (display === "ruby") {
         hasRuby = true;
       }
       for (const child of node.childNodes) {
         recurse(child, hasRuby);
       }
-      if (display === 'block') {
+      if (display === "block") {
         breakParagraph();
       }
     }
@@ -73,8 +77,8 @@ export function visibleObserver(enterCallback, exitCallback) {
       }
     },
     {
-      rootMargin: '50% 50% 50% 50%',
-    },
+      rootMargin: "50% 50% 50% 50%",
+    }
   );
   return elementVisibleObserver;
 }
@@ -85,7 +89,7 @@ export function addedObserver(selector, callback) {
   }
   const newParagraphObserver = new MutationObserver((mutations, _observer) => {
     for (const mutation of mutations) {
-      if (mutation.type !== 'childList') continue;
+      if (mutation.type !== "childList") continue;
       const filteredNodes = [];
       for (const node of mutation.addedNodes) {
         // TODO support non-elements (like text nodes)
@@ -132,23 +136,23 @@ export function parseVisibleObserver(filter = () => true) {
           for (const { abort } of batches) abort.abort();
         }
       }
-    },
+    }
   );
   return visible;
 }
-export function parseParagraphs(paragraphs) {
+export function parseParagraphs(paragraphs, shouldApply = () => true) {
   const batches = paragraphs.map(createParseBatch);
   const applied = batches.map(({ paragraph, promise }) =>
     promise
       .then((tokens) => {
-        applyTokens(paragraph, tokens);
+        if (shouldApply()) applyTokens(paragraph, tokens);
       })
       .catch((error) => {
         if (!(error instanceof Canceled)) {
           showError(error);
         }
         throw error;
-      }),
+      })
   );
   return [batches, applied];
 }

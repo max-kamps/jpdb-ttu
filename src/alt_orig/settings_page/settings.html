@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script type="module" src="settings.js"></script>
+        <link rel="stylesheet" href="../themes.css" />
+        <link rel="stylesheet" href="../common.css" />
+
+        <style>
+            body {
+                padding: 0;
+                margin: 0;
+                visibility: hidden;
+                opacity: 0;
+            }
+
+            body.ready {
+                visibility: visible;
+                opacity: 1;
+                transition: 0.25s opacity;
+            }
+
+            article {
+                padding: 1em;
+                display: flex;
+                flex-direction: row;
+                gap: 1em;
+                align-items: flex-start;
+            }
+
+            h1 {
+                margin-top: 0.5em;
+                margin-bottom: 0.5em;
+            }
+
+            nav {
+                margin-right: 1em;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5em;
+                position: sticky;
+                top: 1em;
+                left: 1em;
+            }
+
+            nav a.active {
+                filter: var(--filter-more-contrast);
+                text-decoration-thickness: 2px;
+                font-weight: 600;
+            }
+
+            #save {
+                margin-top: 1em;
+            }
+
+            body.has-unsaved-changes #save {
+                --color-button-border: rgb(199, 58, 79);
+                color: rgb(199, 58, 79);
+                box-shadow: 0px 0px 0.4em 0.25em rgba(232, 104, 123);
+            }
+
+            #preview {
+                position: sticky;
+                top: 1em;
+            }
+
+            #settings {
+                max-width: 48em;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5em;
+            }
+
+            #import-file-picker {
+                display: none;
+            }
+
+            section {
+                display: grid;
+                grid-template-columns: max-content minmax(min-content, 1fr) max-content;
+                grid-auto-flow: dense;
+                align-items: center;
+                gap: 0.5em 1em;
+            }
+
+            section h1 {
+                grid-column: 1 / span 3;
+            }
+
+            .explanation {
+                grid-column: 1 / span 3;
+                margin-bottom: 0.5em;
+                opacity: 75%;
+                font-size: 85%;
+            }
+
+            .setting {
+                display: contents;
+            }
+
+            .setting::part(label) {
+                grid-column: 1;
+            }
+
+            setting-string.setting::part(label) {
+                grid-column: 1 / span 2;
+            }
+
+            .setting::part(input) {
+                grid-column: 2;
+            }
+
+            .setting::part(input):invalid {
+                border: 2px dashed red;
+            }
+
+            setting-string.setting::part(input) {
+                grid-column: 1 / span 3;
+            }
+
+            .setting::part(reset-button) {
+                grid-column: 3;
+            }
+        </style>
+        <title>Reader Settings</title>
+        <link rel="icon" href="../icons/logo_32.png" />
+    </head>
+
+    <body>
+        <article>
+            <nav>
+                <h1>Sections:</h1>
+                <a href="#general" class="active">General</a>
+                <a href="#mining">Mining</a>
+                <a href="#keybinds">Keybinds</a>
+                <a href="#accessibility">Accessibility</a>
+                <a href="#appearance">Appearance</a>
+                <a href="#import-export">Import/Export</a>
+
+                <input type="submit" id="save" value="Save settings" />
+            </nav>
+            <div id="settings">
+                <section id="general">
+                    <h1>General</h1>
+                    <div class="explanation">
+                        To find your API token, visit the
+                        <a
+                            href="https://jpdb.io/settings#:~:text=in%20the%20future.-,Account%20information,-Username"
+                            target="_blank"
+                            >jpdb settings page</a
+                        >
+                        and scroll to the very bottom.
+                    </div>
+                    <setting-token class="setting" name="apiToken">API Token</setting-token>
+                </section>
+                <section id="general">
+                    <h1>Mining</h1>
+                    <div class="explanation">
+                        To find the deck ID for a specific deck, open that deck's page on jpdb and look at the URL.
+                        <br />
+                        You will see something like <code>https://jpdb.io/deck?id=32</code>. The number at the end is
+                        the deck ID. <br />
+                        The following special deck IDs are also allowed: <code>blacklist</code>,
+                        <code>never-forget</code>, <code>forq</code> (= front of review queue)<br />
+                    </div>
+                    <setting-deck-id class="setting" name="miningDeckId">Mining deck ID</setting-deck-id>
+                    <setting-deck-id class="setting" name="forqDeckId">FORQ deck ID</setting-deck-id>
+                    <setting-deck-id class="setting" name="blacklistDeckId">Blacklist deck ID</setting-deck-id>
+                    <setting-deck-id class="setting" name="neverForgetDeckId">Never forget deck ID</setting-deck-id>
+                    <setting-number class="setting" name="contextWidth">Number of context sentences</setting-number>
+                    <setting-boolean class="setting" name="forqOnMine" min="0">Add to FORQ when mining</setting-boolean>
+                </section>
+                <section id="keybinds">
+                    <h1>Keybinds</h1>
+                    <div class="explanation">
+                        Press escape to clear. Holding modifiers like shift or alt is supported. <br />
+                        Hotkeys are based on key position and independent of your current keyboard layout. <br />
+                        Note: Keybinds currently always work on the word you are hovering your mouse over, even if you
+                        have the popup for another word open.
+                        <!-- Clearing "Show popup" engages hover mode. -->
+                    </div>
+                    <setting-keybind class="setting" name="showPopupKey">Show popup</setting-keybind>
+                    <setting-keybind class="setting" name="addKey">Add word to mining deck</setting-keybind>
+                    <setting-keybind class="setting" name="dialogKey">Show advanced mining dialog</setting-keybind>
+                    <setting-keybind class="setting" name="blacklistKey">Blacklist word</setting-keybind>
+                    <setting-keybind class="setting" name="neverForgetKey">Mark word as never forget</setting-keybind>
+                    <setting-keybind class="setting" name="nothingKey">Review word as nothing</setting-keybind>
+                    <setting-keybind class="setting" name="somethingKey">Review word as something</setting-keybind>
+                    <setting-keybind class="setting" name="hardKey">Review word as hard</setting-keybind>
+                    <setting-keybind class="setting" name="goodKey">Review word as good</setting-keybind>
+                    <setting-keybind class="setting" name="easyKey">Review word as easy</setting-keybind>
+                </section>
+                <section id="accessibility">
+                    <h1>Accessibility</h1>
+                    <setting-boolean class="setting" name="showPopupOnHover">Show the popup on hover</setting-boolean>
+                    <setting-boolean class="setting" name="touchscreenSupport">Touchscreen support</setting-boolean>
+                    <setting-boolean class="setting" name="disableFadeAnimation"
+                        >Disable fade animation</setting-boolean
+                    >
+                </section>
+                <section id="appearance">
+                    <h1>Appearance</h1>
+                    <setting-string class="setting" name="customWordCSS">Custom Word CSS</setting-string>
+                    <setting-string class="setting" name="customPopupCSS">Custom Popup CSS</setting-string>
+                </section>
+                <section id="import-export">
+                    <h1>Import/Export</h1>
+                    <div>
+                        <button id="export">Export Settings</button>
+                        <button id="import">Import Settings</button>
+                        <input type="file" id="import-file-picker" accept="application/json" />
+                    </div>
+                </section>
+            </div>
+            <aside id="preview"></aside>
+        </article>
+    </body>
+</html>

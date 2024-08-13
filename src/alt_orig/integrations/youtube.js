@@ -1,101 +1,99 @@
 (async () => {
-  "use strict";
-  const $browser = globalThis.browser ?? globalThis.chrome,
-    $import = (path) => import($browser.runtime.getURL(path));
-  const { showError } = await $import("/content/toast.js");
-  const { addedObserver, parseVisibleObserver } = await $import(
-    "/integrations/common.js"
-  );
-  async function getTranscriptFromURL(url) {
-    const response = await fetch(url);
-    const data = await response.text();
-    const regex = /({"captionTracks":.*isTranslatable":(true|false)}])/;
-    const matches = regex.exec(data);
-    if (!matches?.length) throw new Error("Could not find captions.");
-    const { captionTracks } = JSON.parse(`${matches[0]}}`);
-    const subSource = captionTracks.find(
-      (track) => track.languageCode === "ja"
-    );
-    if (!subSource) return null;
-    if (subSource.kind === "asr") {
-      const response = await fetch(subSource.baseUrl);
-      const data = await response.text();
-      const subs = data
-        .replace('<?xml version="1.0" encoding="utf-8" ?><transcript>', "")
-        .replace("</transcript>", "")
-        .split("</text>")
-        .filter((line) => line && line.trim())
-        .map((line) => {
-          const startRegex = /start="([\d.]+)"/;
-          const durRegex = /dur="([\d.]+)"/;
-          // const [, start] = startRegex.exec(line)!;
-          // const [, dur] = durRegex.exec(line)!;
-          const startMatch = startRegex.exec(line);
-          const durMatch = durRegex.exec(line);
-          const start = startMatch ? parseFloat(startMatch[1]) : 0;
-          const dur = durMatch ? parseFloat(durMatch[1]) : 0;
-          if (startMatch && durMatch) {
-            const htmlText = line
-              .replace(/<text.+>/, "")
-              .replace(/&amp;/gi, "&")
-              .replace(/<\/?[^>]+(>|$)/g, "");
+    "use strict";
+    const $browser = globalThis.browser ?? globalThis.chrome, $import = path => import($browser.runtime.getURL(path));
+    const { showError } = await $import("/content/toast.js");
+    const { addedObserver, parseVisibleObserver } = await $import("/integrations/common.js");
+    async function getTranscriptFromURL(url) {
+        const response = await fetch(url);
+        const data = await response.text();
+        const regex = /({"captionTracks":.*isTranslatable":(true|false)}])/;
+        const matches = regex.exec(data);
+        if (!matches?.length)
+            throw new Error('Could not find captions.');
+        const { captionTracks } = JSON.parse(`${matches[0]}}`);
+        const subSource = captionTracks.find(track => track.languageCode === 'ja');
+        if (!subSource)
+            return null;
+        if (subSource.kind === 'asr') {
+            const response = await fetch(subSource.baseUrl);
+            const data = await response.text();
+            const subs = data
+                .replace('<?xml version="1.0" encoding="utf-8" ?><transcript>', '')
+                .replace('</transcript>', '')
+                .split('</text>')
+                .filter(line => line && line.trim())
+                .map(line => {
+                const startRegex = /start="([\d.]+)"/;
+                const durRegex = /dur="([\d.]+)"/;
+                // const [, start] = startRegex.exec(line)!;
+                // const [, dur] = durRegex.exec(line)!;
+                const startMatch = startRegex.exec(line);
+                const durMatch = durRegex.exec(line);
+                const start = startMatch ? parseFloat(startMatch[1]) : 0;
+                const dur = durMatch ? parseFloat(durMatch[1]) : 0;
+                if (startMatch && durMatch) {
+                    const htmlText = line
+                        .replace(/<text.+>/, '')
+                        .replace(/&amp;/gi, '&')
+                        .replace(/<\/?[^>]+(>|$)/g, '');
+                    return {
+                        start,
+                        dur,
+                        text: htmlText,
+                    };
+                }
+                else {
+                    throw new Error('Could not parse ASR transcript. start or dur missing.');
+                }
+            });
+            const transcript = subs.reduce((acc, curr, index, arr) => {
+                const next = index < arr.length ? arr[index + 1] : null;
+                const prev = index > 0 ? arr[index - 1] : null;
+                if (prev && curr.start < prev.start + prev.dur) {
+                    prev.dur = curr.start - prev.start;
+                }
+                if (next && next.start - curr.start + curr.dur < 0.1) {
+                    curr.text += next.text;
+                    curr.dur += next.dur;
+                    arr.splice(index + 1, 1);
+                }
+                acc.push(curr);
+                return acc;
+            }, []);
             return {
-              start,
-              dur,
-              text: htmlText,
+                content: transcript,
+                isAsr: true,
             };
-          } else {
-            throw new Error(
-              "Could not parse ASR transcript. start or dur missing."
-            );
-          }
-        });
-      const transcript = subs.reduce((acc, curr, index, arr) => {
-        const next = index < arr.length ? arr[index + 1] : null;
-        const prev = index > 0 ? arr[index - 1] : null;
-        if (prev && curr.start < prev.start + prev.dur) {
-          prev.dur = curr.start - prev.start;
         }
-        if (next && next.start - curr.start + curr.dur < 0.1) {
-          curr.text += next.text;
-          curr.dur += next.dur;
-          arr.splice(index + 1, 1);
+        else {
+            return {
+                content: [],
+                isAsr: false,
+            };
         }
-        acc.push(curr);
-        return acc;
-      }, []);
-      return {
-        content: transcript,
-        isAsr: true,
-      };
-    } else {
-      return {
-        content: [],
-        isAsr: false,
-      };
     }
-  }
-  class Subs {
-    captionsParent = null;
-    jpdbCaptions = null;
-    jpdbButton = null;
-    isAsr = false;
-    isActive = false;
-    transcript;
-    activate(transcript) {
-      if (!transcript) return;
-      this.isAsr = transcript.isAsr;
-      this.transcript = transcript;
-      if (!this.jpdbButton) {
-        this.jpdbButton = document.createElement("button");
-        this.jpdbButton.setAttribute("id", "jpdb-button");
-        this.jpdbButton.setAttribute("class", "ytp-button");
-        this.jpdbButton.setAttribute("aria-pressed", "false");
-        this.jpdbButton.setAttribute("aria-label", "JPDB");
-        this.jpdbButton.setAttribute("title", "JPDB");
-        this.jpdbButton.setAttribute("data-title-no-tooltip", "JPDB");
-        // logo
-        this.jpdbButton.innerHTML = `
+    class Subs {
+        captionsParent = null;
+        jpdbCaptions = null;
+        jpdbButton = null;
+        isAsr = false;
+        isActive = false;
+        transcript;
+        activate(transcript) {
+            if (!transcript)
+                return;
+            this.isAsr = transcript.isAsr;
+            this.transcript = transcript;
+            if (!this.jpdbButton) {
+                this.jpdbButton = document.createElement('button');
+                this.jpdbButton.setAttribute('id', 'jpdb-button');
+                this.jpdbButton.setAttribute('class', 'ytp-button');
+                this.jpdbButton.setAttribute('aria-pressed', 'false');
+                this.jpdbButton.setAttribute('aria-label', 'JPDB');
+                this.jpdbButton.setAttribute('title', 'JPDB');
+                this.jpdbButton.setAttribute('data-title-no-tooltip', 'JPDB');
+                // logo
+                this.jpdbButton.innerHTML = `
         <svg version="1.1" width="100%" height="100%" fill-opacity="1" viewBox="-36 72 180 1">
             <path fill="#fff" d="M84.5 10.5v13c1.915.285 3.581-.049 5-1a173.26 173.26 0 0 0 17.5-2c4.206 1.093 5.539 3.76 4 8-1.826 1.574-3.993 2.407-6.5 2.5a152.177 152.177 0 0 1-19 1.5 40.936 40.936 0 0 0 .5 9 62.459 62.459 0 0 1 19.5-1.5c2.667 2.667 2.667 5.333 0 8A3021.482 3021.482 0 0 1 59 53.5c-1.71.06-3.044-.606-4-2-.758-2.27-.591-4.436.5-6.5a68.679 68.679 0 0 1 19-2.5v-8c-7.327.705-14.66.872-22 .5-3.013-4.274-2.013-7.274 3-9a228.001 228.001 0 0 1 19-1.5c-.166-5.011 0-10.011.5-15 3.74-2.94 6.906-2.607 9.5 1z" />
             <path fill="#fff" d="M17.5 9.5c9.752.377 17.752 4.21 24 11.5-1.084 5.023-4.084 6.69-9 5l-15-9.5c-1.214-2.359-1.214-4.692 0-7z" />
@@ -110,47 +108,42 @@
             <path fill="#fff" d="M14.5 110.5c1.527-.073 2.527.594 3 2-1.527.073-2.527-.594-3-2z" />
         </svg>
     `;
-        this.jpdbButton.addEventListener("click", () => {
-          const simulateToggle = () => {
-            const ccButton = document.querySelector(".ytp-subtitles-button");
-            if (this.jpdbButton?.getAttribute("aria-pressed") === "false") {
-              if (ccButton.getAttribute("aria-pressed") === "false")
-                ccButton.click();
-              this.jpdbButton.setAttribute("aria-pressed", "true");
-            } else {
-              this.jpdbButton?.setAttribute("aria-pressed", "false");
+                this.jpdbButton.addEventListener('click', () => {
+                    const simulateToggle = () => {
+                        const ccButton = document.querySelector('.ytp-subtitles-button');
+                        if (this.jpdbButton?.getAttribute('aria-pressed') === 'false') {
+                            if (ccButton.getAttribute('aria-pressed') === 'false')
+                                ccButton.click();
+                            this.jpdbButton.setAttribute('aria-pressed', 'true');
+                        }
+                        else {
+                            this.jpdbButton?.setAttribute('aria-pressed', 'false');
+                        }
+                    };
+                    subs.toggle();
+                    simulateToggle();
+                });
+                const settingsButton = document.querySelector('.ytp-settings-button');
+                if (settingsButton.parentElement) {
+                    settingsButton.parentElement.insertBefore(this.jpdbButton, settingsButton);
+                }
+                else {
+                    throw new Error('Failed to place jpdb button. Could not find settings button parent');
+                }
             }
-          };
-          subs.toggle();
-          simulateToggle();
-        });
-        const settingsButton = document.querySelector(".ytp-settings-button");
-        if (settingsButton.parentElement) {
-          settingsButton.parentElement.insertBefore(
-            this.jpdbButton,
-            settingsButton
-          );
-        } else {
-          throw new Error(
-            "Failed to place jpdb button. Could not find settings button parent"
-          );
+            if (this.jpdbButton?.getAttribute('aria-pressed') === 'true') {
+                this.isActive = true;
+                const ccButton = document.querySelector('.ytp-subtitles-button');
+                if (ccButton.getAttribute('aria-pressed') === 'false') {
+                    ccButton.click();
+                }
+            }
+            this.jpdbCaptions?.remove();
+            this.captionsParent = document.getElementById('ytp-caption-window-container');
+            this.addJpdbCaptions();
         }
-      }
-      if (this.jpdbButton?.getAttribute("aria-pressed") === "true") {
-        this.isActive = true;
-        const ccButton = document.querySelector(".ytp-subtitles-button");
-        if (ccButton.getAttribute("aria-pressed") === "false") {
-          ccButton.click();
-        }
-      }
-      this.jpdbCaptions?.remove();
-      this.captionsParent = document.getElementById(
-        "ytp-caption-window-container"
-      );
-      this.addJpdbCaptions();
-    }
-    addJpdbCaptions() {
-      const captionWindowContainerHTML = `
+        addJpdbCaptions() {
+            const captionWindowContainerHTML = `
             <div class="caption-window ytp-caption-window-bottom ytp-caption-window-rollup" id="jpdb-subs" dir="ltr" tabindex="0" lang="ja" draggable="true" style="touch-action: none; text-align: center; left: 50%; width: 299px; margin-left: -149.5px; bottom: 2%; display: none;">
                 <span class="captions-text" style="overflow-wrap: normal; display: block;">
                     <span class="caption-visual-line" style="display: block;">
@@ -159,166 +152,154 @@
                     </span>
                 </span>
             </div>`;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(
-        captionWindowContainerHTML,
-        "text/html"
-      );
-      // Create custom subs and place it
-      const jpdbCaptionsElement = doc.querySelector("div");
-      if (!jpdbCaptionsElement) {
-        throw new Error("Failed to create jpdb captions element");
-      }
-      this.jpdbCaptions = jpdbCaptionsElement;
-      this.captionsParent?.appendChild(this.jpdbCaptions);
-    }
-    toggle() {
-      if (this.isActive) {
-        this.clean(false);
-      } else {
-        this.activate(this.transcript);
-      }
-      this.isActive = !this.isActive;
-    }
-    clean(removeTranscript) {
-      if (this.isActive) {
-        const originalSubs = this.captionsParent?.querySelector(
-          "div:not(#jpdb-subs)"
-        );
-        if (originalSubs) {
-          originalSubs.style.display = "block";
-        }
-        if (this.jpdbCaptions) {
-          this.jpdbCaptions.style.display = "none";
-        }
-      }
-      if (removeTranscript) this.transcript = undefined;
-      this.isAsr = false;
-    }
-    // Hide original captions and readjust jpdb captions style
-    readjustStyle() {
-      if (!this.isActive) return;
-      const originalSubs = this.captionsParent?.querySelector(
-        "div:not(#jpdb-subs)"
-      );
-      const jpdbSubs = this.jpdbCaptions;
-      if (originalSubs && jpdbSubs) {
-        originalSubs.style.display = "none";
-        jpdbSubs.style.cssText = originalSubs.style.cssText;
-        jpdbSubs.style.display = "block";
-        const originalSubsFont = originalSubs.querySelector(
-          ".ytp-caption-segment"
-        );
-        const jpdbSubsFont = jpdbSubs.querySelector(".ytp-caption-segment");
-        if (originalSubsFont && jpdbSubsFont) {
-          jpdbSubsFont.style.cssText = originalSubsFont.style.cssText;
-        }
-      }
-    }
-  }
-  let previousText = "";
-  let currentUrl = "";
-  const subs = new Subs();
-  let playerElement = null;
-  // Get every time url changes
-  new MutationObserver(() => {
-    if (window.location.href !== currentUrl) {
-      currentUrl = window.location.href;
-      if (currentUrl.includes("watch?v=")) {
-        observerCallback();
-      }
-    }
-  }).observe(document.body, {
-    attributes: false,
-    childList: true,
-    subtree: true,
-  });
-  function observerCallback() {
-    subs.clean(true);
-    getTranscriptFromURL(currentUrl).then((transcript) => {
-      try {
-        if (transcript) {
-          subs.activate(transcript);
-          // console.log('subs loaded');
-        } else {
-          // console.log('cant get subs');
-        }
-      } catch (e) {
-        // console.log('youtube subs error: ' + e);
-      }
-    });
-    // Get current video player
-    if (!playerElement) {
-      const playerElementArr = document.getElementsByTagName("video");
-      if (playerElementArr.length <= 0) {
-        // throw new Error('No player element found');
-        return;
-      }
-      playerElement = playerElementArr[0];
-    }
-  }
-  // Video subtitles
-  try {
-    const visible = parseVisibleObserver();
-    const updateCaptions = () => {
-      const captionsegment = document.querySelector(
-        "#jpdb-subs span.ytp-caption-segment"
-      );
-      if (captionsegment && playerElement) {
-        const currentTime = playerElement.currentTime;
-        const curr = subs.transcript?.content.find((caption) => {
-          return caption.start + caption.dur > currentTime + 0.2;
-        });
-        if (curr && curr.text !== previousText) {
-          captionsegment.innerHTML = curr.text;
-          if (captionsegment.parentElement) {
-            visible.observe(captionsegment.parentElement);
-            previousText = curr.text;
-            subs.readjustStyle();
-          }
-        }
-      }
-    };
-    const videosubs = addedObserver(
-      ":not(#jpdb-subs) span.ytp-caption-segment",
-      (originalspan) => {
-        if (!subs.isActive) return;
-        if (subs.isAsr) {
-          updateCaptions();
-          subs.readjustStyle();
-        } else {
-          for (const element of originalspan) {
-            if (element.parentElement) {
-              visible.observe(element.parentElement);
-              break;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(captionWindowContainerHTML, 'text/html');
+            // Create custom subs and place it
+            const jpdbCaptionsElement = doc.querySelector('div');
+            if (!jpdbCaptionsElement) {
+                throw new Error('Failed to create jpdb captions element');
             }
-          }
+            this.jpdbCaptions = jpdbCaptionsElement;
+            this.captionsParent?.appendChild(this.jpdbCaptions);
         }
-      }
-    );
-    videosubs.observe(document.body, {
-      subtree: true,
-      childList: true,
-    });
-  } catch (error) {
-    // console.log("[jpdb] video subs error:", error);
-  }
-  // Transcript box
-  try {
-    const visible = parseVisibleObserver();
-    const added = addedObserver(
-      "yt-formatted-string.ytd-transcript-segment-renderer",
-      (elements) => {
-        for (const element of elements) {
-          visible.observe(element);
+        toggle() {
+            if (this.isActive) {
+                this.clean(false);
+            }
+            else {
+                this.activate(this.transcript);
+            }
+            this.isActive = !this.isActive;
         }
-      }
-    );
-    added.observe(document.body, {
-      subtree: true,
-      childList: true,
-    });
-  } catch (error) {
-    showError(error);
-  }
+        clean(removeTranscript) {
+            if (this.isActive) {
+                const originalSubs = this.captionsParent?.querySelector('div:not(#jpdb-subs)');
+                if (originalSubs) {
+                    originalSubs.style.display = 'block';
+                }
+                if (this.jpdbCaptions) {
+                    this.jpdbCaptions.style.display = 'none';
+                }
+            }
+            if (removeTranscript)
+                this.transcript = undefined;
+            this.isAsr = false;
+        }
+        // Hide original captions and readjust jpdb captions style
+        readjustStyle() {
+            if (!this.isActive)
+                return;
+            const originalSubs = this.captionsParent?.querySelector('div:not(#jpdb-subs)');
+            const jpdbSubs = this.jpdbCaptions;
+            if (originalSubs && jpdbSubs) {
+                originalSubs.style.display = 'none';
+                jpdbSubs.style.cssText = originalSubs.style.cssText;
+                jpdbSubs.style.display = 'block';
+                const originalSubsFont = originalSubs.querySelector('.ytp-caption-segment');
+                const jpdbSubsFont = jpdbSubs.querySelector('.ytp-caption-segment');
+                if (originalSubsFont && jpdbSubsFont) {
+                    jpdbSubsFont.style.cssText = originalSubsFont.style.cssText;
+                }
+            }
+        }
+    }
+    let previousText = '';
+    let currentUrl = '';
+    const subs = new Subs();
+    let playerElement = null;
+    // Get every time url changes
+    new MutationObserver(() => {
+        if (window.location.href !== currentUrl) {
+            currentUrl = window.location.href;
+            if (currentUrl.includes('watch?v=')) {
+                observerCallback();
+            }
+        }
+    }).observe(document.body, { attributes: false, childList: true, subtree: true });
+    function observerCallback() {
+        subs.clean(true);
+        getTranscriptFromURL(currentUrl).then(transcript => {
+            try {
+                if (transcript) {
+                    subs.activate(transcript);
+                    console.log('subs loaded');
+                }
+                else {
+                    console.log('cant get subs');
+                }
+            }
+            catch (e) {
+                console.log('youtube subs error: ' + e);
+            }
+        });
+        // Get current video player
+        if (!playerElement) {
+            const playerElementArr = document.getElementsByTagName('video');
+            if (playerElementArr.length <= 0) {
+                // throw new Error('No player element found');
+                return;
+            }
+            playerElement = playerElementArr[0];
+        }
+    }
+    // Video subtitles
+    try {
+        const visible = parseVisibleObserver();
+        const updateCaptions = () => {
+            const captionsegment = document.querySelector('#jpdb-subs span.ytp-caption-segment');
+            if (captionsegment && playerElement) {
+                const currentTime = playerElement.currentTime;
+                const curr = subs.transcript?.content.find(caption => {
+                    return caption.start + caption.dur > currentTime + 0.2;
+                });
+                if (curr && curr.text !== previousText) {
+                    captionsegment.innerHTML = curr.text;
+                    if (captionsegment.parentElement) {
+                        visible.observe(captionsegment.parentElement);
+                        previousText = curr.text;
+                        subs.readjustStyle();
+                    }
+                }
+            }
+        };
+        const videosubs = addedObserver(':not(#jpdb-subs) span.ytp-caption-segment', originalspan => {
+            if (!subs.isActive)
+                return;
+            if (subs.isAsr) {
+                updateCaptions();
+                subs.readjustStyle();
+            }
+            else {
+                for (const element of originalspan) {
+                    if (element.parentElement) {
+                        visible.observe(element.parentElement);
+                        break;
+                    }
+                }
+            }
+        });
+        videosubs.observe(document.body, {
+            subtree: true,
+            childList: true,
+        });
+    }
+    catch (error) {
+        console.log('[jpdb] video subs error:', error);
+    }
+    // Transcript box
+    try {
+        const visible = parseVisibleObserver();
+        const added = addedObserver('yt-formatted-string.ytd-transcript-segment-renderer', elements => {
+            for (const element of elements) {
+                visible.observe(element);
+            }
+        });
+        added.observe(document.body, {
+            subtree: true,
+            childList: true,
+        });
+    }
+    catch (error) {
+        showError(error);
+    }
 })();

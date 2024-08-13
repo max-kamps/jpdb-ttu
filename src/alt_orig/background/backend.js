@@ -1,467 +1,272 @@
-import { anki } from "./lib/anki.js";
-import { parser } from "./lib/parser.js";
-
-import { config } from "./background.js";
-
-const PARTS_OF_SPEECH = {
-  n: "Noun",
-  pn: "Pronoun",
-  pref: "Prefix",
-  suf: "Suffix",
-  name: "Name",
-  "name-fem": "Name (Feminine)",
-  "name-male": "Name (Masculine)",
-  "name-surname": "Surname",
-  "name-person": "Personal Name",
-  "name-place": "Place Name",
-  "name-company": "Company Name",
-  "name-product": "Product Name",
-  "adj-i": "Adjective",
-  "adj-na": "な-Adjective",
-  "adj-no": "の-Adjective",
-  "adj-pn": "Adjectival",
-  "adj-nari": "なり-Adjective (Archaic/Formal)",
-  "adj-ku": "く-Adjective (Archaic)",
-  "adj-shiku": "しく-Adjective (Archaic)",
-  adv: "Adverb",
-  aux: "Auxiliary",
-  "aux-v": "Auxiliary Verb",
-  "aux-adj": "Auxiliary Adjective",
-  conj: "Conjunction",
-  cop: "Copula",
-  ctr: "Counter",
-  exp: "Expression",
-  int: "Interjection",
-  num: "Numeric",
-  prt: "Particle",
-  vt: "Transitive Verb",
-  vi: "Intransitive Verb",
-  v1: "Ichidan Verb",
-  "v1-s": "Ichidan Verb (くれる Irregular)",
-  v5: "Godan Verb",
-  v5u: "う Godan Verb",
-  "v5u-s": "う Godan Verb (Irregular)",
-  v5k: "く Godan Verb",
-  "v5k-s": "く Godan Verb (いく/ゆく Irregular)",
-  v5g: "ぐ Godan Verb",
-  v5s: "す Godan Verb",
-  v5t: "つ Godan Verb",
-  v5n: "ぬ Godan Verb",
-  v5b: "ぶ Godan Verb",
-  v5m: "む Godan Verb",
-  v5r: "る Godan Verb",
-  "v5r-i": "る Godan Verb (Irregular)",
-  v5aru: "る Godan Verb (-ある Irregular)",
-  vk: "Irregular Verb (くる)",
-  vs: "する Verb",
-  vz: "ずる Verb",
-  "vs-c": "す Verb (Archaic)",
-  v2: "Nidan Verb (Archaic)",
-  v4: "Yodan Verb (Archaic)",
-  v4k: "",
-  v4g: "",
-  v4s: "",
-  v4t: "",
-  v4h: "",
-  v4b: "",
-  v4m: "",
-  v4r: "",
-  va: "Archaic",
-};
-
-//#region Anki
-
-const ankiCards = {};
-const ankiNotes = {};
-const ankiWords = {};
-const ankiJpdbIDs = {};
-const jpdbCards = {};
-
-async function loadCardsFromQuery(query) {
-  const cardIDs = await anki.invoke("findCards", { query });
-  const suspended = await anki.invoke("areSuspended", { cards: cardIDs });
-  const due = await anki.invoke("areDue", { cards: cardIDs });
-
-  const cardsInfo = await anki.invoke("cardsInfo", {
-    cards: cardIDs,
-  });
-
-  cardsInfo.forEach((card) => {
-    const { cardId, deckName, interval, note, queue, type, fields } = card;
-    const { Word } = fields;
-    const index = cardIDs.indexOf(cardId);
-    const isDue = due[index];
-    const isSuspended = suspended[index];
-
-    const cardItem = Object.assign(
-      {
-        cardId,
-        deckName,
-        interval,
-        note,
-        queue,
-        type,
-        word: Word?.value,
-        source: "anki",
-      },
-      {
-        isDue,
-        isSuspended,
-        isMature: interval > 21,
-        isNew: type === 0,
-        isLearning: [1, 3].includes(type), // 1: learning, 3: relearning
-        isBlacklisted: deckName === config.blacklistDeckId,
-        isNeverForget: deckName === config.neverForgetDeckId,
-        isUserBuried: queue === -3,
-        isSchedBuried: queue === -2,
-        isReview: type === 2 && queue === 2,
-      }
-    );
-
-    if (cardItem.isReview) {
-      // isReview is a pretty broad category - however, it is not clear what it actually means
-      // mostly it just means a card is not relearning, but also not mature yet.
-      // We'll treat them as learning for now
-      cardItem.isLearning = true;
-    }
-
-    ankiCards[cardId] = Object.assign(cardItem, {
-      state: anki.getCardState(cardItem),
-      priority: anki.getStatePriority(cardItem),
-    });
-
-    if (ankiCards[cardId].state === "unknown") {
-      console.error("Unknown card state:", ankiCards[cardId]);
-    }
-  });
-
-  return cardsInfo;
-}
-
-function loadNotesFromCards() {
-  const localNotes = Object.groupBy(
-    Object.values(ankiCards),
-    (card) => card.note
-  );
-
-  Object.keys(localNotes).forEach((nid) => {
-    const [bestNote] = localNotes[nid]
-      .sort((a, b) => a.priority - b.priority)
-      .reverse();
-
-    ankiNotes[nid] = bestNote;
-  });
-}
-
-function loadWordsFromNotes() {
-  Object.entries(
-    Object.groupBy(Object.values(ankiNotes), (note) => note.word)
-  ).forEach(([word, [note]]) => {
-    ankiWords[word] = note;
-  });
-}
-
-function loadJpdbIDsFromNotes(vocabulary) {
-  vocabulary.forEach((vocab) => {
-    const [vid, sid, rid, spelling] = vocab;
-    const card = ankiWords[spelling];
-
-    if (card) {
-      card.vid = vid;
-      card.sid = sid;
-
-      ankiJpdbIDs[`${vid}-${sid}`] = card;
-    } else {
-      const item = {
-        vid,
-        sid,
-        state: "not-in-deck",
-        word: spelling,
-        source: "jpdb",
-      };
-
-      ankiJpdbIDs[`${vid}-${sid}`] = item;
-      ankiWords[spelling] = item;
-    }
-  });
-}
-
-async function buildAnkiMaps(vocabulary) {
-  const query = vocabulary.map((vocab) => `Word:${vocab[3]} `).join(" OR ");
-
-  await loadCardsFromQuery(query);
-  loadNotesFromCards();
-  loadWordsFromNotes();
-  loadJpdbIDsFromNotes(vocabulary);
-}
-
-export async function openInAnki(vid, sid, spelling) {
-  const card = ankiJpdbIDs[`${vid}-${sid}`];
-  const query = card.note ? `nid:${card.note}` : `word:${spelling}`;
-
-  await anki.invoke("guiBrowse", { query });
-}
-
-function sanitizeSentence(sentence) {
-  return sentence
-    .replace(/[\r\n]+/g, " ")
-    .replace(/<\/?br>/g, " ")
-    .replace(/（.*?）/g, "")
-    .replace(/\(.*?\)/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-//#endregion
-
+import { assertNonNull, truncate } from '../util.js';
+import { config } from './background.js';
+const API_RATELIMIT = 0.2; // seconds between requests
+const SCRAPE_RATELIMIT = 1.1; // seconds between requests
+// NOTE: If you change these, make sure to change the .map calls down below in the parse function too
+const TOKEN_FIELDS = ['vocabulary_index', 'position', 'length', 'furigana'];
+const VOCAB_FIELDS = [
+    'vid',
+    'sid',
+    'rid',
+    'spelling',
+    'reading',
+    'frequency_rank',
+    'part_of_speech',
+    'meanings_chunks',
+    'meanings_part_of_speech',
+    'card_state',
+    'pitch_accent',
+];
 export async function parse(text) {
-  const data = await parser.parse(text);
-
-  await buildAnkiMaps(data.vocabulary);
-
-  const cards = data.vocabulary.map((vocab) => {
-    // NOTE: If you change these, make sure to change VOCAB_FIELDS too
-    let [
-      vid,
-      sid,
-      rid,
-      spelling,
-      reading,
-      frequencyRank,
-      partOfSpeech,
-      meaningsChunks,
-      meaningsPartOfSpeech,
-      jpdbCardState,
-      pitchAccent,
-    ] = vocab;
-
-    if (jpdbCardState === null) {
-      jpdbCardState = ["suspended"];
-    }
-
-    const ankiCard = ankiWords[spelling];
-    const ankiCardState = ankiCard.state;
-    const relevantJpdbCardState = [
-      "blacklisted",
-      "suspended",
-      "redundant",
-    ].includes(jpdbCardState?.[0]);
-
-    const state =
-      ankiCardState === "not-in-deck" && relevantJpdbCardState
-        ? jpdbCardState
-        : [ankiCardState];
-
-    return {
-      vid,
-      sid,
-      rid,
-      spelling,
-      reading,
-      frequencyRank,
-      partOfSpeech,
-      meanings: meaningsChunks.map((glosses, i) => ({
-        glosses,
-        partOfSpeech: meaningsPartOfSpeech[i],
-      })),
-      state,
-      source: ankiCard.source,
-      pitchAccent: pitchAccent ?? [], // HACK not documented... in case it can be null, better safe than sorry
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiToken}`,
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({
+            text,
+            // furigana: [[position, length reading], ...] // TODO pass furigana to parse endpoint
+            position_length_encoding: 'utf16',
+            token_fields: TOKEN_FIELDS,
+            vocabulary_fields: VOCAB_FIELDS,
+        }),
     };
-  });
-
-  const tokens = data.tokens.map((tokens) =>
-    tokens.map((token) => {
-      // This is type-safe, but not... variable name safe :/
-      // NOTE: If you change these, make sure to change TOKEN_FIELDS too
-      const [vocabularyIndex, position, length, furigana] = token;
-      const card = cards[vocabularyIndex];
-      let offset = position;
-      const rubies =
-        furigana === null
-          ? []
-          : furigana.flatMap((part) => {
-              if (typeof part === "string") {
-                offset += part.length;
-                return [];
-              } else {
-                const [base, ruby] = part;
-                const start = offset;
-                const length = base.length;
-                const end = (offset = start + length);
-                return { text: ruby, start, end, length };
-              }
+    const response = await fetch('https://jpdb.io/api/v1/parse', options);
+    if (!(200 <= response.status && response.status <= 299)) {
+        const data = (await response.json());
+        throw Error(`${data.error_message} while parsing 「${truncate(text.join(' '), 20)}」`);
+    }
+    const data = (await response.json());
+    const cards = data.vocabulary.map(vocab => {
+        // NOTE: If you change these, make sure to change VOCAB_FIELDS too
+        const [vid, sid, rid, spelling, reading, frequencyRank, partOfSpeech, meaningsChunks, meaningsPartOfSpeech, cardState, pitchAccent,] = vocab;
+        return {
+            vid,
+            sid,
+            rid,
+            spelling,
+            reading,
+            frequencyRank,
+            partOfSpeech,
+            meanings: meaningsChunks.map((glosses, i) => ({ glosses, partOfSpeech: meaningsPartOfSpeech[i] })),
+            state: cardState ?? ['not-in-deck'],
+            pitchAccent: pitchAccent ?? [], // HACK not documented... in case it can be null, better safe than sorry
+        };
+    });
+    const tokens = data.tokens.map(tokens => tokens.map(token => {
+        // This is type-safe, but not... variable name safe :/
+        // NOTE: If you change these, make sure to change TOKEN_FIELDS too
+        const [vocabularyIndex, position, length, furigana] = token;
+        const card = cards[vocabularyIndex];
+        let offset = position;
+        const rubies = furigana === null
+            ? []
+            : furigana.flatMap(part => {
+                if (typeof part === 'string') {
+                    offset += part.length;
+                    return [];
+                }
+                else {
+                    const [base, ruby] = part;
+                    const start = offset;
+                    const length = base.length;
+                    const end = (offset = start + length);
+                    return { text: ruby, start, end, length };
+                }
             });
-      return {
-        card,
-        start: position,
-        end: position + length,
-        length: length,
-        rubies,
-      };
-    })
-  );
-
-  tokens.forEach((token) => {
-    if (!token.length) return;
-
-    token.forEach((inner) => {
-      if (!inner.rubies.length) return;
-
-      const ruby = inner.rubies;
-      const kanji = inner.card.spelling;
-      const offset = inner.start;
-
-      const word = kanji.split("");
-
-      for (let i = ruby.length - 1; i >= 0; i--) {
-        const { text, start, length } = ruby[i];
-
-        word.splice(start - offset + length, 0, `[${text}]`);
-      }
-
-      ankiWords[kanji].furigana = word.join("");
+        return {
+            card,
+            start: position,
+            end: position + length,
+            length: length,
+            rubies,
+        };
+    }));
+    return [[tokens, cards], API_RATELIMIT];
+}
+export function addToDeck(vid, sid, deckId) {
+    if (deckId === 'forq') {
+        return addToForqScrape(vid, sid);
+    }
+    else {
+        return addToDeckAPI(vid, sid, deckId);
+    }
+}
+async function addToDeckAPI(vid, sid, deckId) {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiToken}`,
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({
+            id: deckId,
+            vocabulary: [[vid, sid]],
+        }),
+    };
+    const response = await fetch('https://jpdb.io/api/v1/deck/add-vocabulary', options);
+    if (!(200 <= response.status && response.status <= 299)) {
+        const data = (await response.json());
+        throw Error(`${data.error_message} while adding word ${vid}/${sid} to deck "${deckId}"`);
+    }
+    return [null, API_RATELIMIT];
+}
+async function addToForqScrape(vid, sid) {
+    const response = await fetch('https://jpdb.io/prioritize', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/110.0',
+            Accept: '*/*',
+            'content-type': 'application/x-www-form-urlencoded',
+        },
+        body: `v=${vid}&s=${sid}&origin=/`,
     });
-  });
-
-  window.search = (queryOrVid, sid) => {
-    if (sid !== undefined) {
-      return console.log(ankiJpdbIDs[`${queryOrVid}-${sid}`]);
+    if (response.status >= 400) {
+        throw Error(`HTTP error ${response.statusText} while adding word ${vid}/${sid} to FORQ`);
     }
-    const [type, word] = queryOrVid.split(":");
-    switch (type) {
-      case "note":
-        return console.log(ankiNotes[word]);
-      case "card":
-        return console.log(ankiCards[word]);
-      case "word":
-      case "Word":
-        return console.log(ankiWords[word]);
-      default:
-        return console.log(ankiWords[queryOrVid]);
-    }
-  };
-
-  Object.entries(
-    Object.groupBy(cards, (card) => `${card.vid}-${card.sid}`)
-  ).forEach(([key, value]) => {
-    jpdbCards[key] = value[0];
-  });
-
-  return [data.jpdbTokens, cards];
+    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+    if (doc.querySelector('a[href="/login"]') !== null)
+        throw Error(`You are not logged in to jpdb.io - Adding cards to the FORQ requires being logged in`);
+    return [null, SCRAPE_RATELIMIT];
 }
-
-export async function addToDeck(vid, sid, sentence, deckId) {
-  const ankiCard = ankiJpdbIDs[`${vid}-${sid}`];
-  const jpdbCard = jpdbCards[`${vid}-${sid}`];
-
-  const groupedMeanings = [];
-  let lastPOS = [];
-  for (const [index, meaning] of jpdbCard.meanings.entries()) {
-    if (
-      // Same part of speech as previous meaning?
-      meaning.partOfSpeech.length == lastPOS.length &&
-      meaning.partOfSpeech.every((p, i) => p === lastPOS[i])
-    ) {
-      // Append to previous meaning group
-      groupedMeanings[groupedMeanings.length - 1].glosses.push(meaning.glosses);
-    } else {
-      // Create a new meaning group
-      groupedMeanings.push({
-        partOfSpeech: meaning.partOfSpeech,
-        glosses: [meaning.glosses],
-        startIndex: index,
-      });
-      lastPOS = meaning.partOfSpeech;
+export function removeFromDeck(vid, sid, deckId) {
+    if (deckId === 'forq') {
+        return removeFromForqScrape(vid, sid);
     }
-  }
-
-  const meaning = groupedMeanings
-    .flatMap((meanings) => [
-      `<h2>${meanings.partOfSpeech
-        .map((pos) => PARTS_OF_SPEECH[pos] ?? "")
-        .filter((x) => x.length > 0)
-        .join(", ")}</h2><ol start="${
-        meanings.startIndex + 1
-      }">${meanings.glosses
-        .map((glosses) => `<li>${glosses.join("; ")}</li>`)
-        .join("")}</ol>`,
-    ])
-    .join("");
-
-  const fields = {
-    Key: jpdbCard.spelling,
-    Word: jpdbCard.spelling,
-    WordReading: ankiCard.furigana ?? jpdbCard.reading,
-    Kanji: jpdbCard.spelling === jpdbCard.reading ? "" : "1",
-    PrimaryDefinition: meaning,
-    Sentence: sanitizeSentence(sentence),
-    PASilence: "[sound:_silence.wav]",
-    WordReadingHiragana: jpdbCard.reading,
-    FrequencySort: jpdbCard.frequencyRank?.toString() ?? "",
-    FrequenciesStylized: jpdbCard.frequencyRank
-      ? `Top ${jpdbCard.frequencyRank}`
-      : "",
-  };
-
-  fields["Word [jpdb_vocabulary]"] = fields.Word;
-  fields["Reading [jpdb_reading]"] = fields.WordReadingHiragana;
-  fields["Furigana [jpdb_furigana]"] = fields.WordReading;
-  fields["Meaning [jpdb_meaning]"] = fields.PrimaryDefinition;
-  fields["Ignore [jpdb_ignore]"] = "";
-
-  const tags =
-    deckId === config.miningDeckId ? ["breader", "check"] : ["breader"];
-  const note = await anki.invoke("addNote", {
-    note: {
-      deckName: deckId,
-      modelName: "JP Mining Note",
-      fields,
-      options: {
-        allowDuplicate: true,
-      },
-      tags,
-    },
-  });
-
-  const stateMap = {
-    [config.miningDeckId]: ["new"],
-    [config.blacklistDeckId]: ["blacklisted"],
-    [config.neverForgetDeckId]: ["never-forget"],
-  };
-
-  Object.assign(ankiCard, {
-    note,
-    deckId,
-    source: "anki",
-    state: stateMap[deckId],
-  });
-  jpdbCard.source = "anki";
+    else {
+        return removeFromDeckAPI(vid, sid, deckId);
+    }
 }
-
-export async function removeFromDeck(vid, sid) {
-  const ankiCard = ankiJpdbIDs[`${vid}-${sid}`];
-  const jpdbCard = jpdbCards[`${vid}-${sid}`];
-
-  if (ankiCard.note) {
-    await anki.invoke("deleteNotes", {
-      notes: [ankiCard.note],
+async function removeFromDeckAPI(vid, sid, deckId) {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiToken}`,
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({
+            id: deckId,
+            vocabulary: [[vid, sid]],
+        }),
+    };
+    const response = await fetch('https://jpdb.io/api/v1/deck/remove-vocabulary', options);
+    if (!(200 <= response.status && response.status <= 299)) {
+        const data = (await response.json());
+        throw Error(`${data.error_message} while removing word ${vid}/${sid} from deck "${deckId}"`);
+    }
+    return [null, API_RATELIMIT];
+}
+async function removeFromForqScrape(vid, sid) {
+    const response = await fetch('https://jpdb.io/deprioritize', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            Accept: '*/*',
+            'content-type': 'application/x-www-form-urlencoded',
+        },
+        body: `v=${vid}&s=${sid}&origin=`,
     });
-  }
-
-  Object.assign(ankiCard, {
-    note: null,
-    deckId: null,
-    source: "jpdb",
-    state: ["not-in-deck"],
-  });
-  jpdbCard.source = "jpdb";
+    if (response.status >= 400) {
+        throw Error(`HTTP error ${response.statusText} while removing word ${vid}/${sid} from FORQ`);
+    }
+    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+    if (doc.querySelector('a[href="/login"]') !== null)
+        throw Error(`You are not logged in to jpdb.io - Removing cards from the FORQ requires being logged in`);
+    return [null, SCRAPE_RATELIMIT];
 }
-
+export async function setSentence(vid, sid, sentence, translation) {
+    const body = { vid, sid };
+    if (sentence)
+        body.sentence = sentence;
+    if (translation)
+        body.translation = translation;
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiToken}`,
+            Accept: 'application/json',
+        },
+        body: JSON.stringify(body),
+    };
+    const response = await fetch('https://jpdb.io/api/v1/set-card-sentence', options);
+    if (!(200 <= response.status && response.status <= 299)) {
+        const data = (await response.json());
+        throw Error(`${data.error_message} while setting sentence for word ${vid}/${sid} to ${sentence === undefined ? 'none' : `「${truncate(sentence, 10)}」`} (translation: ${translation === undefined ? 'none' : `'${truncate(translation, 20)}'`})`);
+    }
+    return [null, API_RATELIMIT];
+}
+const REVIEW_GRADES = {
+    nothing: '1',
+    something: '2',
+    hard: '3',
+    good: '4',
+    easy: '5',
+    pass: 'p',
+    fail: 'f',
+    known: 'k',
+    unknown: 'n',
+    never_forget: 'w',
+    blacklist: '-1',
+};
+export async function review(vid, sid, rating) {
+    // Get current review number
+    const response = await fetch(`https://jpdb.io/review?c=vf%2C${vid}%2C${sid}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            Accept: '*/*',
+        },
+    });
+    if (response.status >= 400) {
+        throw Error(`HTTP error ${response.statusText} while getting next review number for word ${vid}/${sid}`);
+    }
+    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+    if (doc.querySelector('a[href="/login"]') !== null)
+        throw Error(`You are not logged in to jpdb.io - Reviewing cards requires being logged in`);
+    const reviewNoInput = doc.querySelector('form[action^="/review"] input[type=hidden][name=r]');
+    assertNonNull(reviewNoInput);
+    const reviewNo = parseInt(reviewNoInput.value);
+    const reviewResponse = await fetch('https://jpdb.io/review', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            Accept: '*/*',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `c=vf%2C${vid}%2C${sid}&r=${reviewNo}&g=${REVIEW_GRADES[rating]}`, // &force=true
+    });
+    if (reviewResponse.status >= 400) {
+        throw Error(`HTTP error ${response.statusText} while adding ${rating} review to word ${vid}/${sid}`);
+    }
+    return [null, 2 * SCRAPE_RATELIMIT];
+}
 export async function getCardState(vid, sid) {
-  const card = ankiJpdbIDs[`${vid}-${sid}`];
-  const state = card?.state ?? ["not-in-deck"];
-  const source = card?.source ?? "jpdb";
-
-  return [state, source];
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiToken}`,
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({
+            list: [[vid, sid]],
+            fields: ['card_state'],
+        }),
+    };
+    const response = await fetch('https://jpdb.io/api/v1/lookup-vocabulary', options);
+    if (!(200 <= response.status && response.status <= 299)) {
+        const data = (await response.json());
+        throw Error(`${data.error_message} while getting state for word ${vid}/${sid}`);
+    }
+    const data = (await response.json());
+    const vocabInfo = data.vocabulary_info[0];
+    if (vocabInfo === null)
+        throw Error(`Can't get state for word ${vid}/${sid}, word does not exist`);
+    return [vocabInfo[0] ?? ['not-in-deck'], API_RATELIMIT];
 }

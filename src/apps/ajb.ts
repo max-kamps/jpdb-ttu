@@ -70,12 +70,15 @@ export class AJB {
 
       console.log('pressed', pressed);
       if (pressed) {
+        event.stopPropagation();
+        event.preventDefault();
+
         eventBus.emit(pressed as keyof LocalEvents, event);
       }
     };
 
-    window.addEventListener('keydown', hotkeyListener);
-    window.addEventListener('mousedown', hotkeyListener);
+    window.addEventListener('keyup', hotkeyListener);
+    window.addEventListener('mouseup', hotkeyListener);
   }
 }
 
