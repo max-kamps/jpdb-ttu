@@ -3,7 +3,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 const views = ['settings', 'popup'];
-const styles = []; // ['toast', 'word'];
+const styles = ['toast']; // ['toast', 'word'];
 
 const foregroundApps = ['ajb']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 

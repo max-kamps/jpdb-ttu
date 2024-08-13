@@ -26,15 +26,14 @@ class SettingsController {
     (async () => {
       await this._setupSimpleInputs();
       await this._setupSelectFields();
-
-      this._setupJPDBInteraction();
-      this._setupAnkiInteraction();
-
-      await this._testJPDB();
-      await this._testAnki();
-      await this._testAnkiProxy();
-
+      // this._setupJPDBInteraction();
+      // this._setupAnkiInteraction();
+      // await this._testJPDB();
+      // await this._testAnki();
+      // await this._testAnkiProxy();
       this._setupSaveButton();
+
+      this._setupCollapsibleTriggers();
     })();
   }
 
@@ -139,7 +138,6 @@ class SettingsController {
     // We allow the ankiProxyUrl to be invalid, otherwise one would have to start the proxy every time the settings are opened.
     const invalidFields = Array.from(this._invalidFields).filter((key) => key !== 'ankiProxyUrl');
 
-    console.log(localChanges, invalidFields);
     this._saveButton.disabled = localChanges.length === 0 || invalidFields.length > 0;
   }
 
@@ -148,6 +146,20 @@ class SettingsController {
   }
 
   private _setupAnkiInteraction(): void {
+    const maxHeight = Math.max(
+      ...Array.from(view.findElements('#anki-endpoints .form-box > div')).map(
+        (e) => e.offsetHeight,
+      ),
+    );
+
+    // view.withElement('input[name="enableAnkiIntegration"]', (inputElement: HTMLInputElement) => {
+    //   this._collapsible('anki-endpoints', inputElement.checked);
+
+    //   inputElement.addEventListener('change', () => {
+    //     this._collapsible('anki-endpoints', inputElement.checked);
+    //   });
+    // });
+
     this._setupInteraction('input[name="ankiUrl"]', '#ankiUrlButton', this._testAnki.bind(this));
     this._setupInteraction(
       'input[name="ankiProxyUrl"]',
@@ -271,6 +283,81 @@ class SettingsController {
       }, 50);
     }
   }
+
+  //#region Collapsible
+  private _collapsible(collapsible: HTMLElement, show: boolean): void {
+    const targetHeight = Number(collapsible.getAttribute('data-height') ?? 1000);
+    const skipAnimation = collapsible.hasAttribute('skip-animation');
+
+    if (skipAnimation) {
+      if (show) {
+        collapsible.removeAttribute('hidden');
+        collapsible.style.maxHeight = `unset`;
+
+        return;
+      }
+
+      collapsible.setAttribute('hidden', '');
+      collapsible.style.maxHeight = `0`;
+
+      return;
+    }
+
+    if (show) {
+      collapsible.removeAttribute('hidden');
+      collapsible.offsetHeight;
+
+      collapsible.classList.add('is-open');
+      collapsible.style.maxHeight = `${targetHeight}px`;
+
+      setTimeout(() => {
+        collapsible.classList.add('rem-height');
+        collapsible.style.maxHeight = `unset`;
+      }, 300);
+    } else {
+      collapsible.classList.remove('rem-height');
+      collapsible.style.maxHeight = `${targetHeight}px`;
+
+      setTimeout(() => {
+        collapsible.classList.remove('is-open');
+        collapsible.style.maxHeight = `0`;
+
+        setTimeout(() => {
+          collapsible.setAttribute('hidden', '');
+        }, 300);
+      }, 50);
+    }
+  }
+
+  private _setupCollapsibleTriggers(): void {
+    const enablers = view.findElements<'input'>('[enables]');
+    const disablers = view.findElements<'input'>('[disables]');
+
+    enablers.forEach((enabler) => {
+      enabler.addEventListener('change', () => {
+        const targets = view.findElements<'div'>(enabler.getAttribute('enables') as string);
+
+        targets.forEach((target) => {
+          this._collapsible(target, enabler.checked);
+        });
+      });
+
+      enabler.dispatchEvent(new Event('change'));
+    });
+
+    disablers.forEach((disabler) => {
+      disabler.addEventListener('change', () => {
+        const targets = view.findElements<'div'>(disabler.getAttribute('disables') as string);
+
+        targets.forEach((target) => {
+          this._collapsible(target, !disabler.checked);
+        });
+      });
+
+      disabler.dispatchEvent(new Event('change'));
+    });
+  }
+  //#endregion
 }
 
 new SettingsController();

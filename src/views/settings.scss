@@ -4,10 +4,12 @@ h6 {
   font-weight: bold;
   text-align: center;
 }
+
 .subsection-header {
   font-size: 103%;
   margin-bottom: 0.5rem;
 }
+
 #save-all-settings-box {
   position: fixed;
   left: 0;
@@ -22,10 +24,19 @@ h6 {
 #save-all-settings-box > input {
   margin-bottom: 1.2rem;
 }
+
 .explanation {
   margin-left: 0.5rem;
   margin-top: 0.75rem;
   opacity: 0.8;
+}
+
+.distance-after {
+  padding-bottom: 1.5rem;
+}
+
+.distance-before {
+  padding-top: 1.5rem;
 }
 
 .form-box-parent {
@@ -68,6 +79,24 @@ input.v1 {
 select {
   margin-bottom: 0;
   font-family: monospace;
+}
+
+.collapsible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height ease-out 0.3s;
+
+  &.is-open {
+    max-height: 100px;
+  }
+
+  &.rem-height {
+    max-height: unset;
+  }
+
+  [skip-animation] & {
+    transition: none;
+  }
 }
 
 #requires-anki {

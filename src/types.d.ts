@@ -40,18 +40,42 @@ declare type DiscoverWordConfiguration = {
 
 declare type ConfigurationSchema = {
   schemaVersion: number;
-  apiToken: string;
+  jpdbApiToken: string;
+  jpdbMiningDeck: string;
+  jpdbBlacklistDeck: string;
+  jpdbForqDeck: string;
+  jpdbNeverForgetDeck: string;
+  jpdbAddToForq: boolean;
+  jpdbUseTwoGrades: boolean;
+  jpdbReviewNothing: Keybind;
+  jpdbReviewSomething: Keybind;
+  jpdbReviewHard: Keybind;
+  jpdbReviewGood: Keybind;
+  jpdbReviewEasy: Keybind;
+  jpdbReviewFail: Keybind;
+  jpdbReviewPass: Keybind;
+
+  enableAnkiIntegration: boolean;
   ankiUrl: string;
   ankiProxyUrl: string;
-  miningConfig: DeckConfiguration;
-  blacklistConfig: DeckConfiguration;
-  neverForgetConfig: DeckConfiguration;
-  readonlyConfigs: DiscoverWordConfiguration[];
+  ankiMiningConfig: DeckConfiguration;
+  ankiBlacklistConfig: DeckConfiguration;
+  ankiNeverForgetConfig: DeckConfiguration;
+  ankiReadonlyConfigs: DiscoverWordConfiguration[];
+
   contextWidth: number;
-  customWordCSS: string;
-  customPopupCSS: string;
+
   showPopupOnHover: boolean;
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
+
+  parseKey: Keybind;
   showPopupKey: Keybind;
+  showAdvancedDialogKey: Keybind;
+  addToMiningKey: Keybind;
+  addToBlacklistKey: Keybind;
+  addToNeverForgetKey: Keybind;
+
+  customWordCSS: string;
+  customPopupCSS: string;
 };

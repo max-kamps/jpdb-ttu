@@ -2728,7 +2728,11 @@ input.rich-number {
   padding-top: 0.5rem;
   padding-bottom: 1rem;
   padding-bottom: 0;
-  gap: 1rem;
+  gap: 0.5rem;
+}
+
+.form-box > div > label {
+  padding-top: 1rem;
 }
 
 .form-box > div > input {

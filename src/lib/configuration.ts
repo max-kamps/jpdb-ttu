@@ -14,24 +14,55 @@ type ObjectKeys = Filter<
 class Configuration {
   private NUMBER_KEYS: NumberKeys = ['schemaVersion', 'contextWidth'];
   private BOOLEAN_KEYS: BooleanKeys = [
+    'jpdbAddToForq',
+    'jpdbUseTwoGrades',
+    'enableAnkiIntegration',
     'showPopupOnHover',
     'touchscreenSupport',
     'disableFadeAnimation',
   ];
   private OBJECT_KEYS: ObjectKeys = [
+    'jpdbReviewNothing',
+    'jpdbReviewSomething',
+    'jpdbReviewHard',
+    'jpdbReviewGood',
+    'jpdbReviewEasy',
+    'jpdbReviewFail',
+    'jpdbReviewPass',
+    'ankiMiningConfig',
+    'ankiBlacklistConfig',
+    'ankiNeverForgetConfig',
+    'ankiReadonlyConfigs',
+    'parseKey',
     'showPopupKey',
-    'miningConfig',
-    'blacklistConfig',
-    'neverForgetConfig',
-    'readonlyConfigs',
+    'showAdvancedDialogKey',
+    'addToMiningKey',
+    'addToBlacklistKey',
+    'addToNeverForgetKey',
   ];
 
   public readonly DEFAULTS: ConfigurationSchema = {
     schemaVersion: 1,
-    apiToken: '',
+
+    jpdbApiToken: '',
+    jpdbMiningDeck: '',
+    jpdbBlacklistDeck: '',
+    jpdbForqDeck: '',
+    jpdbNeverForgetDeck: '',
+    jpdbAddToForq: false,
+    jpdbUseTwoGrades: false,
+    jpdbReviewNothing: { key: '', code: '', modifiers: [] },
+    jpdbReviewSomething: { key: '', code: '', modifiers: [] },
+    jpdbReviewHard: { key: '', code: '', modifiers: [] },
+    jpdbReviewGood: { key: '', code: '', modifiers: [] },
+    jpdbReviewEasy: { key: '', code: '', modifiers: [] },
+    jpdbReviewFail: { key: '', code: '', modifiers: [] },
+    jpdbReviewPass: { key: '', code: '', modifiers: [] },
+
+    enableAnkiIntegration: false,
     ankiUrl: 'http://localhost:8765',
     ankiProxyUrl: '',
-    miningConfig: {
+    ankiMiningConfig: {
       deck: '',
       model: '',
       proxy: false,
@@ -39,7 +70,7 @@ class Configuration {
       readingField: '',
       templateTargets: [],
     },
-    blacklistConfig: {
+    ankiBlacklistConfig: {
       deck: '',
       model: '',
       proxy: false,
@@ -47,7 +78,7 @@ class Configuration {
       readingField: '',
       templateTargets: [],
     },
-    neverForgetConfig: {
+    ankiNeverForgetConfig: {
       deck: '',
       model: '',
       proxy: false,
@@ -55,14 +86,23 @@ class Configuration {
       readingField: '',
       templateTargets: [],
     },
-    readonlyConfigs: [],
+    ankiReadonlyConfigs: [],
+
     contextWidth: 1,
-    customPopupCSS: '',
-    customWordCSS: '',
+
     showPopupOnHover: true,
     touchscreenSupport: false,
     disableFadeAnimation: false,
+
+    parseKey: { key: 'P', code: 'KeyP', modifiers: ['Control', 'Shift'] },
     showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
+    showAdvancedDialogKey: { key: '', code: '', modifiers: [] },
+    addToMiningKey: { key: '', code: '', modifiers: [] },
+    addToBlacklistKey: { key: '', code: '', modifiers: [] },
+    addToNeverForgetKey: { key: '', code: '', modifiers: [] },
+
+    customWordCSS: '',
+    customPopupCSS: '',
   };
 
   public async get<K extends keyof ConfigurationSchema>(

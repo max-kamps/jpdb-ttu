@@ -22,13 +22,13 @@
     <div class="container" style="padding-top: 1rem">
       <h4 style="text-align: center; opacity: 0.85">Settings</h4>
       <form>
-        <h6>Connectivity</h6>
+        <h6>JPDB Integration</h6>
         <div class="form-box-parent">
           <div class="form-box">
             <div>
-              <label for="apiToken">JPDB API Token</label>
+              <label for="jpdbApiToken">JPDB API Token</label>
               <div class="inline-group">
-                <input type="password" id="apiToken" name="apiToken" />
+                <input type="password" id="jpdbApiToken" name="jpdbApiToken" />
                 <div>
                   <input type="button" id="apiTokenButton" class="button outline small" value="⭯"></input>
                 </div>
@@ -45,111 +45,245 @@
             </div>
           </div>
         </div>
-
-        <div class="form-box-parent">
+        <div class="form-box-parent" style="display: none">
           <div class="form-box">
             <div>
-              <label for="ankiUrl">Anki Connect Endpoint URL</label>
-              <div class="inline-group">
-                <input type="text" id="ankiUrl" name="ankiUrl" />
-                <div>
-                  <input type="button" id="ankiUrlButton" class="button outline small" value="⭯"></input>
-                </div>
+              <div class="checkbox">
+                <input type="checkbox" id="enableAnkiIntegration" name="enableAnkiIntegration" disables="#jpdb-decks" enables="#anki-integration" />
+                <label for="enableAnkiIntegration">Mine into Anki instead of JPDB</label>
               </div>
-              <p style="opacity: 0.8; margin-bottom: 0;">
-                To find your Anki Connect endpoint URL, go to Anki -> Tools -> Add-ons ->
-                AnkiConnect -> Config.
-              </p>
-              <p style="opacity: 0.8; margin-bottom: 0;">
-                Enter the webBindAddress as well as the webBindPort as
-                <code>webBindAddress:webBindPort</code> - the default is <code>127.0.0.1:8765</code>.
-              </p>
-              <p style="opacity: 0.8; margin-bottom: 0;">
-                Install the <a href="https://ankiweb.net/shared/info/2055492159" target="_blank">AnkiConnect</a> Add-on if you haven't already.
-              </p>
             </div>
-          </div>
-
-          <div class="form-box">
-            <div>
-              <label for="ankiProxyUrl">Anki Connect Endpoint Proxy</label>
-              <div class="inline-group">
-                <input type="text" id="ankiProxyUrl" name="ankiProxyUrl" />
-                <div>
-                  <input type="button" id="ankiProxyUrlButton" class="button outline small" value="⭯"></input>
-                </div>
-              </div>
-              <p style="opacity: 0.8; margin-bottom: 0;">
-                You can define an additional proxy for the Anki Connect endpoint. This is useful if
-                you are using asbplayers <a href="https://github.com/killergerbah/asbplayer?tab=readme-ov-file#advanced-features" target="_blank">auto capture option</a> for example.
-              </p>
-              <p style="opacity: 0.8; margin-bottom: 0;">
-                With this you can tunnel only a select few requests through the proxy to avoid triggering captures on blacklist items for example.
-              </p>
-            </div>
+            <p style="opacity: 0.8">Anki will be implemented at a later point in time!</p>
           </div>
         </div>
-        <div style="padding-bottom: 1.5rem"></div>
 
-        <div id="requires-anki" hidden>
-          <h6>Mining</h6>
-          <mining-input id="miningConfig" name="miningConfig" title="Mining Deck">
-            <p>This is your <b>mining deck</b>. Cards you mine will be saved here.</p>
-            <p>Words from this deck will be displayed according to its learning state in anki.</p>
-            <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
-          </mining-input>
-          <mining-input id="neverForgetConfig" name="neverForgetConfig" title="Never Forget Deck">
-            <p>This is your <b>never forget deck</b>. Cards you won't ever forget will be saved here.</p>
-            <p>Words from this deck will be displayed as known.</p>
-            <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
-          </mining-input>
-          <mining-input id="blacklistConfig" name="blacklistConfig" title="Blacklist Deck">
-            <p>This is your <b>blacklist deck</b>. Cards you don't want to learn will be saved here.</p>
-            <p>Words from this deck will be displayed as suspended.</p>
-            <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
-          </mining-input>
+        <div id="jpdb-decks" class="collapsible" hidden skip-animation>
+          <h6>Mining Configuration</h6>
 
-          <div class="form-box-parent">
+          <p style="opacity: 0.8">
+            To find the deck ID for a specific deck, open that deck's page on jpdb and look at the URL.
+            <br />
+            You will see something like <code>https://jpdb.io/deck?id=32</code>. The number at the end is
+            the deck ID. <br />
+            The following special deck IDs are also allowed: <code>blacklist</code>,
+            <code>never-forget</code>, <code>forq</code> (= front of review queue)<br />
+          </p>
+          <div class="form-box-parent distance-after">
             <div class="form-box">
               <div>
-                <label for="contextWidth">Number of context sentences</label>
+                <label for="jpdbMiningDeck">Mining Deck</label>
                 <input
                   style="width: 100%"
-                  type="number"
-                  id="contextWidth"
-                  name="contextWidth"
-                  min="1"
+                  type="text"
+                  id="jpdbMiningDeck"
+                  name="jpdbMiningDeck"
                 />
-                <p style="opacity: 0.8">
-                  Number of sentences for more context when mining from pure text content.
-                </p>
+              </div>
+
+              <div>
+                <label for="jpdbBlacklistDeck">Blacklist Deck</label>
+                <input
+                  style="width: 100%"
+                  type="text"
+                  id="jpdbBlacklistDeck"
+                  name="jpdbBlacklistDeck"
+                />
+              </div>
+            </div>
+
+            <div class="form-box">
+              <div>
+                <label for="jpdbForqDeck">FORQ Deck</label>
+                <input
+                  style="width: 100%"
+                  type="text"
+                  id="jpdbForqDeck"
+                  name="jpdbForqDeck"
+                />
+              </div>
+
+              <div>
+                <label for="jpdbNeverForgetDeck">Never Forget Deck</label>
+                <input
+                  style="width: 100%"
+                  type="text"
+                  id="jpdbNeverForgetDeck"
+                  name="jpdbNeverForgetDeck"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-box-parent distance-after">
+            <div class="form-box">
+              <div>
+                <div class="checkbox">
+                  <input type="checkbox" id="jpdbAddToForq" name="jpdbAddToForq" />
+                  <label for="jpdbAddToForq">Add to FORQ when mining</label>
+                </div>
+              </div>
+              <div>
+                <div class="checkbox">
+                  <input type="checkbox" id="jpdbUseTwoGrades" name="jpdbUseTwoGrades" disables=".grade-five" enables="#grade-two" />
+                  <label for="jpdbUseTwoGrades">Use a 2-point pass/fail grading scale</label>
+                </div>
               </div>
             </div>
 
             <div class="form-box"></div>
           </div>
-          <div style="padding-bottom: 1.5rem"></div>
+
+          <p style="opacity: 0.8; margin-bottom: 0">
+            Press escape to clear. Holding modifiers like shift or alt is supported. <br />
+            Hotkeys are based on key position and independent of your current keyboard layout.
+            <br />
+            Note: Keybinds currently always work on the word you are hovering your mouse over,
+            even if you have the popup for another word open.
+            <br />
+            Additionally, Left Mouse Click (without modifiers) as well as Right Mouse Click (no matter the modifiers) are not supported.
+          </p>
+
+          <div class="form-box-parent grade-five collapsible" hidden skip-animation>
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewNothing">Review word as nothing</label>
+                <keybind-input id="jpdbReviewNothing" name="jpdbReviewNothing"></keybind-input>
+              </div>
+            </div>
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewSomething">Review word as something</label>
+                <keybind-input id="jpdbReviewSomething" name="jpdbReviewSomething"></keybind-input>
+              </div>
+            </div>
+          </div>
+          <div class="form-box-parent grade-five collapsible" hidden skip-animation>
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewHard">Review word as hard</label>
+                <keybind-input id="jpdbReviewHard" name="jpdbReviewHard"></keybind-input>
+              </div>
+            </div>
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewGood">Review word as good</label>
+                <keybind-input id="jpdbReviewGood" name="jpdbReviewGood"></keybind-input>
+              </div>
+            </div>
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewEasy">Review word as easy</label>
+                <keybind-input id="jpdbReviewEasy" name="jpdbReviewEasy"></keybind-input>
+              </div>
+            </div>
+          </div>
+
+          <div id="grade-two" class="form-box-parent collapsible" hidden skip-animation>
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewFail">Review word as fail</label>
+                <keybind-input id="jpdbReviewFail" name="jpdbReviewFail"></keybind-input>
+              </div>
+            </div>
+
+            <div class="form-box">
+              <div>
+                <label for="jpdbReviewPass">Review word as pass</label>
+                <keybind-input id="jpdbReviewPass" name="jpdbReviewPass"></keybind-input>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="anki-integration" class="collapsible" hidden skip-animation>
+          <h6>Anki Integration</h6>
+          <div class="form-box-parent">
+            <div class="form-box">
+              <div>
+                <label for="ankiUrl">Anki Connect Endpoint URL</label>
+                <div class="inline-group">
+                  <input type="text" id="ankiUrl" name="ankiUrl" />
+                  <div>
+                    <input type="button" id="ankiUrlButton" class="button outline small" value="⭯"></input>
+                  </div>
+                </div>
+                <p style="opacity: 0.8; margin-bottom: 0;">
+                  To find your Anki Connect endpoint URL, go to Anki -> Tools -> Add-ons ->
+                  AnkiConnect -> Config.
+                </p>
+                <p style="opacity: 0.8; margin-bottom: 0;">
+                  Enter the webBindAddress as well as the webBindPort as
+                  <code>webBindAddress:webBindPort</code> - the default is <code>127.0.0.1:8765</code>.
+                </p>
+                <p style="opacity: 0.8; margin-bottom: 0;">
+                  Install the <a href="https://ankiweb.net/shared/info/2055492159" target="_blank">AnkiConnect</a> Add-on if you haven't already.
+                </p>
+              </div>
+            </div>
+
+            <div class="form-box">
+              <div>
+                <label for="ankiProxyUrl">Anki Connect Endpoint Proxy</label>
+                <div class="inline-group">
+                  <input type="text" id="ankiProxyUrl" name="ankiProxyUrl" />
+                  <div>
+                    <input type="button" id="ankiProxyUrlButton" class="button outline small" value="⭯"></input>
+                  </div>
+                </div>
+                <p style="opacity: 0.8; margin-bottom: 0;">
+                  You can define an additional proxy for the Anki Connect endpoint. This is useful if
+                  you are using asbplayers <a href="https://github.com/killergerbah/asbplayer?tab=readme-ov-file#advanced-features" target="_blank">auto capture option</a> for example.
+                </p>
+                <p style="opacity: 0.8; margin-bottom: 0;">
+                  With this you can tunnel only a select few requests through the proxy to avoid triggering captures on blacklist items for example.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div id="requires-anki" hidden>
+            <h6>Mining</h6>
+            <mining-input id="ankiMiningConfig" name="ankiMiningConfig" title="Mining Deck">
+              <p>This is your <b>mining deck</b>. Cards you mine will be saved here.</p>
+              <p>Words from this deck will be displayed according to its learning state in anki.</p>
+              <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
+            </mining-input>
+            <mining-input id="ankiNeverForgetConfig" name="ankiNeverForgetConfig" title="Never Forget Deck">
+              <p>This is your <b>never forget deck</b>. Cards you won't ever forget will be saved here.</p>
+              <p>Words from this deck will be displayed as known.</p>
+              <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
+            </mining-input>
+            <mining-input id="ankiBlacklistConfig" name="ankiBlacklistConfig" title="Blacklist Deck">
+              <p>This is your <b>blacklist deck</b>. Cards you don't want to learn will be saved here.</p>
+              <p>Words from this deck will be displayed as suspended.</p>
+              <p>Also the Word and Reading configuration will be used to lookup words in Anki.</p>
+            </mining-input>
+          </div>
+        </div>
+
+        <div class="form-box-parent distance-before">
+          <div class="form-box">
+            <div>
+              <label for="contextWidth">Number of context sentences</label>
+              <input
+                style="width: 100%"
+                type="number"
+                id="contextWidth"
+                name="contextWidth"
+                min="1"
+              />
+              <p style="opacity: 0.8">
+                Number of sentences for more context when mining from pure text content.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-box"></div>
         </div>
 
         <h6>Accessibility</h6>
         <div class="form-box-parent">
           <div class="form-box">
-            <div>
-              <label for="showPopupKey">Show popup</label>
-              <keybind-input id="showPopupKey" name="showPopupKey"></keybind-input>
-              <p style="opacity: 0.8">
-                Press escape to clear. Holding modifiers like shift or alt is supported. <br />
-                Hotkeys are based on key position and independent of your current keyboard layout.
-                <br />
-                Note: Keybinds currently always work on the word you are hovering your mouse over,
-                even if you have the popup for another word open.
-                <br />
-                Additionally, Left Mouse Click (without modifiers) as well as Right Mouse Click (no matter the modifiers) are not supported.
-              </p>
-            </div>
-          </div>
-
-          <div class="form-box" style="padding-top: 2rem">
             <div>
               <div class="checkbox">
                 <input type="checkbox" id="showPopupOnHover" name="showPopupOnHover" />
@@ -171,10 +305,58 @@
               </div>
             </div>
           </div>
-        </div>
-        <div style="padding-bottom: 1.5rem"></div>
 
-        <h6>Appearance</h6>
+          <div class="form-box"></div>
+        </div>
+
+        <h6>Keybinds</h6>
+        <div class="form-box-parent">
+          <div class="form-box">
+            <p style="opacity: 0.8; padding-top: .5rem">
+              Press escape to clear. Holding modifiers like shift or alt is supported. <br />
+              Hotkeys are based on key position and independent of your current keyboard layout.
+              <br />
+              Note: Keybinds currently always work on the word you are hovering your mouse over,
+              even if you have the popup for another word open.
+              <br />
+              Additionally, Left Mouse Click (without modifiers) as well as Right Mouse Click (no matter the modifiers) are not supported.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-box-parent">
+          <div class="form-box">
+            <div>
+              <label for="parseKey">Parse page or selection</label>
+              <keybind-input id="parseKey" name="parseKey"></keybind-input>
+            </div>
+            <div>
+              <label for="showPopupKey">Show popup</label>
+              <keybind-input id="showPopupKey" name="showPopupKey"></keybind-input>
+            </div>
+            <div>
+              <label for="showAdvancedDialogKey">Show advanced mining dialog</label>
+              <keybind-input id="showAdvancedDialogKey" name="showAdvancedDialogKey"></keybind-input>
+            </div>
+          </div>
+
+          <div class="form-box">
+            <div>
+              <label for="addToMiningKey">Add word to mining deck</label>
+              <keybind-input id="addToMiningKey" name="addToMiningKey"></keybind-input>
+            </div>
+            <div>
+              <label for="addToBlacklistKey">Add word to blacklist</label>
+              <keybind-input id="addToBlacklistKey" name="addToBlacklistKey"></keybind-input>
+            </div>
+            <div>
+              <label for="addToNeverForgetKey">Mark word as never forget</label>
+              <keybind-input id="addToNeverForgetKey" name="addToNeverForgetKey"></keybind-input>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="distance-before">Appearance</h6>
         <div class="form-box-parent">
           <div class="form-box">
             <div>

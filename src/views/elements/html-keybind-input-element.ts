@@ -186,6 +186,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
           }
         : { key, code, modifiers };
 
+    console.log(HTMLKeybindInputElement.active.value);
     HTMLKeybindInputElement.active.deactivate();
   }
 
