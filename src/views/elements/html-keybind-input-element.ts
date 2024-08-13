@@ -126,6 +126,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     document.addEventListener('keydown', HTMLKeybindInputElement.keyListener);
     document.addEventListener('keyup', HTMLKeybindInputElement.keyListener);
     document.addEventListener('mousedown', HTMLKeybindInputElement.keyListener);
+    document.addEventListener('mouseup', HTMLKeybindInputElement.keyListener);
 
     HTMLKeybindInputElement.active = this;
   }
@@ -136,6 +137,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     document.removeEventListener('keydown', HTMLKeybindInputElement.keyListener);
     document.removeEventListener('keyup', HTMLKeybindInputElement.keyListener);
     document.removeEventListener('mousedown', HTMLKeybindInputElement.keyListener);
+    document.removeEventListener('mouseup', HTMLKeybindInputElement.keyListener);
 
     HTMLKeybindInputElement.active = undefined;
   }
@@ -166,6 +168,8 @@ export class HTMLKeybindInputElement extends HTMLElement {
     const modifiers = HTMLKeybindInputElement.MODIFIERS.filter(
       (name) => name !== key && event.getModifierState(name),
     );
+
+    console.log({ code, key, modifiers });
 
     if (!modifiers.length && code === 'Mouse0') {
       // We don't want to allow the left mouse button as keybind, as it would be impossible to click on anything.
