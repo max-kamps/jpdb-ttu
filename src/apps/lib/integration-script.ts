@@ -1,4 +1,5 @@
 import { onMessage } from '@lib/extension/on-message';
+import { sendToBackground } from '@lib/extension/send-to-background';
 
 const remoteListeners: Partial<Record<keyof TabEvents, Function[]>> = {};
 
@@ -44,5 +45,15 @@ export abstract class IntegrationScript {
     }
 
     remoteListeners[event].push(listener as Function);
+  }
+
+  protected lookupText(text: string): void {
+    if (!text?.length) {
+      console.error('No text to lookup!');
+
+      return;
+    }
+
+    sendToBackground('lookupText', text);
   }
 }

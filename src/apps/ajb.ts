@@ -19,12 +19,12 @@ export class AJB extends Integration {
     super();
 
     this.on('parseKey', () => console.log('parsePage'));
-    this.on('lookupSelectionKey', () => console.log('lookupSelectionKey'));
+    this.on('lookupSelectionKey', () => this.lookupText(window.getSelection()?.toString()));
 
     this.listen('parsePage', () => console.log('parsePage'));
     this.listen('parseSelection', () => console.log('parseSelection'));
 
-    onBroadcast('configuration-updated', () => console.log('configuration-updated'));
+    onBroadcast('configurationUpdated', () => console.log('configuration-updated'));
   }
 }
 

@@ -40,7 +40,7 @@ export class KeybindManager extends IntegrationScript {
   private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
 
   private async setup(): Promise<void> {
-    onBroadcast('configuration-updated', () => this.buildKeyMap());
+    onBroadcast('configurationUpdated', () => this.buildKeyMap());
 
     await this.buildKeyMap();
     this.installGlobalListeners();

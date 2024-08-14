@@ -14,24 +14,20 @@ declare interface EventMap {
   [key: string]: (...args: any) => any;
 }
 declare interface BroadcastEvents {
-  'configuration-updated': () => void;
+  configurationUpdated: () => void;
 }
 
-declare interface BackgroundEvents extends BroadcastEvents {}
+declare interface BackgroundEvents {
+  lookupText: (text: string) => void;
+}
 
 declare interface TabEvents {
   parsePage: () => void;
   parseSelection: () => void;
 }
-declare type TE = {
-  [K in keyof TabEvents]: (
-    tabId: number,
-    ...args: [...Parameters<TabEvents[K]>]
-  ) => ReturnType<TabEvents[K]>;
-};
 
 declare interface LocalEvents {
-  'close-all-dialogs': (e: KeyboardEvent | MouseEvent) => void;
+  closeAllDialogs: (e: KeyboardEvent | MouseEvent) => void;
   jpdbReviewNothing: (e: KeyboardEvent | MouseEvent) => void;
   jpdbReviewSomething: (e: KeyboardEvent | MouseEvent) => void;
   jpdbReviewHard: (e: KeyboardEvent | MouseEvent) => void;
