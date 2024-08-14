@@ -1,4 +1,6 @@
+import { createElement } from './create-element';
 import { DOMElementTagOptions } from './dom.types';
+import { resolveElement } from './resolve-element';
 
 export function appendElement<TChild extends HTMLElement = HTMLElement>(
   parent: string,
@@ -21,9 +23,9 @@ export function appendElement(
   parent: string | HTMLElement,
   child: HTMLElement | DOMElementTagOptions,
 ): HTMLElement {
-  const e = child instanceof HTMLElement ? child : this.createElement(child);
+  const e = child instanceof HTMLElement ? child : createElement(child);
 
-  this.resolveElement(parent)?.append(e);
+  resolveElement(parent)?.append(e);
 
   return e;
 }

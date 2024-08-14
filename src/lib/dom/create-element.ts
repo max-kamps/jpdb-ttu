@@ -66,7 +66,7 @@ export function createElement(
   (options.children ?? [])
     .filter((ch) => ch)
     .forEach((ch: HTMLElement | DOMElementTagOptions<keyof HTMLElementTagNameMap>) =>
-      appendElement(e, ch instanceof HTMLElement ? ch : this.createElement(ch)),
+      appendElement(e, ch instanceof HTMLElement ? ch : createElement(ch)),
     );
 
   return e;

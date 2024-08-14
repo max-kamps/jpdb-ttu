@@ -29,7 +29,7 @@ export function displayToast(
   message: string,
   timeoutDuration: number = 5000,
 ): void {
-  const container = this.getOrCreateToastContainer();
+  const container = getOrCreateToastContainer();
   const toast: HTMLLIElement = createElement('li', {
     class: ['toast', 'outline', type],
     handler: () => toast.classList.add('hide'),
