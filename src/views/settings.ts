@@ -1,13 +1,14 @@
 import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
-import { anki } from '@lib/anki';
-import { view } from '@lib/view';
+import { Anki } from '@lib/anki';
+import { View } from '@lib/view';
 import { configuration } from '@lib/configuration';
-import { jpdb } from '@lib/jpdb';
+import { JPDB } from '@lib/jpdb';
 import { Broadcaster } from '@lib/broadcaster';
 
 class SettingsController {
-  private _broadcaster = new Broadcaster();
+  private _broadcaster = Broadcaster.getInstance();
+  private _view = View.getInstance();
   private _lastSavedConfiguration = new Map<
     keyof ConfigurationSchema,
     ConfigurationSchema[keyof ConfigurationSchema]
@@ -19,7 +20,7 @@ class SettingsController {
   private _localChanges = new Set<keyof ConfigurationSchema>();
   private _invalidFields = new Set<keyof ConfigurationSchema>();
 
-  private _saveButton = view.findElement<'button'>('#save-all-settings');
+  private _saveButton = this._view.findElement<'button'>('#save-all-settings');
 
   constructor() {
     customElements.define('mining-input', HTMLMiningInputElement);
@@ -62,7 +63,7 @@ class SettingsController {
     getTargetProperty: (type: string) => keyof HTMLInputElement = () => 'value',
   ): Promise<void> {
     await Promise.all(
-      view.withElements(selector, async (inputElement: HTMLInputElement) => {
+      this._view.withElements(selector, async (inputElement: HTMLInputElement) => {
         const name = inputElement.name as keyof ConfigurationSchema;
 
         if (filter.includes(name) || inputElement.type === 'hidden') {
@@ -122,7 +123,7 @@ class SettingsController {
       this._saveButton.disabled = true;
 
       for (const key of itemsToSave) {
-        const inputElement = view.findElement<'input'>(`[name="${key}"]`);
+        const inputElement = this._view.findElement<'input'>(`[name="${key}"]`);
         const value = inputElement.type === 'checkbox' ? inputElement.checked : inputElement.value;
 
         await configuration.set(key, value);
@@ -131,7 +132,7 @@ class SettingsController {
         this._localChanges.delete(key);
       }
 
-      view.displayToast('success', 'Settings saved successfully');
+      this._view.displayToast('success', 'Settings saved successfully');
       this._broadcaster.emit('configuration-updated');
     };
   }
@@ -157,12 +158,12 @@ class SettingsController {
 
   private _setupAnkiInteraction(): void {
     const maxHeight = Math.max(
-      ...Array.from(view.findElements('#anki-endpoints .form-box > div')).map(
+      ...Array.from(this._view.findElements('#anki-endpoints .form-box > div')).map(
         (e) => e.offsetHeight,
       ),
     );
 
-    // view.withElement('input[name="enableAnkiIntegration"]', (inputElement: HTMLInputElement) => {
+    // this._view.withElement('input[name="enableAnkiIntegration"]', (inputElement: HTMLInputElement) => {
     //   this._collapsible('anki-endpoints', inputElement.checked);
 
     //   inputElement.addEventListener('change', () => {
@@ -183,11 +184,11 @@ class SettingsController {
     buttonSelector: string,
     testFunction: () => void,
   ): void {
-    view.withElement(inputSelector, (inputElement: HTMLInputElement) => {
+    this._view.withElement(inputSelector, (inputElement: HTMLInputElement) => {
       inputElement.addEventListener('change', testFunction);
     });
 
-    view.withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
+    this._view.withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
       buttonElement.addEventListener('click', testFunction);
     });
   }
@@ -196,7 +197,7 @@ class SettingsController {
     await this._testEndpoint(
       '#apiTokenButton',
       '[name="jpdbApiToken"]',
-      (apiToken) => jpdb.ping({ apiToken }),
+      (apiToken) => JPDB.getInstance().ping({ apiToken }),
       false,
     );
   }
@@ -205,10 +206,10 @@ class SettingsController {
     await this._testEndpoint(
       '#ankiUrlButton',
       '[name="ankiUrl"]',
-      (ankiConnectUrl) => anki.getApiVersion({ ankiConnectUrl }),
+      (ankiConnectUrl) => Anki.getInstance().getApiVersion({ ankiConnectUrl }),
       false,
       async (ankiConnectUrl: string) => {
-        view.withElements('mining-input', (element: HTMLMiningInputElement) => {
+        this._view.withElements('mining-input', (element: HTMLMiningInputElement) => {
           element.fetchUrl = ankiConnectUrl;
         });
 
@@ -222,7 +223,7 @@ class SettingsController {
     await this._testEndpoint(
       '#ankiProxyUrlButton',
       '[name="ankiProxyUrl"]',
-      (ankiConnectUrl) => anki.getApiVersion({ ankiConnectUrl }),
+      (ankiConnectUrl) => Anki.getInstance().getApiVersion({ ankiConnectUrl }),
       true,
     );
   }
@@ -235,8 +236,8 @@ class SettingsController {
     afterSuccess?: (value: string) => Promise<void>,
     afterFail?: () => void,
   ): Promise<void> {
-    const button = view.findElement<'button'>(buttonSelector);
-    const input = view.findElement<'input'>(inputSelector);
+    const button = this._view.findElement<'button'>(buttonSelector);
+    const input = this._view.findElement<'input'>(inputSelector);
 
     if (allowEmpty && !input.value) {
       button.classList.remove('v1');
@@ -270,7 +271,7 @@ class SettingsController {
   }
 
   private _animateMiningSection(show: boolean): void {
-    const miningElement = view.findElement<'div'>('#requires-anki');
+    const miningElement = this._view.findElement<'div'>('#requires-anki');
 
     if (show) {
       miningElement.removeAttribute('hidden');
@@ -340,12 +341,12 @@ class SettingsController {
   }
 
   private _setupCollapsibleTriggers(): void {
-    const enablers = view.findElements<'input'>('[enables]');
-    const disablers = view.findElements<'input'>('[disables]');
+    const enablers = this._view.findElements<'input'>('[enables]');
+    const disablers = this._view.findElements<'input'>('[disables]');
 
     enablers.forEach((enabler) => {
       enabler.addEventListener('change', () => {
-        const targets = view.findElements<'div'>(enabler.getAttribute('enables') as string);
+        const targets = this._view.findElements<'div'>(enabler.getAttribute('enables') as string);
 
         targets.forEach((target) => {
           this._collapsible(target, enabler.checked);
@@ -357,7 +358,7 @@ class SettingsController {
 
     disablers.forEach((disabler) => {
       disabler.addEventListener('change', () => {
-        const targets = view.findElements<'div'>(disabler.getAttribute('disables') as string);
+        const targets = this._view.findElements<'div'>(disabler.getAttribute('disables') as string);
 
         targets.forEach((target) => {
           this._collapsible(target, !disabler.checked);

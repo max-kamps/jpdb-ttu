@@ -1,4 +1,4 @@
-import { browser } from './browser';
+import { Browser } from './browser';
 
 interface DOMElementBaseOptions {
   id?: string;
@@ -19,7 +19,19 @@ type DOMElementTagOptions<K extends keyof HTMLElementTagNameMap = keyof HTMLElem
     tag: K;
   };
 
-class View {
+export class View {
+  //#region Singleton
+  private static _instance: View;
+  public static getInstance(): View {
+    if (!View._instance) {
+      View._instance = new View();
+    }
+
+    return View._instance;
+  }
+  private constructor() {}
+  //#endregion
+
   public onLoaded(listener: () => void | Promise<void>): void {
     this.on('DOMContentLoaded', listener);
   }
@@ -328,7 +340,7 @@ class View {
 
       shadowRoot.append(
         this.createElement('link', {
-          attributes: { rel: 'stylesheet', href: browser.styleUrl('styles/toast') },
+          attributes: { rel: 'stylesheet', href: Browser.getInstance().styleUrl('styles/toast') },
         }),
         this.createElement('ul', { id: 'ajb-toast-item-container', class: 'notifications' }),
       );
@@ -339,5 +351,3 @@ class View {
     return shadowRoot.getElementById('ajb-toast-item-container') as HTMLDivElement;
   }
 }
-
-export const view = new View();

@@ -1,4 +1,15 @@
-class Browser {
+export class Browser {
+  //#region Singleton
+  private static _instance: Browser;
+  public static getInstance(): Browser {
+    if (!Browser._instance) {
+      Browser._instance = new Browser();
+    }
+
+    return Browser._instance;
+  }
+  //#endregion
+
   private _contextHandlers = new Map<
     string,
     (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => void | Promise<void>
@@ -126,5 +137,3 @@ class Browser {
     }
   }
 }
-
-export const browser = new Browser();

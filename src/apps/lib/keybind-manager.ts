@@ -3,6 +3,21 @@ import { EventBus } from '../../lib/event-bus';
 import { Broadcaster } from '@lib/broadcaster';
 
 export class KeybindManager {
+  //#region Singleton
+  private static _instance: KeybindManager;
+  public static getInstance(): KeybindManager {
+    if (!KeybindManager._instance) {
+      KeybindManager._instance = new KeybindManager();
+    }
+
+    return KeybindManager._instance;
+  }
+
+  private constructor() {
+    this.setup();
+  }
+  //#endregion
+
   private _events: FilterKeys<ConfigurationSchema, Keybind>[] = [
     'jpdbReviewNothing',
     'jpdbReviewSomething',
@@ -19,11 +34,10 @@ export class KeybindManager {
     'parseKey',
     'showPopupKey',
   ];
-  private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
+  private _bus = EventBus.getInstance<LocalEvents>();
+  private _broadcaster = Broadcaster.getInstance();
 
-  constructor(private _bus: EventBus<LocalEvents>, private _broadcaster: Broadcaster) {
-    this.setup();
-  }
+  private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
 
   private async setup(): Promise<void> {
     this._broadcaster.on('configuration-updated', () => this.buildKeyMap());

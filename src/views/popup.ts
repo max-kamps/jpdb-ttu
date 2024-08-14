@@ -1,14 +1,12 @@
-// import { getCallable } from '@lib/messaging/get-callable';
+import { Browser } from '@lib/browser';
+import { View } from '@lib/view';
 
-import { browser } from '@lib/browser';
-import { view } from '@lib/view';
-
-view.onLoaded(async () => {
+View.getInstance().onLoaded(async () => {
   document.getElementById('settings-link').addEventListener('click', () => {
-    browser.openOptionsPage();
+    Browser.getInstance().openOptionsPage();
   });
 
-  for (const tab of await browser.getTabs({ currentWindow: true })) {
+  for (const tab of await Browser.getInstance().getTabs({ currentWindow: true })) {
     if (tab.url.startsWith('about://') || tab.url.startsWith('chrome://')) {
       continue;
     }
@@ -17,11 +15,11 @@ view.onLoaded(async () => {
     //   continue;
     // }
 
-    view.appendElement<'a'>('.container', {
+    View.getInstance().appendElement<'a'>('.container', {
       tag: 'a',
       class: ['outline', 'parse'],
       handler: async () => {
-        await browser.sendToTab(tab.id, 'parsePage', false);
+        await Browser.getInstance().sendToTab('parsePage', tab.id);
 
         window.close();
       },
@@ -31,6 +29,6 @@ view.onLoaded(async () => {
 });
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settings-link').addEventListener('click', () => {
-    browser.openOptionsPage();
+    Browser.getInstance().openOptionsPage();
   });
 });

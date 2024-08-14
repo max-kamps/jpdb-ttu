@@ -13,8 +13,8 @@ export class BackgroundWorker {
     return BackgroundWorker._instance;
   }
 
-  public readonly broadcaster = new Broadcaster();
-  public readonly tabComms = new TabComms();
+  private broadcaster = Broadcaster.getInstance();
+  private tabComms = TabComms.getInstance();
   private _initiator = new ParseInitiator(this);
 
   private constructor() {

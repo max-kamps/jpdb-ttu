@@ -1,4 +1,4 @@
-import { browser } from './browser';
+import { Browser } from './browser';
 
 type NumberKeys = FilterKeys<ConfigurationSchema, number>[];
 type BooleanKeys = FilterKeys<ConfigurationSchema, boolean>[];
@@ -107,7 +107,7 @@ class Configuration {
     key: K,
     defaultValue?: ConfigurationSchema[K],
   ): Promise<ConfigurationSchema[K]> {
-    const value: string = await browser.readStorage(key, defaultValue?.toString());
+    const value: string = await Browser.getInstance().readStorage(key, defaultValue?.toString());
 
     if (this.NUMBER_KEYS.includes(key as FilterKeys<ConfigurationSchema, number>)) {
       return parseInt(value, 10) as ConfigurationSchema[K];
@@ -139,7 +139,7 @@ class Configuration {
     key: K,
     value: ConfigurationSchema[K],
   ): Promise<void> {
-    await browser.writeStorage(
+    await Browser.getInstance().writeStorage(
       key,
       typeof value === 'object' ? JSON.stringify(value) : value.toString(),
     );

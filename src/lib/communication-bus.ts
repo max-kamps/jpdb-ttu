@@ -1,11 +1,11 @@
-import { browser } from './browser';
+import { Browser } from './browser';
 import { EventBus } from './event-bus';
 
 export abstract class CommunicationBus<TSending, TReceiving> {
-  protected _receiver = new EventBus<TReceiving>();
+  protected _receiver = EventBus.getInstance<TReceiving>();
 
-  constructor() {
-    browser.onMessage(
+  protected constructor() {
+    Browser.getInstance().onMessage(
       (event: keyof TReceiving, _, ...args: [...ArgumentsFor<TReceiving[keyof TReceiving]>]) => {
         this._receiver.emit(event, ...args);
       },

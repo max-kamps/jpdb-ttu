@@ -1,5 +1,6 @@
-import { browser } from '@lib/browser';
+import { Browser } from '@lib/browser';
 import { BackgroundWorker } from '../background-worker';
+import { TabComms } from './tab-comms';
 
 export class ParseInitiator {
   constructor(private _worker: BackgroundWorker) {
@@ -7,13 +8,15 @@ export class ParseInitiator {
   }
 
   private installContextMenu(): void {
+    const browser = Browser.getInstance();
+
     browser.installContextMenu(
       {
         id: 'parse-selection',
         title: 'Parse selected text',
         contexts: ['selection'],
       },
-      (_, { id: tabId }) => this._worker.tabComms.emit('parseSelection', tabId),
+      (_, { id: tabId }) => TabComms.getInstance().emit('parseSelection', tabId),
     );
 
     browser.installContextMenu(
@@ -22,7 +25,7 @@ export class ParseInitiator {
         title: 'Parse page',
         contexts: ['page'],
       },
-      (_, { id: tabId }) => this._worker.tabComms.emit('parsePage', tabId),
+      (_, { id: tabId }) => TabComms.getInstance().emit('parsePage', tabId),
     );
 
     browser.installContextMenu(

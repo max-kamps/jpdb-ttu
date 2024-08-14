@@ -1,4 +1,16 @@
 export class EventBus<TEventMap> {
+  //#region Singleton
+  private static instance: EventBus<any> | null = null;
+  public static getInstance<TEventMap>(): EventBus<TEventMap> {
+    if (!EventBus.instance) {
+      EventBus.instance = new EventBus<TEventMap>();
+    }
+
+    return EventBus.instance;
+  }
+  protected constructor() {}
+  //#endregion
+
   protected listeners: Partial<Record<keyof TEventMap, Function[]>> = {};
 
   public on<TEvent extends keyof TEventMap>(event: TEvent, listener: TEventMap[TEvent]): void {

@@ -4,7 +4,18 @@ type AnkiRequestOptions = {
   ankiConnectUrl?: string;
 };
 
-class Anki {
+export class Anki {
+  //#region Singleton
+  private static _instance: Anki;
+  public static getInstance(): Anki {
+    if (!Anki._instance) {
+      Anki._instance = new Anki();
+    }
+
+    return Anki._instance;
+  }
+  //#endregion
+
   public getApiVersion(options?: AnkiRequestOptions): Promise<number> {
     return this.request('version', {}, options);
   }
@@ -57,5 +68,3 @@ class Anki {
     return responseObject.result;
   }
 }
-
-export const anki = new Anki();

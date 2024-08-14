@@ -14,10 +14,10 @@ export class AJB {
     return this._instance;
   }
 
-  public readonly events = new EventBus<LocalEvents>();
-  public readonly backgroundComms = new BackgroundComms();
-  public readonly broadcaster = new Broadcaster();
-  public readonly keyBindManager = new KeybindManager(this.events, this.broadcaster);
+  private events = EventBus.getInstance<LocalEvents>();
+  private backgroundComms = BackgroundComms.getInstance();
+  private broadcaster = Broadcaster.getInstance();
+  private keyBindManager = KeybindManager.getInstance();
 
   private constructor() {
     this.events.on('parseKey', (e: KeyboardEvent | MouseEvent) => console.log('parsePage', e));

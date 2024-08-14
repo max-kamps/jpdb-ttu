@@ -4,7 +4,19 @@ type JPDBRequestOptions = {
   apiToken?: string;
 };
 
-class JPDB {
+export class JPDB {
+  //#region Singleton
+  private static _instance: JPDB;
+  public static getInstance(): JPDB {
+    if (!JPDB._instance) {
+      JPDB._instance = new JPDB();
+    }
+
+    return JPDB._instance;
+  }
+  private constructor() {}
+  //#endregion
+
   public async ping(options?: JPDBRequestOptions): Promise<boolean> {
     await this.request('ping', undefined, options);
 
@@ -16,7 +28,7 @@ class JPDB {
     params: any,
     options?: JPDBRequestOptions,
   ): Promise<TResult> {
-    const apiToken = options?.apiToken || (await configuration.get('apiToken'));
+    const apiToken = options?.apiToken || (await configuration.get('jpdbApiToken'));
 
     if (!apiToken) {
       throw new Error('API Token is not set');
@@ -46,5 +58,3 @@ class JPDB {
     return responseObject;
   }
 }
-
-export const jpdb = new JPDB();
