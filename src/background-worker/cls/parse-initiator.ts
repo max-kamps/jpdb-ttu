@@ -13,7 +13,7 @@ export class ParseInitiator {
         title: 'Parse selected text',
         contexts: ['selection'],
       },
-      (_, { id: tabId }) => browser.sendToTab(tabId, 'parseSelection', false),
+      (_, { id: tabId }) => this._worker.tabComms.emit('parseSelection', tabId),
     );
 
     browser.installContextMenu(
@@ -22,7 +22,7 @@ export class ParseInitiator {
         title: 'Parse page',
         contexts: ['page'],
       },
-      (_, { id: tabId }) => browser.sendToTab(tabId, 'parsePage', false),
+      (_, { id: tabId }) => this._worker.tabComms.emit('parsePage', tabId),
     );
 
     browser.installContextMenu(

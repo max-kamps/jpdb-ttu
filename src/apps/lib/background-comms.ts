@@ -1,27 +1,11 @@
 import { browser } from '@lib/browser';
+import { CommunicationBus } from '@lib/communication-bus';
 
-class BackgroundComms {
-  private _listeners: Partial<Record<keyof TabEvents, Function[]>> = {};
-
-  constructor() {
-    browser.onMessage((event: keyof TabEvents, _, ...args) => {
-      if (!this._listeners[event]) {
-        return;
-      }
-
-      this._listeners[event].forEach((listener) => listener(...args));
-    });
-  }
-
-  public on<TEvent extends keyof TabEvents>(
+export class BackgroundComms extends CommunicationBus<BackgroundEvents, TabEvents> {
+  public async emit<TEvent extends keyof BackgroundEvents>(
     event: TEvent,
-    listener: (...args: [...TabEvents[TEvent][0]]) => TabEvents[TEvent][1],
-  ): void {
-    if (!this._listeners[event]) {
-      this._listeners[event] = [];
-    }
-    this._listeners[event].push(listener);
+    ...args: [...ArgumentsFor<BackgroundEvents[TEvent]>]
+  ): Promise<void> {
+    await browser.sendToBackground(event, ...args);
   }
 }
-
-export const backgroundComms = new BackgroundComms();

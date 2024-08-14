@@ -1,12 +1,8 @@
 import { browser } from './browser';
 
-type Filter<T, TF extends T[keyof T]> = keyof {
-  [K in keyof T as T[K] extends TF ? K : never]: T[K];
-};
-
-type NumberKeys = Filter<ConfigurationSchema, number>[];
-type BooleanKeys = Filter<ConfigurationSchema, boolean>[];
-type ObjectKeys = Filter<
+type NumberKeys = FilterKeys<ConfigurationSchema, number>[];
+type BooleanKeys = FilterKeys<ConfigurationSchema, boolean>[];
+type ObjectKeys = FilterKeys<
   ConfigurationSchema,
   Keybind | DeckConfiguration | DiscoverWordConfiguration[]
 >[];
@@ -113,15 +109,15 @@ class Configuration {
   ): Promise<ConfigurationSchema[K]> {
     const value: string = await browser.readStorage(key, defaultValue?.toString());
 
-    if (this.NUMBER_KEYS.includes(key as Filter<ConfigurationSchema, number>)) {
+    if (this.NUMBER_KEYS.includes(key as FilterKeys<ConfigurationSchema, number>)) {
       return parseInt(value, 10) as ConfigurationSchema[K];
     }
 
-    if (this.BOOLEAN_KEYS.includes(key as Filter<ConfigurationSchema, boolean>)) {
+    if (this.BOOLEAN_KEYS.includes(key as FilterKeys<ConfigurationSchema, boolean>)) {
       return (value === 'true') as ConfigurationSchema[K];
     }
 
-    if (this.OBJECT_KEYS.includes(key as Filter<ConfigurationSchema, Keybind>)) {
+    if (this.OBJECT_KEYS.includes(key as FilterKeys<ConfigurationSchema, Keybind>)) {
       try {
         return JSON.parse(value) as ConfigurationSchema[K];
       } catch {

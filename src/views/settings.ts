@@ -4,9 +4,10 @@ import { anki } from '@lib/anki';
 import { view } from '@lib/view';
 import { configuration } from '@lib/configuration';
 import { jpdb } from '@lib/jpdb';
-import { broadcaster } from '@lib/broadcaster';
+import { Broadcaster } from '@lib/broadcaster';
 
 class SettingsController {
+  private _broadcaster = new Broadcaster();
   private _lastSavedConfiguration = new Map<
     keyof ConfigurationSchema,
     ConfigurationSchema[keyof ConfigurationSchema]
@@ -27,11 +28,14 @@ class SettingsController {
     (async () => {
       await this._setupSimpleInputs();
       await this._setupSelectFields();
-      // this._setupJPDBInteraction();
+
+      this._setupJPDBInteraction();
       // this._setupAnkiInteraction();
-      // await this._testJPDB();
+
+      await this._testJPDB();
       // await this._testAnki();
       // await this._testAnkiProxy();
+
       this._setupSaveButton();
 
       this._setupCollapsibleTriggers();
@@ -128,7 +132,7 @@ class SettingsController {
       }
 
       view.displayToast('success', 'Settings saved successfully');
-      broadcaster.broadcast({ event: 'configuration-updated', target: 'all' });
+      this._broadcaster.emit('configuration-updated');
     };
   }
 
@@ -144,7 +148,11 @@ class SettingsController {
   }
 
   private _setupJPDBInteraction(): void {
-    this._setupInteraction('input[name="apiToken"]', '#apiTokenButton', this._testJPDB.bind(this));
+    this._setupInteraction(
+      'input[name="jpdbApiToken"]',
+      '#apiTokenButton',
+      this._testJPDB.bind(this),
+    );
   }
 
   private _setupAnkiInteraction(): void {
@@ -187,7 +195,7 @@ class SettingsController {
   private async _testJPDB(): Promise<void> {
     await this._testEndpoint(
       '#apiTokenButton',
-      '[name="apiToken"]',
+      '[name="jpdbApiToken"]',
       (apiToken) => jpdb.ping({ apiToken }),
       false,
     );

@@ -57,11 +57,10 @@ class Browser {
 
   public async sendToBackground<TEvent extends keyof BackgroundEvents>(
     event: TEvent,
-    isBroadcast: boolean,
-    ...args: [...BackgroundEvents[TEvent][0]]
-  ): Promise<BackgroundEvents[TEvent][1]> {
-    return new Promise<BackgroundEvents[TEvent][1]>((resolve, reject) => {
-      chrome.runtime.sendMessage({ event, isBroadcast, args }, (response) => {
+    ...args: [...ArgumentsFor<BackgroundEvents[TEvent]>]
+  ): Promise<ReturnType<BackgroundEvents[TEvent]>> {
+    return new Promise<ReturnType<BackgroundEvents[TEvent]>>((resolve, reject) => {
+      chrome.runtime.sendMessage({ event, args }, (response) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         }
@@ -72,13 +71,12 @@ class Browser {
   }
 
   public async sendToTab<TEvent extends keyof TabEvents>(
-    tabId: number,
     event: TEvent,
-    isBroadcast: boolean,
-    ...args: [...TabEvents[TEvent][0]]
-  ): Promise<TabEvents[TEvent][1]> {
-    return new Promise<TabEvents[TEvent][1]>((resolve, reject) => {
-      chrome.tabs.sendMessage(tabId, { event, isBroadcast, args }, (response) => {
+    tabId: number,
+    ...args: [...ArgumentsFor<TabEvents[TEvent]>]
+  ): Promise<ReturnType<TabEvents[TEvent]>> {
+    return new Promise<ReturnType<TabEvents[TEvent]>>((resolve, reject) => {
+      chrome.tabs.sendMessage(tabId, { event, args }, (response) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         }
@@ -88,28 +86,7 @@ class Browser {
     });
   }
 
-  public onBroadcast(
-    handler: (
-      event: keyof BroadcastEvents,
-      sender: chrome.runtime.MessageSender,
-      ...args: any[]
-    ) => void | Promise<void>,
-  ) {
-    return this.onAnyMessage(({ isBroadcast }) => isBroadcast, handler);
-  }
-
-  public onMessage(
-    handler: (
-      event: keyof BackgroundEvents | keyof TabEvents,
-      sender: chrome.runtime.MessageSender,
-      ...args: any[]
-    ) => void | Promise<void>,
-  ) {
-    return this.onAnyMessage(({ isBroadcast }) => !isBroadcast, handler);
-  }
-
-  private onAnyMessage<TEvent>(
-    filter: (event: { event: string; isBroadcast: boolean }) => boolean,
+  public onMessage<TEvent>(
     handler: (
       event: TEvent,
       sender: chrome.runtime.MessageSender,
@@ -117,11 +94,7 @@ class Browser {
     ) => void | Promise<void>,
   ): void {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse): boolean => {
-      const { event, isBroadcast, args } = request;
-
-      if (!filter({ event, isBroadcast })) {
-        return false;
-      }
+      const { event, args } = request;
 
       const handlerResult = handler(event as TEvent, sender, ...args);
       const promise =
