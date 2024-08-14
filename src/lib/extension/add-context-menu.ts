@@ -26,6 +26,10 @@ export const addContextMenu = (
   options: chrome.contextMenus.CreateProperties,
   handler: (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => void | Promise<void>,
 ): void => {
+  if (handlers.has(options.id)) {
+    return;
+  }
+
   chrome.contextMenus.create(options);
   handlers.set(options.id, handler);
 

@@ -58,6 +58,7 @@ export class KeybindManager extends IntegrationScript {
       const value = await getConfiguration(key, true);
 
       if (value.code) {
+        console.log(key, value);
         this._keyMap[key] = value;
       }
     }

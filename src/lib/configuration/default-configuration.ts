@@ -51,10 +51,10 @@ export const DEFAULT_CONFIGURATION = Object.freeze<ConfigurationSchema>({
   touchscreenSupport: false,
   disableFadeAnimation: false,
 
-  parseKey: { key: 'P', code: 'KeyP', modifiers: ['Control', 'Shift'] },
+  parseKey: { key: 'P', code: 'KeyP', modifiers: ['Alt'] },
   showPopupKey: { key: 'Left Mouse Button', code: 'Mouse0', modifiers: ['Shift'] },
   showAdvancedDialogKey: { key: '', code: '', modifiers: [] },
-  lookupSelectionKey: { key: 'L', code: 'KeyL', modifiers: ['Control', 'Shift'] },
+  lookupSelectionKey: { key: 'L', code: 'KeyL', modifiers: ['Alt'] },
   addToMiningKey: { key: '', code: '', modifiers: [] },
   addToBlacklistKey: { key: '', code: '', modifiers: [] },
   addToNeverForgetKey: { key: '', code: '', modifiers: [] },
