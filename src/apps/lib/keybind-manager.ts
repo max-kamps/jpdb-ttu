@@ -1,8 +1,8 @@
-import { configuration } from '@lib/configuration';
-import { EventBus } from '../../lib/event-bus';
-import { Broadcaster } from '@lib/broadcaster';
+import { getConfiguration } from '@lib/configuration/get-configuration';
+import { onBroadcast } from '@lib/broadcaster/on-broadcast';
+import { IntegrationScript } from './integration-script';
 
-export class KeybindManager {
+export class KeybindManager extends IntegrationScript {
   //#region Singleton
   private static _instance: KeybindManager;
   public static getInstance(): KeybindManager {
@@ -14,6 +14,8 @@ export class KeybindManager {
   }
 
   private constructor() {
+    super();
+
     this.setup();
   }
   //#endregion
@@ -34,20 +36,18 @@ export class KeybindManager {
     'parseKey',
     'showPopupKey',
   ];
-  private _bus = EventBus.getInstance<LocalEvents>();
-  private _broadcaster = Broadcaster.getInstance();
 
   private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
 
   private async setup(): Promise<void> {
-    this._broadcaster.on('configuration-updated', () => this.buildKeyMap());
+    onBroadcast('configuration-updated', () => this.buildKeyMap());
 
     await this.buildKeyMap();
     this.installGlobalListeners();
   }
 
   private async buildKeyMap(): Promise<void> {
-    const isAnkiEnabled = await configuration.getOrDefault('enableAnkiIntegration');
+    const isAnkiEnabled = await getConfiguration('enableAnkiIntegration', true);
     const keys = isAnkiEnabled
       ? this._events.filter((event) => !event.startsWith('jpdb'))
       : this._events;
@@ -55,7 +55,7 @@ export class KeybindManager {
     this._keyMap = {};
 
     for (const key of keys) {
-      const value = await configuration.getOrDefault(key);
+      const value = await getConfiguration(key, true);
 
       if (value.code) {
         this._keyMap[key] = value;
@@ -79,7 +79,7 @@ export class KeybindManager {
       e.stopPropagation();
       e.stopImmediatePropagation();
 
-      this._bus.emit(keybind as FilterKeys<ConfigurationSchema, Keybind>, e);
+      this.emit(keybind as FilterKeys<ConfigurationSchema, Keybind>, e);
     }
   }
 

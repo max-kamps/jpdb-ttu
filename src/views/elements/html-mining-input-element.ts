@@ -1,6 +1,9 @@
-import { View } from '@lib/view';
-import { Anki } from '@lib/anki';
-import { Browser } from '@lib/browser';
+import { getDecks } from '@lib/anki/get-decks';
+import { getModels } from '@lib/anki/get-models';
+import { getFields } from '@lib/anki/get-fields';
+import { getStyleUrl } from '@lib/extension/get-style-url';
+import { createElement } from '@lib/dom/create-element';
+import { displayToast } from '@lib/dom/display-toast';
 
 const observedAttributes = ['value', 'name', 'fetch-url', 'title'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];
@@ -23,23 +26,21 @@ export class HTMLMiningInputElement extends HTMLElement {
   public static observedAttributes = observedAttributes;
   public static copiedDeckConfiguration: Pick<DeckConfiguration, 'model' | 'templateTargets'>;
 
-  private _anki = Anki.getInstance();
-  private _view = View.getInstance();
   protected _decks: string[] = [];
   protected _models: string[] = [];
   protected _fields: string[] = [];
 
   protected _shadow: ShadowRoot;
   protected _input: HTMLInputElement;
-  protected _templateContainer = this._view.createElement('div', { id: 'template-list' });
+  protected _templateContainer = createElement('div', { id: 'template-list' });
   protected _selects = {
-    deckInput: this._view.createElement('select'),
-    modelInput: this._view.createElement('select'),
-    wordInput: this._view.createElement('select'),
-    readingInput: this._view.createElement('select'),
+    deckInput: createElement('select'),
+    modelInput: createElement('select'),
+    wordInput: createElement('select'),
+    readingInput: createElement('select'),
   };
   protected _fieldSelects = [this._selects.wordInput, this._selects.readingInput];
-  protected _proxyInput = this._view.createElement('input', {
+  protected _proxyInput = createElement('input', {
     attributes: {
       type: 'checkbox',
     },
@@ -107,10 +108,10 @@ export class HTMLMiningInputElement extends HTMLElement {
   protected installStyles() {
     ['styles/theme', 'styles/common', 'views/settings'].forEach((style) => {
       this._shadow.appendChild(
-        this._view.createElement('link', {
+        createElement('link', {
           attributes: {
             rel: 'stylesheet',
-            href: Browser.getInstance().styleUrl(style),
+            href: getStyleUrl(style),
           },
         }),
       );
@@ -132,7 +133,7 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected buildInputElements() {
-    this._input = this._view.createElement('input', {
+    this._input = createElement('input', {
       attributes: {
         type: 'hidden',
         name: this.name,
@@ -151,7 +152,7 @@ export class HTMLMiningInputElement extends HTMLElement {
   protected buildDOM() {
     this._shadow.appendChild(this._input);
 
-    const container = this._view.createElement('div', {
+    const container = createElement('div', {
       class: ['mining-input'],
       children: [
         this.buildHeaderBlock(),
@@ -177,14 +178,14 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected buildAccordionBlock(contents: HTMLElement) {
-    return this._view.createElement('details', {
+    return createElement('details', {
       class: ['accordion'],
       children: [{ tag: 'summary', innerText: this.getAttribute('title') }, contents],
     });
   }
 
   protected buildHeaderBlock() {
-    return this._view.createElement('div', {
+    return createElement('div', {
       style: {
         display: 'flex',
         justifyContent: 'space-between',
@@ -198,16 +199,16 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected buildColumn(inputs: HTMLElement[]) {
-    return this._view.createElement('div', {
+    return createElement('div', {
       class: ['form-box'],
       children: inputs
-        .map((input) => [input, this._view.createElement('div', { style: { height: '1rem' } })])
+        .map((input) => [input, createElement('div', { style: { height: '1rem' } })])
         .flat(),
     });
   }
 
   protected buildSelectBlock(label: string, input: HTMLSelectElement) {
-    return this._view.createElement('div', {
+    return createElement('div', {
       children: [
         {
           tag: 'label',
@@ -220,7 +221,7 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected buildProxyBlock() {
-    return this._view.createElement('div', {
+    return createElement('div', {
       style: { flex: '1' },
       children: [
         {
@@ -240,7 +241,7 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected buildTemplateBlock() {
-    return this._view.createElement('div', {
+    return createElement('div', {
       children: [
         { tag: 'p', innerText: 'Template Fields' },
         this._templateContainer,
@@ -256,20 +257,20 @@ export class HTMLMiningInputElement extends HTMLElement {
     }
 
     const childs = this._templateTargets.map((target, index) => {
-      const fieldSelect = this._view.createElement('select', {
+      const fieldSelect = createElement('select', {
         attributes: { name: 'field' },
         children: [...new Set(['', ...this._availableFields, target.field])].map((field) => {
-          return this._view.createElement('option', {
+          return createElement('option', {
             innerText: field,
             attributes: { value: field },
           });
         }),
       });
-      const templateSelect = this._view.createElement('select', {
+      const templateSelect = createElement('select', {
         attributes: { name: 'template' },
         children: Object.keys(TemplateTargetTranslations).map(
           (template: keyof typeof TemplateTargetTranslations) => {
-            return this._view.createElement('option', {
+            return createElement('option', {
               innerText: TemplateTargetTranslations[template],
               attributes: { value: template },
             });
@@ -286,7 +287,7 @@ export class HTMLMiningInputElement extends HTMLElement {
         });
       });
 
-      const removeButton = this._view.createElement('input', {
+      const removeButton = createElement('input', {
         class: ['outline', 'v1'],
         attributes: { type: 'button', value: '-' },
         handler: () => {
@@ -297,7 +298,7 @@ export class HTMLMiningInputElement extends HTMLElement {
         },
       });
 
-      return this._view.createElement('div', {
+      return createElement('div', {
         children: [fieldSelect, templateSelect, removeButton],
       });
     });
@@ -308,7 +309,7 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected buildTemplateControls() {
-    return this._view.createElement('div', {
+    return createElement('div', {
       class: ['controls-list'],
       children: [
         {
@@ -360,18 +361,18 @@ export class HTMLMiningInputElement extends HTMLElement {
       templateTargets: this._templateTargets,
     };
 
-    this._view.displayToast('success', 'Template copied');
+    displayToast('success', 'Template copied');
   }
 
   protected pasteTemplate() {
     if (!HTMLMiningInputElement.copiedDeckConfiguration?.model?.length) {
-      this._view.displayToast('error', 'No template copied');
+      displayToast('error', 'No template copied');
 
       return;
     }
 
     if (this._selects.modelInput.value !== HTMLMiningInputElement.copiedDeckConfiguration.model) {
-      this._view.displayToast('error', 'Models do not match');
+      displayToast('error', 'Models do not match');
 
       return;
     }
@@ -415,24 +416,24 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected async updateDecks(ankiConnectUrl: string) {
-    this._decks = await this._anki.getDecks({ ankiConnectUrl });
+    this._decks = await getDecks({ ankiConnectUrl });
 
     this._decks.unshift('');
     this._selects.deckInput.replaceChildren(
-      ...this._decks.map((deck) => this._view.createElement('option', { innerText: deck })),
+      ...this._decks.map((deck) => createElement('option', { innerText: deck })),
     );
   }
 
   protected async updateModels(ankiConnectUrl: string) {
-    this._models = await this._anki.getModels({ ankiConnectUrl });
+    this._models = await getModels({ ankiConnectUrl });
 
     this._selects.modelInput.replaceChildren(
-      ...this._models.map((model) => this._view.createElement('option', { innerText: model })),
+      ...this._models.map((model) => createElement('option', { innerText: model })),
     );
   }
 
   protected async updateFields(ankiConnectUrl: string, model: string) {
-    this._fields = model ? await this._anki.getFields(model, { ankiConnectUrl }) : [];
+    this._fields = model ? await getFields(model, { ankiConnectUrl }) : [];
 
     ['wordInput', 'readingInput'].forEach((key: keyof typeof this._selects) => {
       const select = this._selects[key];
@@ -441,7 +442,7 @@ export class HTMLMiningInputElement extends HTMLElement {
 
       select.replaceChildren(
         ...fields.map((field) =>
-          this._view.createElement('option', { attributes: { value: field }, innerText: field }),
+          createElement('option', { attributes: { value: field }, innerText: field }),
         ),
       );
     });

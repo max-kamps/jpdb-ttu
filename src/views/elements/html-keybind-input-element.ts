@@ -1,5 +1,5 @@
-import { Browser } from '@lib/browser';
-import { View } from '@lib/view';
+import { createElement } from '@lib/dom/create-element';
+import { getStyleUrl } from '@lib/extension/get-style-url';
 
 const observedAttributes = ['value', 'name'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];
@@ -17,7 +17,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
 
   protected _shadow: ShadowRoot;
   protected _input: HTMLInputElement;
-  protected _button: HTMLInputElement = View.getInstance().createElement('input', {
+  protected _button: HTMLInputElement = createElement('input', {
     class: ['outline'],
     attributes: { type: 'button' },
     style: { width: '100%', marginBottom: '0' },
@@ -65,10 +65,10 @@ export class HTMLKeybindInputElement extends HTMLElement {
   protected installStyles() {
     ['styles/theme', 'styles/common', 'views/settings'].forEach((style) => {
       this._shadow.appendChild(
-        View.getInstance().createElement('link', {
+        createElement('link', {
           attributes: {
             rel: 'stylesheet',
-            href: Browser.getInstance().styleUrl(style),
+            href: getStyleUrl(style),
           },
         }),
       );
@@ -76,7 +76,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
   }
 
   protected buildInputElements() {
-    this._input = View.getInstance().createElement('input', {
+    this._input = createElement('input', {
       attributes: {
         type: 'hidden',
         name: this.name,

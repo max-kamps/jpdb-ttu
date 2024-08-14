@@ -1,12 +1,15 @@
-import { Browser } from '@lib/browser';
-import { View } from '@lib/view';
+import { appendElement } from '@lib/dom/append-element';
+import { onLoaded } from '@lib/dom/on-loaded';
+import { getTabs } from '@lib/extension/get-tabs';
+import { openOptionsPage } from '@lib/extension/open-options-page';
+import { sendToTab } from '@lib/extension/send-to-tab';
 
-View.getInstance().onLoaded(async () => {
+onLoaded(async () => {
   document.getElementById('settings-link').addEventListener('click', () => {
-    Browser.getInstance().openOptionsPage();
+    openOptionsPage();
   });
 
-  for (const tab of await Browser.getInstance().getTabs({ currentWindow: true })) {
+  for (const tab of await getTabs({ currentWindow: true })) {
     if (tab.url.startsWith('about://') || tab.url.startsWith('chrome://')) {
       continue;
     }
@@ -15,20 +18,15 @@ View.getInstance().onLoaded(async () => {
     //   continue;
     // }
 
-    View.getInstance().appendElement<'a'>('.container', {
+    appendElement<'a'>('.container', {
       tag: 'a',
       class: ['outline', 'parse'],
       handler: async () => {
-        await Browser.getInstance().sendToTab('parsePage', tab.id);
+        await sendToTab('parsePage', tab.id);
 
         window.close();
       },
       innerText: `Parse "${tab.title ?? 'Untitled'}"`,
     });
   }
-});
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('settings-link').addEventListener('click', () => {
-    Browser.getInstance().openOptionsPage();
-  });
 });

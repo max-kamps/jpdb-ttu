@@ -19,7 +19,7 @@ declare interface BroadcastEvents {
 
 declare interface BackgroundEvents extends BroadcastEvents {}
 
-declare interface TabEvents extends BroadcastEvents {
+declare interface TabEvents {
   parsePage: () => void;
   parseSelection: () => void;
 }

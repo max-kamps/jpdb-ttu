@@ -1,6 +1,5 @@
-import { Broadcaster } from '@lib/broadcaster';
-import { ParseInitiator } from './cls/parse-initiator';
-import { TabComms } from './cls/tab-comms';
+import { ParseInitiator } from './lib/parse-initiator';
+import { onBroadcast } from '@lib/broadcaster/on-broadcast';
 
 export class BackgroundWorker {
   private static _instance: BackgroundWorker;
@@ -13,14 +12,12 @@ export class BackgroundWorker {
     return BackgroundWorker._instance;
   }
 
-  private broadcaster = Broadcaster.getInstance();
-  private tabComms = TabComms.getInstance();
   private _initiator = new ParseInitiator(this);
 
   private constructor() {
     console.log('BackgroundWorker constructor');
 
-    this.broadcaster.on('configuration-updated', () => {
+    onBroadcast('configuration-updated', () => {
       console.log('BackgroundWorker configuration-updated');
     });
   }

@@ -1,6 +1,7 @@
-import { Browser } from '@lib/browser';
 import { BackgroundWorker } from '../background-worker';
-import { TabComms } from './tab-comms';
+import { openNewTab } from '@lib/extension/open-new-tab';
+import { addContextMenu } from '@lib/extension/add-context-menu';
+import { sendToTab } from '@lib/extension/send-to-tab';
 
 export class ParseInitiator {
   constructor(private _worker: BackgroundWorker) {
@@ -8,27 +9,25 @@ export class ParseInitiator {
   }
 
   private installContextMenu(): void {
-    const browser = Browser.getInstance();
-
-    browser.installContextMenu(
+    addContextMenu(
       {
         id: 'parse-selection',
         title: 'Parse selected text',
         contexts: ['selection'],
       },
-      (_, { id: tabId }) => TabComms.getInstance().emit('parseSelection', tabId),
+      (_, { id: tabId }) => sendToTab('parseSelection', tabId),
     );
 
-    browser.installContextMenu(
+    addContextMenu(
       {
         id: 'parse-page',
         title: 'Parse page',
         contexts: ['page'],
       },
-      (_, { id: tabId }) => TabComms.getInstance().emit('parsePage', tabId),
+      (_, { id: tabId }) => sendToTab('parsePage', tabId),
     );
 
-    browser.installContextMenu(
+    addContextMenu(
       {
         id: 'lookup-selection',
         title: 'Lookup selected text',
@@ -38,7 +37,7 @@ export class ParseInitiator {
         const urlEncoded = encodeURIComponent(info.selectionText);
         const url = `https://jpdb.io/search?q=${urlEncoded}&lang=english#a`;
 
-        browser.openNewTab(url);
+        openNewTab(url);
       },
     );
   }

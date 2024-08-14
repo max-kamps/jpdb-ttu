@@ -1,14 +1,17 @@
 import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
-import { Anki } from '@lib/anki';
-import { View } from '@lib/view';
-import { configuration } from '@lib/configuration';
-import { JPDB } from '@lib/jpdb';
-import { Broadcaster } from '@lib/broadcaster';
+import { getApiVersion } from '@lib/anki/get-api-version';
+import { ping } from '@lib/jpdb/ping';
+import { getConfiguration } from '@lib/configuration/get-configuration';
+import { setConfiguration } from '@lib/configuration/set-configuration';
+import { findElement } from '@lib/dom/find-element';
+import { findElements } from '@lib/dom/find-elements';
+import { withElement } from '@lib/dom/with-element';
+import { withElements } from '@lib/dom/with-elements';
+import { displayToast } from '@lib/dom/display-toast';
+import { broadcast } from '@lib/broadcaster/broadcast';
 
 class SettingsController {
-  private _broadcaster = Broadcaster.getInstance();
-  private _view = View.getInstance();
   private _lastSavedConfiguration = new Map<
     keyof ConfigurationSchema,
     ConfigurationSchema[keyof ConfigurationSchema]
@@ -20,7 +23,7 @@ class SettingsController {
   private _localChanges = new Set<keyof ConfigurationSchema>();
   private _invalidFields = new Set<keyof ConfigurationSchema>();
 
-  private _saveButton = this._view.findElement<'button'>('#save-all-settings');
+  private _saveButton = findElement<'button'>('#save-all-settings');
 
   constructor() {
     customElements.define('mining-input', HTMLMiningInputElement);
@@ -63,7 +66,7 @@ class SettingsController {
     getTargetProperty: (type: string) => keyof HTMLInputElement = () => 'value',
   ): Promise<void> {
     await Promise.all(
-      this._view.withElements(selector, async (inputElement: HTMLInputElement) => {
+      withElements(selector, async (inputElement: HTMLInputElement) => {
         const name = inputElement.name as keyof ConfigurationSchema;
 
         if (filter.includes(name) || inputElement.type === 'hidden') {
@@ -72,7 +75,7 @@ class SettingsController {
 
         const targetProperty: keyof HTMLInputElement = getTargetProperty(inputElement.type);
         const value = this._lastSavedConfiguration
-          .set(name, await configuration.get(name, configuration.DEFAULTS[name]))
+          .set(name, await getConfiguration(name, true))
           .get(name) as Exclude<ConfigurationSchema[keyof ConfigurationSchema], Keybind>;
 
         this._currentConfiguration.set(name, value);
@@ -123,17 +126,17 @@ class SettingsController {
       this._saveButton.disabled = true;
 
       for (const key of itemsToSave) {
-        const inputElement = this._view.findElement<'input'>(`[name="${key}"]`);
+        const inputElement = findElement<'input'>(`[name="${key}"]`);
         const value = inputElement.type === 'checkbox' ? inputElement.checked : inputElement.value;
 
-        await configuration.set(key, value);
+        await setConfiguration(key, value);
 
         this._lastSavedConfiguration.set(key, value);
         this._localChanges.delete(key);
       }
 
-      this._view.displayToast('success', 'Settings saved successfully');
-      this._broadcaster.emit('configuration-updated');
+      displayToast('success', 'Settings saved successfully');
+      broadcast('configuration-updated');
     };
   }
 
@@ -158,9 +161,7 @@ class SettingsController {
 
   private _setupAnkiInteraction(): void {
     const maxHeight = Math.max(
-      ...Array.from(this._view.findElements('#anki-endpoints .form-box > div')).map(
-        (e) => e.offsetHeight,
-      ),
+      ...Array.from(findElements('#anki-endpoints .form-box > div')).map((e) => e.offsetHeight),
     );
 
     // this._view.withElement('input[name="enableAnkiIntegration"]', (inputElement: HTMLInputElement) => {
@@ -184,11 +185,11 @@ class SettingsController {
     buttonSelector: string,
     testFunction: () => void,
   ): void {
-    this._view.withElement(inputSelector, (inputElement: HTMLInputElement) => {
+    withElement(inputSelector, (inputElement: HTMLInputElement) => {
       inputElement.addEventListener('change', testFunction);
     });
 
-    this._view.withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
+    withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
       buttonElement.addEventListener('click', testFunction);
     });
   }
@@ -197,7 +198,7 @@ class SettingsController {
     await this._testEndpoint(
       '#apiTokenButton',
       '[name="jpdbApiToken"]',
-      (apiToken) => JPDB.getInstance().ping({ apiToken }),
+      (apiToken) => ping({ apiToken }),
       false,
     );
   }
@@ -206,10 +207,10 @@ class SettingsController {
     await this._testEndpoint(
       '#ankiUrlButton',
       '[name="ankiUrl"]',
-      (ankiConnectUrl) => Anki.getInstance().getApiVersion({ ankiConnectUrl }),
+      (ankiConnectUrl) => getApiVersion({ ankiConnectUrl }),
       false,
       async (ankiConnectUrl: string) => {
-        this._view.withElements('mining-input', (element: HTMLMiningInputElement) => {
+        withElements('mining-input', (element: HTMLMiningInputElement) => {
           element.fetchUrl = ankiConnectUrl;
         });
 
@@ -223,7 +224,7 @@ class SettingsController {
     await this._testEndpoint(
       '#ankiProxyUrlButton',
       '[name="ankiProxyUrl"]',
-      (ankiConnectUrl) => Anki.getInstance().getApiVersion({ ankiConnectUrl }),
+      (ankiConnectUrl) => getApiVersion({ ankiConnectUrl }),
       true,
     );
   }
@@ -236,8 +237,8 @@ class SettingsController {
     afterSuccess?: (value: string) => Promise<void>,
     afterFail?: () => void,
   ): Promise<void> {
-    const button = this._view.findElement<'button'>(buttonSelector);
-    const input = this._view.findElement<'input'>(inputSelector);
+    const button = findElement<'button'>(buttonSelector);
+    const input = findElement<'input'>(inputSelector);
 
     if (allowEmpty && !input.value) {
       button.classList.remove('v1');
@@ -271,7 +272,7 @@ class SettingsController {
   }
 
   private _animateMiningSection(show: boolean): void {
-    const miningElement = this._view.findElement<'div'>('#requires-anki');
+    const miningElement = findElement<'div'>('#requires-anki');
 
     if (show) {
       miningElement.removeAttribute('hidden');
@@ -341,12 +342,12 @@ class SettingsController {
   }
 
   private _setupCollapsibleTriggers(): void {
-    const enablers = this._view.findElements<'input'>('[enables]');
-    const disablers = this._view.findElements<'input'>('[disables]');
+    const enablers = findElements<'input'>('[enables]');
+    const disablers = findElements<'input'>('[disables]');
 
     enablers.forEach((enabler) => {
       enabler.addEventListener('change', () => {
-        const targets = this._view.findElements<'div'>(enabler.getAttribute('enables') as string);
+        const targets = findElements<'div'>(enabler.getAttribute('enables') as string);
 
         targets.forEach((target) => {
           this._collapsible(target, enabler.checked);
@@ -358,7 +359,7 @@ class SettingsController {
 
     disablers.forEach((disabler) => {
       disabler.addEventListener('change', () => {
-        const targets = this._view.findElements<'div'>(disabler.getAttribute('disables') as string);
+        const targets = findElements<'div'>(disabler.getAttribute('disables') as string);
 
         targets.forEach((target) => {
           this._collapsible(target, !disabler.checked);

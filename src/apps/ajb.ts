@@ -1,9 +1,8 @@
-import { Broadcaster } from '@lib/broadcaster';
-import { EventBus } from '../lib/event-bus';
-import { BackgroundComms } from './lib/background-comms';
+import { Integration } from './lib/integration';
 import { KeybindManager } from './lib/keybind-manager';
+import { onBroadcast } from '@lib/broadcaster/on-broadcast';
 
-export class AJB {
+export class AJB extends Integration {
   private static _instance: AJB;
 
   public static get instance(): AJB {
@@ -14,21 +13,18 @@ export class AJB {
     return this._instance;
   }
 
-  private events = EventBus.getInstance<LocalEvents>();
-  private backgroundComms = BackgroundComms.getInstance();
-  private broadcaster = Broadcaster.getInstance();
   private keyBindManager = KeybindManager.getInstance();
 
   private constructor() {
-    this.events.on('parseKey', (e: KeyboardEvent | MouseEvent) => console.log('parsePage', e));
-    this.events.on('lookupSelectionKey', (e: KeyboardEvent | MouseEvent) =>
-      console.log('lookupSelectionKey', e),
-    );
+    super();
 
-    this.broadcaster.on('configuration-updated', () => console.log('configuration-updated'));
+    this.on('parseKey', () => console.log('parsePage'));
+    this.on('lookupSelectionKey', () => console.log('lookupSelectionKey'));
 
-    this.backgroundComms.on('parsePage', () => console.log('parse'));
-    this.backgroundComms.on('parseSelection', () => console.log('parseSelection'));
+    this.listen('parsePage', () => console.log('parsePage'));
+    this.listen('parseSelection', () => console.log('parseSelection'));
+
+    onBroadcast('configuration-updated', () => console.log('configuration-updated'));
   }
 }
 
