@@ -1,10 +1,6 @@
-export const sendToTab = <TEvent extends keyof TabEvents>(
-  event: TEvent,
-  tabId: number,
-  ...args: [...ArgumentsFor<TabEvents[TEvent]>]
-): Promise<ReturnType<TabEvents[TEvent]>> => {
-  return new Promise<ReturnType<TabEvents[TEvent]>>((resolve, reject) => {
-    chrome.tabs.sendMessage(tabId, { event, args }, (response) => {
+function send(event: string, tabId: number, isBroadcast: boolean, ...args: any[]): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    chrome.tabs.sendMessage(tabId, { event, isBroadcast, args }, (response) => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       }
@@ -12,4 +8,16 @@ export const sendToTab = <TEvent extends keyof TabEvents>(
       resolve(response);
     });
   });
-};
+}
+
+export const sendToTab = <TEvent extends keyof TabEvents>(
+  event: TEvent,
+  tabId: number,
+  ...args: [...ArgumentsFor<TabEvents[TEvent]>]
+): Promise<ReturnType<TabEvents[TEvent]>> => send(event, tabId, false, ...args);
+
+export const broadcastToTab = async <TEvent extends keyof BroadcastEvents>(
+  event: TEvent,
+  tabId: number,
+  ...args: [...ArgumentsFor<BroadcastEvents[TEvent]>]
+): Promise<void> => send(event, tabId, true, ...args);
