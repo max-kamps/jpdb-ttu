@@ -7,13 +7,14 @@ const styles = ['toast']; // ['toast', 'word'];
 
 const apps = ['ajb', 'nhk.or.jp', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
-const generate = (array, prefix, target, source = 'ts', targetExt = 'js') =>
+const generate = (array, prefix, target, source = 'ts', targetExt = 'js', dependOn = undefined) =>
   array.reduce(
     (curr, item) =>
       Object.assign(curr, {
         [item]: {
           import: `./src/${prefix}/${item}.${source}`,
           filename: `${target}/${item}.${targetExt}`,
+          dependOn,
         },
       }),
     {},
@@ -45,8 +46,9 @@ module.exports = {
         new HtmlBundlerPlugin({
           entry: {
             'background-worker': './src/background-worker/background-worker.ts',
+            'app-cache': './src/apps/lib/app-cache.ts',
             ...generate(views, 'views', 'views', 'html', 'html'),
-            ...generate(apps, 'apps', 'apps'),
+            ...generate(apps, 'apps', 'apps', 'ts', 'js', 'app-cache'),
             ...generate(styles, 'styles', 'css', 'scss', 'css'),
           },
           js: { outputPath: 'js' },
@@ -89,20 +91,22 @@ module.exports = {
         clean: true,
       },
       optimization: {
-        splitChunks: {
-          cacheGroups: {
-            apps: {
-              test: /[\\/]apps[\\/]lib[\\/].+\.(js|ts)$/,
-              name: 'apps',
-              chunks: 'all',
-            },
-            shared: {
-              test: /[\\/]shared[\\/].+\.(js|ts)$/,
-              name: 'shared',
-              chunks: 'all',
-            },
-          },
-        },
+        // runtimeChunk: 'single',
+        // splitChunks: {
+        //   // chunks: 'all',
+        //   // cacheGroups: {
+        //   //   apps: {
+        //   //     test: /[\\/]apps[\\/]lib[\\/].+\.(js|ts)$/,
+        //   //     name: 'apps',
+        //   //     chunks: 'all',
+        //   //   },
+        //   //   shared: {
+        //   //     test: /[\\/]shared[\\/].+\.(js|ts)$/,
+        //   //     name: 'shared',
+        //   //     chunks: 'all',
+        //   //   },
+        //   // },
+        // },
       },
     };
   },
