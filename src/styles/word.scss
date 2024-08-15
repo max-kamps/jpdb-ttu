@@ -1,0 +1,34 @@
+/* first inherit all colors */
+.jpdb-word {
+  color: inherit;
+}
+
+/* Hide Furigana, make hoverable. Two selectors as some sites do own ruby nesting */
+ruby:not(:hover).jpdb-word:is(.never-forget, .known, .redundant) .jpdb-furi,
+ruby:not(:hover):has(.jpdb-word:is(.never-forget, .known, .redundant)) rt {
+  display: none;
+}
+
+/* everything known, currently learning is orange */
+.jpdb-word:is(.learning, .buried, .due, .failed) {
+  color: orange;
+}
+
+/* new cards are blue, so we see them */
+.jpdb-word:is(.new, .locked) {
+  color: #4b8dff;
+}
+
+/* suspended or blacklisted words should appear accordingly */
+.jpdb-word:is(.blacklisted, .suspended) {
+  color: #777;
+  opacity: 0.8;
+}
+
+.jpdb-word:is(.leeched) {
+  border-bottom: 1px solid #ff0000;
+}
+
+.jpdb-word:is(.not-in-deck) {
+  border-bottom: 1px solid;
+}

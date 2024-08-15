@@ -3,7 +3,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 const views = ['settings', 'popup'];
-const styles = ['toast']; // ['toast', 'word'];
+const styles = ['toast', 'word'];
 
 const apps = ['ajb', 'nhk.or.jp', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
@@ -87,24 +87,6 @@ module.exports = {
       output: {
         path: path.resolve(__dirname, 'anki-jpdb.reader'),
         clean: true,
-      },
-      optimization: {
-        // runtimeChunk: 'single',
-        // splitChunks: {
-        //   // chunks: 'all',
-        //   // cacheGroups: {
-        //   //   apps: {
-        //   //     test: /[\\/]apps[\\/]lib[\\/].+\.(js|ts)$/,
-        //   //     name: 'apps',
-        //   //     chunks: 'all',
-        //   //   },
-        //   //   shared: {
-        //   //     test: /[\\/]shared[\\/].+\.(js|ts)$/,
-        //   //     name: 'shared',
-        //   //     chunks: 'all',
-        //   //   },
-        //   // },
-        // },
       },
     };
   },
