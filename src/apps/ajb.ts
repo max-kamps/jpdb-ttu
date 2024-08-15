@@ -1,50 +1,61 @@
 import { isDisabled } from '@shared/host/is-disabled';
 import { Integration } from './lib/integration';
 import { KeybindManager } from './lib/keybind-manager';
-import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 import { getHostMeta } from '@shared/host/get-host-meta';
-import { get } from 'http';
 import { displayToast } from '@shared/dom/display-toast';
+import { HostEvaluator } from './lib/host-evaluator';
+import { TriggerParser } from './lib/parser/trigger-parser';
+import { AutomaticParser } from './lib/parser/automatic-parser';
 
 export class AJB extends Integration {
-  private baseKeyManager = new KeybindManager(['parseKey', 'lookupSelectionKey'], {
-    closeAllDialogs: { key: '', code: 'Escape', modifiers: [] },
-  });
+  private _lookupKeyManager = new KeybindManager(['lookupSelectionKey']);
+
+  private _hostEvaluator = new HostEvaluator(window.location.href);
 
   constructor() {
     super();
 
-    this.setup();
+    // The user can always lookup selected text per shortcut. Also, a toaster is always available.
+    this.installDefaultListeners();
+
+    // Evaluate host for valid events and behaviors
+    this.evaluateHost();
   }
 
-  private async setup(): Promise<void> {
-    const hostMeta = await getHostMeta(window.location.href);
+  private async evaluateHost(): Promise<void> {
+    await this._hostEvaluator.load();
 
-    if (await isDisabled(window.location.href)) {
-      return;
+    if (!this._hostEvaluator.canBeTriggered) {
+      this.installRejectionTriggers();
     }
 
-    this.installEvents();
-    this.baseKeyManager.activate();
-
-    if (hostMeta?.parse) {
-      this.setParseBehavior(hostMeta.parse);
-    }
+    this.installParsers();
   }
 
-  private installEvents(): void {
+  private installDefaultListeners(): void {
+    this._lookupKeyManager.activate();
     this.on('lookupSelectionKey', () => this.lookupText(window.getSelection()?.toString()));
-    this.on('parseKey', () => {
-      if (window.getSelection()?.toString()) {
-        return this.parseSelection();
+
+    this.listen('toast', displayToast);
+  }
+
+  private installRejectionTriggers(): void {
+    const reject = () => displayToast('error', 'This page has been disabled for manual parsing.');
+
+    this.listen('parsePage', reject);
+    this.listen('parseSelection', reject);
+  }
+
+  private installParsers(): void {
+    for (const meta of this._hostEvaluator.relevantMeta) {
+      if (!meta.auto) {
+        this.installParser(meta, TriggerParser);
+
+        continue;
       }
 
-      this.parsePage();
-    });
-
-    this.listen('parsePage', () => this.parsePage());
-    this.listen('parseSelection', () => this.parseSelection());
-    this.listen('toast', displayToast);
+      this.installParser(meta, AutomaticParser);
+    }
   }
 }
 

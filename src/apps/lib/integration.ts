@@ -1,27 +1,10 @@
-import { displayToast } from '@shared/dom/display-toast';
 import { IntegrationScript } from './integration-script';
-import { AppCache } from './app-cache';
+import { BaseParser } from './parser/base-parser';
 
 export abstract class Integration extends IntegrationScript {
-  protected setParseBehavior(behavior: string | HTMLElement | Document): void {
-    AppCache.instance.parseBehavior = behavior;
-  }
+  protected parsers: BaseParser[] = [];
 
-  protected parsePage(): void {
-    this.parseElement(AppCache.instance.parseBehavior as string);
-  }
-
-  protected parseSelection(): void {}
-
-  protected parseElement(element: string | HTMLElement | Document): void {
-    if (typeof element === 'string') {
-      element = document.querySelector<HTMLElement>(element);
-    }
-
-    if (!element) {
-      displayToast('error', 'No element to parse!');
-
-      return;
-    }
+  protected installParser(meta: HostMeta, parser: new (meta: HostMeta) => BaseParser): void {
+    this.parsers.push(new parser(meta));
   }
 }

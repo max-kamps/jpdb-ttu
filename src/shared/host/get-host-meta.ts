@@ -1,14 +1,23 @@
 import { getURL } from '@shared/extension/get-url';
 
-type HostMeta = {
-  host: string | string[];
-  disabled?: boolean;
-  parse?: string;
-};
-
 let hostsMeta: HostMeta[];
 
-export const getHostMeta = async (host: string): Promise<HostMeta | undefined> => {
+export function getHostMeta(
+  host: string,
+  filter?: (meta: HostMeta) => boolean,
+  multiple?: false,
+): Promise<HostMeta | undefined>;
+export function getHostMeta(
+  host: string,
+  filter: (meta: HostMeta) => boolean,
+  multiple: true,
+): Promise<HostMeta[]>;
+
+export async function getHostMeta(
+  host: string,
+  filter: (meta: HostMeta) => boolean = () => true,
+  multiple?: boolean,
+): Promise<HostMeta[] | HostMeta | undefined> {
   if (!hostsMeta) {
     const fetchData = await fetch(getURL('hosts.json'));
     const jsonData = await fetchData.json();
@@ -16,8 +25,10 @@ export const getHostMeta = async (host: string): Promise<HostMeta | undefined> =
     hostsMeta = jsonData;
   }
 
-  return hostsMeta.find((meta) => {
+  const filterFn = (meta: HostMeta) => {
     const matchUrl = (matchPattern: string): boolean => {
+      if (matchPattern === '<all_urls>') return true;
+
       const [patternSchema, patternUrl] = matchPattern.split('://', 2);
       const [patternHost, patternPath] = patternUrl.split(/\/(.*)/, 2);
       const [hostSchema, hostUrl] = host.split('://', 2);
@@ -36,5 +47,9 @@ export const getHostMeta = async (host: string): Promise<HostMeta | undefined> =
     };
 
     return Array.isArray(meta.host) ? meta.host.some(matchUrl) : matchUrl(meta.host);
-  });
-};
+  };
+
+  const checkHosts = hostsMeta.filter(filterFn);
+
+  return multiple ? checkHosts.filter(filter) : checkHosts.find(filter);
+}

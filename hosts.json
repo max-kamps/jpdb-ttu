@@ -1,10 +1,92 @@
 [
   {
+    "host": "*://*.crunchyroll.com/*",
+    "auto": false,
+    "disabled": true
+  },
+  {
     "host": "*://*.nhk.or.jp/*",
+    "auto": false,
     "parse": "article"
   },
   {
-    "host": "*://*.crunchyroll.com/*",
-    "disabled": true
+    "host": "<all_urls>",
+    "auto": false,
+    "parse": "body"
+  },
+  {
+    "host": [
+      "*://anacreondjt.gitlab.io/texthooker.html",
+      "*://learnjapanese.moe/texthooker.html",
+      "*://kamwithk.github.io/exSTATic/tracker.html",
+      "*://renji-xd.github.io/texthooker-ui/"
+    ],
+    "auto": true,
+    "visibleObserver": true,
+    "addedObserver": {
+      "selector": ".textline, .line_box, .sentence-entry, .my-2.cursor-pointer",
+      "initWith": "#textlog, #entry_holder, main",
+      "fallback": "body",
+      "config": {
+        "childList": true,
+        "subtree": true
+      }
+    }
+  },
+  {
+    "host": "*://app.readwok.com/*",
+    "auto": true,
+    "visibleObserver": true,
+    "addedObserver": {
+      "selector": "div[class*=\"styles_text_\"]",
+      "initWith": "body",
+      "config": {
+        "childList": true,
+        "subtree": true
+      }
+    }
+  },
+  {
+    "host": ["*://reader.ttsu.app/*", "*://ttu-ebook.web.app/*"],
+    "auto": true,
+    "visibleObserver": {
+      "exclude": "[data-ttu-spoiler-img]"
+    },
+    "addedObserver": {
+      "selector": ".ttu-sentence",
+      "initWith": "body",
+      "config": {
+        "childList": true,
+        "subtree": true
+      }
+    }
+  },
+  {
+    "host": ["*://ja.wikipedia.org/*", "*://ja.m.wikipedia.org/*"],
+    "auto": true,
+    "visibleObserver": {
+      "exclude": ".p-lang-btn, .vector-menu-heading-label, .vector-toc-toggle, .vector-page-toolbar, .mw-editsection, sup.reference"
+    },
+    "addedObserver": {
+      "selector": "#firstHeading, #mw-content-text .mw-parser-output > *, .mwe-popups-extract > *",
+      "initWith": "body",
+      "config": {
+        "childList": true,
+        "subtree": true
+      }
+    }
+  },
+  {
+    "host": "<all_urls>",
+    "auto": true,
+    "css": ".asbplayer-subtitles-container-bottom { z-index: 2147483646 }",
+    "addedObserver": {
+      "selector": ".book-content p, .book-content div.calibre1",
+      "initWith": "body",
+      "config": {
+        "childList": true,
+        "subtree": true
+      }
+    }
   }
 ]
