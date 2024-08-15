@@ -7,14 +7,13 @@ const styles = ['toast']; // ['toast', 'word'];
 
 const apps = ['ajb', 'nhk.or.jp', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
-const generate = (array, prefix, target, source = 'ts', targetExt = 'js', dependOn = undefined) =>
+const generate = (array, prefix, target, source = 'ts', targetExt = 'js') =>
   array.reduce(
     (curr, item) =>
       Object.assign(curr, {
         [item]: {
           import: `./src/${prefix}/${item}.${source}`,
           filename: `${target}/${item}.${targetExt}`,
-          dependOn,
         },
       }),
     {},
@@ -46,9 +45,8 @@ module.exports = {
         new HtmlBundlerPlugin({
           entry: {
             'background-worker': './src/background-worker/background-worker.ts',
-            'app-cache': './src/apps/lib/app-cache.ts',
             ...generate(views, 'views', 'views', 'html', 'html'),
-            ...generate(apps, 'apps', 'apps', 'ts', 'js', 'app-cache'),
+            ...generate(apps, 'apps', 'apps', 'ts', 'js'),
             ...generate(styles, 'styles', 'css', 'scss', 'css'),
           },
           js: { outputPath: 'js' },
