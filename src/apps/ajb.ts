@@ -4,6 +4,7 @@ import { KeybindManager } from './lib/keybind-manager';
 import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 import { getHostMeta } from '@shared/host/get-host-meta';
 import { get } from 'http';
+import { displayToast } from '@shared/dom/display-toast';
 
 export class AJB extends Integration {
   private baseKeyManager = new KeybindManager(['parseKey', 'lookupSelectionKey'], {
@@ -33,7 +34,6 @@ export class AJB extends Integration {
 
   private installEvents(): void {
     this.on('lookupSelectionKey', () => this.lookupText(window.getSelection()?.toString()));
-
     this.on('parseKey', () => {
       if (window.getSelection()?.toString()) {
         return this.parseSelection();
@@ -44,6 +44,7 @@ export class AJB extends Integration {
 
     this.listen('parsePage', () => this.parsePage());
     this.listen('parseSelection', () => this.parseSelection());
+    this.listen('toast', displayToast);
   }
 }
 

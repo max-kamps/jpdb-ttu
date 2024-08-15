@@ -36,7 +36,6 @@ export class AppCache {
     return this.get('parseBehavior') || document;
   }
   public set parseBehavior(value: string | HTMLElement | Document) {
-    console.log('Setting parseBehavior', value);
     this.set('parseBehavior', value);
   }
 
