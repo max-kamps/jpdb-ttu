@@ -7,7 +7,6 @@ export abstract class BaseParser extends IntegrationScript {
   constructor(protected _meta: HostMeta) {
     super();
 
-    console.log('Base parser constructor...', _meta);
     this.setup();
   }
 
@@ -32,13 +31,9 @@ export abstract class BaseParser extends IntegrationScript {
     nodes: (Node | Element)[],
     filter?: (node: Node | Element) => boolean,
   ): void {
-    // console.log('Parsing nodes...', nodes, filter);
-
     nodes.forEach((node) => {
       this.pendingBatches.set(node as Element, {
-        abort: () => {
-          // console.log('Aborting...');
-        },
+        abort: () => {},
       });
     });
   }
@@ -52,11 +47,8 @@ export abstract class BaseParser extends IntegrationScript {
     const observeTargets = Array.isArray(observeFrom) ? observeFrom : [observeFrom];
     let root: HTMLElement;
 
-    // console.log('Getting added observer...', observeTargets, notifyFor, config);
     while (observeTargets.length && !root) {
-      // console.log('Getting root...', observeTargets[0]);
       root = document.querySelector(observeTargets.shift());
-      // console.log('Root...', root);
     }
 
     const initialNodes = Array.from(root.querySelectorAll(notifyFor)) as HTMLElement[];
@@ -116,14 +108,11 @@ export abstract class BaseParser extends IntegrationScript {
   protected getParseVisibleObserver(
     filter: (node: HTMLElement | Text) => boolean = () => true,
   ): IntersectionObserver {
-    // console.log('Getting visible parser...');
     return this.getVisibleObserver(
       (elements) => {
-        // console.log('Entering...', elements);
         this.parseNodes(elements, filter);
       },
       (elements) => {
-        // console.log('Exiting...', elements);
         elements.forEach((element) => {
           const batch = this.pendingBatches.get(element);
 
