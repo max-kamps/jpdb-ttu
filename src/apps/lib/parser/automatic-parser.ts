@@ -1,10 +1,61 @@
 import { BaseParser } from './base-parser';
 
 export class AutomaticParser extends BaseParser {
+  protected _visibleObserver: IntersectionObserver | undefined;
+  protected _addedObserver: MutationObserver | undefined;
+
   protected setup(): void {
-    console.log('Automatic parser setup...');
+    if (this._meta.parseVisibleObserver) {
+      this.setupVisibleObserver();
+    }
+
+    if (this._meta.addedObserver) {
+      this.setupAddedObserver();
+    }
+
+    if (this._meta.parse) {
+      this.root = document.querySelector<HTMLElement>(this._meta.parse);
+
+      this.parsePage();
+    }
   }
-  // public parse(): void {
-  //   console.log('Parsing automatic...');
-  // }
+
+  protected setupVisibleObserver(): void {
+    let filter: (node: HTMLElement | Text) => boolean;
+
+    if (typeof this._meta.parseVisibleObserver === 'object') {
+      const { include, exclude } = this._meta.parseVisibleObserver;
+
+      filter = (node) => {
+        if (node instanceof Text) {
+          return true;
+        }
+
+        if (include && !node.matches(include)) {
+          return false;
+        }
+
+        if (exclude && node.matches(exclude)) {
+          return false;
+        }
+
+        return true;
+      };
+    }
+
+    this._visibleObserver = this.getParseVisibleObserver(filter);
+  }
+
+  protected setupAddedObserver(): void {
+    const callback = this._visibleObserver
+      ? (nodes: HTMLElement[]) => nodes.forEach((node) => this._visibleObserver!.observe(node))
+      : console.log;
+
+    this._addedObserver = this.getAddedObserver(
+      this._meta.addedObserver!.observeFrom,
+      this._meta.addedObserver!.notifyFor,
+      this._meta.addedObserver!.config,
+      callback,
+    );
+  }
 }

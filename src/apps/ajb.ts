@@ -9,7 +9,6 @@ import { AutomaticParser } from './lib/parser/automatic-parser';
 
 export class AJB extends Integration {
   private _lookupKeyManager = new KeybindManager(['lookupSelectionKey']);
-
   private _hostEvaluator = new HostEvaluator(window.location.href);
 
   constructor() {
@@ -40,7 +39,15 @@ export class AJB extends Integration {
   }
 
   private installRejectionTriggers(): void {
-    const reject = () => displayToast('error', 'This page has been disabled for manual parsing.');
+    // We only reject inputs on the main frame, as we only expect parsing on the main frame as well.
+    if (!this.isMainFrame) {
+      return;
+    }
+
+    console.log('Installing rejection triggers...');
+    const reject = () => {
+      displayToast('error', 'This page has been disabled for manual parsing.');
+    };
 
     this.listen('parsePage', reject);
     this.listen('parseSelection', reject);
@@ -49,7 +56,9 @@ export class AJB extends Integration {
   private installParsers(): void {
     for (const meta of this._hostEvaluator.relevantMeta) {
       if (!meta.auto) {
-        this.installParser(meta, TriggerParser);
+        if (!meta.disabled) {
+          this.installParser(meta, TriggerParser);
+        }
 
         continue;
       }

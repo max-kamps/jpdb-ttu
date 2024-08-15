@@ -12,6 +12,8 @@ onMessage<keyof TabEvents>((event, _, ...args) => {
 });
 
 export abstract class IntegrationScript {
+  protected isMainFrame = window === window.top;
+
   protected on<TEvent extends keyof LocalEvents>(
     event: TEvent,
     listener: LocalEvents[TEvent],

@@ -1,10 +1,12 @@
 import { getHostMeta } from '@shared/host/get-host-meta';
 
 export class HostEvaluator {
-  private _targetedTriggerMeta: HostMeta;
+  private _isMainFrame = window === window.top;
+
+  private _targetedTriggerMeta: HostMeta | undefined;
   private _targetedAutomaticMeta: HostMeta[];
 
-  private _defaultTriggerMeta: HostMeta;
+  private _defaultTriggerMeta: HostMeta | undefined;
   private _defaultAutomaticMeta: HostMeta[];
 
   public get relevantMeta(): HostMeta[] {
@@ -18,17 +20,13 @@ export class HostEvaluator {
       result.push(...this._targetedAutomaticMeta);
     }
 
-    if (!result.length) {
+    if (!result.length && this._defaultTriggerMeta) {
       result.push(this._defaultTriggerMeta);
     }
 
     result.push(...this._defaultAutomaticMeta);
 
     return result;
-  }
-
-  public get triggerMeta(): HostMeta {
-    return this._targetedTriggerMeta || this._defaultTriggerMeta;
   }
 
   constructor(private _host: string) {}
@@ -38,27 +36,31 @@ export class HostEvaluator {
       return false;
     }
 
-    return true;
+    return !!this.relevantMeta.length;
   }
 
   public async load(): Promise<void> {
     this._targetedTriggerMeta = await getHostMeta(
       this._host,
-      ({ auto, host }) => !auto && host !== '<all_urls>',
+      ({ auto, host, allFrames }) =>
+        !auto && host !== '<all_urls>' && (allFrames || this._isMainFrame),
     );
     this._targetedAutomaticMeta = await getHostMeta(
       this._host,
-      ({ auto, host }) => auto && host !== '<all_urls>',
+      ({ auto, host, allFrames }) =>
+        auto && host !== '<all_urls>' && (allFrames || this._isMainFrame),
       true,
     );
 
     this._defaultTriggerMeta = await getHostMeta(
       this._host,
-      ({ auto, host }) => auto === false && host === '<all_urls>',
+      ({ auto, host, allFrames }) =>
+        auto === false && host === '<all_urls>' && (allFrames || this._isMainFrame),
     );
     this._defaultAutomaticMeta = await getHostMeta(
       this._host,
-      ({ auto, host }) => auto && host === '<all_urls>',
+      ({ auto, host, allFrames }) =>
+        auto && host === '<all_urls>' && (allFrames || this._isMainFrame),
       true,
     );
   }

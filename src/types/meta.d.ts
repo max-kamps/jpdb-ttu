@@ -6,18 +6,18 @@ declare type VisibleObserverOptions =
     };
 
 declare type AddedObserverOptions = {
-  selector: string;
-  initWith: string;
-  fallback?: string;
-  config?: MutationObserverInit;
+  notifyFor: string;
+  observeFrom: string | string[];
+  config: MutationObserverInit;
 };
 
 declare type HostMeta = {
   host: string | string[];
   auto: boolean;
+  allFrames: boolean;
   disabled?: boolean;
   parse?: string;
   css?: string;
-  visibleObserver?: VisibleObserverOptions;
+  parseVisibleObserver?: VisibleObserverOptions;
   addedObserver?: AddedObserverOptions;
 };

@@ -6,11 +6,7 @@ export class TriggerParser extends BaseParser {
   protected _parseKeyManager: KeybindManager;
 
   protected setup(): void {
-    this._parseKeyManager = new KeybindManager(
-      ['parseKey'] /*, {
-      closeAllDialogs: { key: '', code: 'Escape', modifiers: [] },
-    } */,
-    );
+    this._parseKeyManager = new KeybindManager(['parseKey']);
     this._parseKeyManager.activate();
 
     if (this._meta.parse) {
@@ -27,20 +23,5 @@ export class TriggerParser extends BaseParser {
 
     this.listen('parsePage', () => this.parsePage());
     this.listen('parseSelection', () => this.parseSelection());
-  }
-
-  protected parseSelection(): void {
-    const selection = window.getSelection()!;
-    const range = selection.getRangeAt(0);
-
-    this.parseNode(range.commonAncestorContainer, (node) => range.intersectsNode(node));
-  }
-
-  protected parsePage(): void {
-    this.parseNode(this.root);
-  }
-
-  private parseNode(node: Node | Element, filter?: (node: Node | Element) => boolean): void {
-    console.log('Parsing node...', node, filter);
   }
 }
