@@ -1,0 +1,10 @@
+[
+  {
+    "host": "*://*.nhk.or.jp/*",
+    "parse": "article"
+  },
+  {
+    "host": "*://*.crunchyroll.com/*",
+    "disabled": true
+  }
+]

@@ -5,7 +5,7 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const views = ['settings', 'popup'];
 const styles = ['toast', 'word'];
 
-const apps = ['ajb', 'nhk.or.jp', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
+const apps = ['ajb', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
 const generate = (array, prefix, target, source = 'ts', targetExt = 'js') =>
   array.reduce(
@@ -24,7 +24,7 @@ module.exports = {
     return {
       mode: env,
       resolve: {
-        extensions: ['.tsx', '.ts', '.js'],
+        extensions: ['.tsx', '.ts', '.js', '.json'],
         extensionAlias: {
           '.ts': ['.js', '.ts'],
           '.cts': ['.cjs', '.cts'],
@@ -40,6 +40,7 @@ module.exports = {
           patterns: [
             { from: 'assets', to: 'assets' },
             { from: 'manifest.json', to: 'manifest.json' },
+            { from: 'hosts.json', to: 'hosts.json' },
           ],
         }),
         new HtmlBundlerPlugin({

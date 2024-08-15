@@ -8,7 +8,10 @@ export class KeybindManager extends IntegrationScript {
   /** Reference which can be added or removed as event listener */
   private _listener = this.handleKeydown.bind(this);
 
-  constructor(private _events: FilterKeys<ConfigurationSchema, Keybind>[]) {
+  constructor(
+    private _events: FilterKeys<ConfigurationSchema, Keybind>[],
+    private _extraListeners: Partial<Record<keyof LocalEvents, Keybind>> = {},
+  ) {
     super();
 
     this.setup();
@@ -31,7 +34,6 @@ export class KeybindManager extends IntegrationScript {
   //   'showPopupKey',
   // ];
   public activate(): void {
-    console.log('activate');
     window.addEventListener('keydown', this._listener);
     window.addEventListener('mousedown', this._listener);
   }
@@ -68,10 +70,16 @@ export class KeybindManager extends IntegrationScript {
       return;
     }
 
-    const keybind = Object.keys(this._keyMap).find(
+    let keybind = Object.keys(this._keyMap).find(
       (keybind: FilterKeys<ConfigurationSchema, Keybind>) =>
         this.checkKeybind(this._keyMap[keybind], e),
     );
+
+    if (!keybind) {
+      keybind = Object.keys(this._extraListeners).find((key: keyof LocalEvents) =>
+        this.checkKeybind(this._extraListeners[key], e),
+      );
+    }
 
     if (keybind) {
       e.preventDefault();
