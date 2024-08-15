@@ -5,13 +5,19 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const views = ['settings', 'popup'];
 const styles = ['toast']; // ['toast', 'word'];
 
-const foregroundApps = ['ajb']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
+const apps = ['ajb', 'nhk.or.jp', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
-const fromArray = (array, prefix, source = 'ts', target = 'js') =>
-  array.map((item) => ({
-    import: `./src/${prefix}/${item}.${source}`,
-    filename: `${prefix}/${item}.${target}`,
-  }));
+const generate = (array, prefix, target, source = 'ts', targetExt = 'js') =>
+  array.reduce(
+    (curr, item) =>
+      Object.assign(curr, {
+        [item]: {
+          import: `./src/${prefix}/${item}.${source}`,
+          filename: `${target}/${item}.${targetExt}`,
+        },
+      }),
+    {},
+  );
 
 module.exports = {
   async config(env) {
@@ -25,7 +31,7 @@ module.exports = {
           '.mts': ['.mjs', '.mts'],
         },
         alias: {
-          '@lib': path.resolve(__dirname, 'src/lib'),
+          '@shared': path.resolve(__dirname, 'src/shared'),
           '@styles': path.resolve(__dirname, 'src/styles'),
         },
       },
@@ -37,38 +43,14 @@ module.exports = {
           ],
         }),
         new HtmlBundlerPlugin({
-          entry: [
-            // service-worker
-            {
-              filename: 'background-worker/background-worker.js',
-              import: './src/background-worker/background-worker.ts',
-            },
-            ...fromArray(views, 'views', 'html', 'html'),
-            ...fromArray(styles, 'styles', 'scss', 'css'),
-
-            // foreground (everything that is not a background script)
-            ...fromArray(foregroundApps, 'apps'),
-          ],
-          js: {
-            filename: (source) => {
-              const root = path.relative(
-                path.join(__dirname, 'src'),
-                path.dirname(source.filename),
-              );
-
-              return path.join(root, '[name].js');
-            },
+          entry: {
+            'background-worker': './src/background-worker/background-worker.ts',
+            ...generate(views, 'views', 'views', 'html', 'html'),
+            ...generate(apps, 'apps', 'apps'),
+            ...generate(styles, 'styles', 'css', 'scss', 'css'),
           },
-          css: {
-            filename: (source) => {
-              const root = path.relative(
-                path.join(__dirname, 'src'),
-                path.dirname(source.filename),
-              );
-
-              return path.join(root, '[name].css');
-            },
-          },
+          js: { outputPath: 'js' },
+          css: { outputPath: 'css' },
         }),
       ],
       module: {
@@ -105,6 +87,22 @@ module.exports = {
       output: {
         path: path.resolve(__dirname, 'anki-jpdb.reader'),
         clean: true,
+      },
+      optimization: {
+        splitChunks: {
+          cacheGroups: {
+            apps: {
+              test: /[\\/]apps[\\/]lib[\\/].+\.(js|ts)$/,
+              name: 'apps',
+              chunks: 'all',
+            },
+            shared: {
+              test: /[\\/]shared[\\/].+\.(js|ts)$/,
+              name: 'shared',
+              chunks: 'all',
+            },
+          },
+        },
       },
     };
   },

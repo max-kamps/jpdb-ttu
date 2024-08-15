@@ -1,4 +1,4 @@
-import { onBroadcast } from '@lib/broadcaster/on-broadcast';
+import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 import { installParseInitiator } from './lib/install-parse-initiator';
 import { installLookupController } from './lib/install-lookup-controller';
 

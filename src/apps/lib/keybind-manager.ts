@@ -1,75 +1,73 @@
-import { getConfiguration } from '@lib/configuration/get-configuration';
-import { onBroadcast } from '@lib/broadcaster/on-broadcast';
+import { getConfiguration } from '@shared/configuration/get-configuration';
+import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 import { IntegrationScript } from './integration-script';
 
 export class KeybindManager extends IntegrationScript {
-  //#region Singleton
-  private static _instance: KeybindManager;
-  public static getInstance(): KeybindManager {
-    if (!KeybindManager._instance) {
-      KeybindManager._instance = new KeybindManager();
-    }
+  /** Map of configured keybinds */
+  private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
+  /** Reference which can be added or removed as event listener */
+  private _listener = this.handleKeydown.bind(this);
 
-    return KeybindManager._instance;
-  }
-
-  private constructor() {
+  constructor(private _events: FilterKeys<ConfigurationSchema, Keybind>[]) {
     super();
 
     this.setup();
   }
-  //#endregion
 
-  private _events: FilterKeys<ConfigurationSchema, Keybind>[] = [
-    'jpdbReviewNothing',
-    'jpdbReviewSomething',
-    'jpdbReviewHard',
-    'jpdbReviewGood',
-    'jpdbReviewEasy',
-    'jpdbReviewFail',
-    'jpdbReviewPass',
-    'showAdvancedDialogKey',
-    'lookupSelectionKey',
-    'addToMiningKey',
-    'addToBlacklistKey',
-    'addToNeverForgetKey',
-    'parseKey',
-    'showPopupKey',
-  ];
+  // private _events: FilterKeys<ConfigurationSchema, Keybind>[] = [
+  //   'jpdbReviewNothing',
+  //   'jpdbReviewSomething',
+  //   'jpdbReviewHard',
+  //   'jpdbReviewGood',
+  //   'jpdbReviewEasy',
+  //   'jpdbReviewFail',
+  //   'jpdbReviewPass',
+  //   'showAdvancedDialogKey',
+  //   'lookupSelectionKey',
+  //   'addToMiningKey',
+  //   'addToBlacklistKey',
+  //   'addToNeverForgetKey',
+  //   'parseKey',
+  //   'showPopupKey',
+  // ];
+  public activate(): void {
+    console.log('activate');
+    window.addEventListener('keydown', this._listener);
+    window.addEventListener('mousedown', this._listener);
+  }
 
-  private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
+  public deactivate(): void {
+    window.removeEventListener('keydown', this._listener);
+    window.removeEventListener('mousedown', this._listener);
+  }
 
   private async setup(): Promise<void> {
     onBroadcast('configurationUpdated', () => this.buildKeyMap());
 
     await this.buildKeyMap();
-    this.installGlobalListeners();
   }
 
   private async buildKeyMap(): Promise<void> {
-    const isAnkiEnabled = await getConfiguration('enableAnkiIntegration', true);
-    const keys = isAnkiEnabled
-      ? this._events.filter((event) => !event.startsWith('jpdb'))
-      : this._events;
-
     this._keyMap = {};
 
-    for (const key of keys) {
+    for (const key of this._events) {
       const value = await getConfiguration(key, true);
 
       if (value.code) {
-        console.log(key, value);
         this._keyMap[key] = value;
       }
     }
   }
 
-  private installGlobalListeners(): void {
-    window.addEventListener('keydown', (e) => this.handleKeydown(e));
-    window.addEventListener('mousedown', (e) => this.handleKeydown(e));
-  }
-
   private handleKeydown(e: KeyboardEvent | MouseEvent): void {
+    if (
+      document.activeElement?.tagName === 'INPUT' ||
+      document.activeElement?.tagName === 'TEXTAREA'
+    ) {
+      // Ignore events on input elements! Otherwise we may interfere with typing.
+      return;
+    }
+
     const keybind = Object.keys(this._keyMap).find(
       (keybind: FilterKeys<ConfigurationSchema, Keybind>) =>
         this.checkKeybind(this._keyMap[keybind], e),

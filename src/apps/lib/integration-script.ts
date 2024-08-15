@@ -1,5 +1,6 @@
-import { onMessage } from '@lib/extension/on-message';
-import { sendToBackground } from '@lib/extension/send-to-background';
+import { displayToast } from '@shared/dom/display-toast';
+import { onMessage } from '@shared/extension/on-message';
+import { sendToBackground } from '@shared/extension/send-to-background';
 
 const remoteListeners: Partial<Record<keyof TabEvents, Function[]>> = {};
 
@@ -49,7 +50,7 @@ export abstract class IntegrationScript {
 
   protected lookupText(text: string): void {
     if (!text?.length) {
-      console.error('No text to lookup!');
+      displayToast('error', 'No text to lookup!');
 
       return;
     }

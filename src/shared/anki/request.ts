@@ -1,4 +1,4 @@
-import { getConfiguration } from '@lib/configuration/get-configuration';
+import { getConfiguration } from '@shared/configuration/get-configuration';
 
 export type AnkiRequestOptions = {
   ankiConnectUrl?: string;

@@ -1,8 +1,8 @@
-import { appendElement } from '@lib/dom/append-element';
-import { onLoaded } from '@lib/dom/on-loaded';
-import { getTabs } from '@lib/extension/get-tabs';
-import { openOptionsPage } from '@lib/extension/open-options-page';
-import { sendToTab } from '@lib/extension/send-to-tab';
+import { appendElement } from '@shared/dom/append-element';
+import { onLoaded } from '@shared/dom/on-loaded';
+import { getTabs } from '@shared/extension/get-tabs';
+import { openOptionsPage } from '@shared/extension/open-options-page';
+import { sendToTab } from '@shared/extension/send-to-tab';
 
 onLoaded(async () => {
   document.getElementById('settings-link').addEventListener('click', () => {

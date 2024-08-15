@@ -1,5 +1,5 @@
-import { createElement } from '@lib/dom/create-element';
-import { getStyleUrl } from '@lib/extension/get-style-url';
+import { createElement } from '@shared/dom/create-element';
+import { getStyleUrl } from '@shared/extension/get-style-url';
 
 const observedAttributes = ['value', 'name'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];

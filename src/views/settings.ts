@@ -1,15 +1,15 @@
 import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
-import { getApiVersion } from '@lib/anki/get-api-version';
-import { ping } from '@lib/jpdb/ping';
-import { getConfiguration } from '@lib/configuration/get-configuration';
-import { setConfiguration } from '@lib/configuration/set-configuration';
-import { findElement } from '@lib/dom/find-element';
-import { findElements } from '@lib/dom/find-elements';
-import { withElement } from '@lib/dom/with-element';
-import { withElements } from '@lib/dom/with-elements';
-import { displayToast } from '@lib/dom/display-toast';
-import { broadcast } from '@lib/broadcaster/broadcast';
+import { getApiVersion } from '@shared/anki/get-api-version';
+import { ping } from '@shared/jpdb/ping';
+import { getConfiguration } from '@shared/configuration/get-configuration';
+import { setConfiguration } from '@shared/configuration/set-configuration';
+import { findElement } from '@shared/dom/find-element';
+import { findElements } from '@shared/dom/find-elements';
+import { withElement } from '@shared/dom/with-element';
+import { withElements } from '@shared/dom/with-elements';
+import { displayToast } from '@shared/dom/display-toast';
+import { broadcast } from '@shared/broadcaster/broadcast';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -136,7 +136,7 @@ class SettingsController {
       }
 
       displayToast('success', 'Settings saved successfully');
-      broadcast('configuration-updated');
+      broadcast('configurationUpdated');
     };
   }
 

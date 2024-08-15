@@ -1,31 +1,30 @@
 import { Integration } from './lib/integration';
 import { KeybindManager } from './lib/keybind-manager';
-import { onBroadcast } from '@lib/broadcaster/on-broadcast';
+import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 
 export class AJB extends Integration {
-  private static _instance: AJB;
+  private baseKeyManager = new KeybindManager(['parseKey', 'lookupSelectionKey']);
 
-  public static get instance(): AJB {
-    if (!this._instance) {
-      this._instance = new AJB();
-    }
-
-    return this._instance;
-  }
-
-  private keyBindManager = KeybindManager.getInstance();
-
-  private constructor() {
+  constructor() {
     super();
 
-    this.on('parseKey', () => console.log('parsePage'));
+    this.baseKeyManager.activate();
+
     this.on('lookupSelectionKey', () => this.lookupText(window.getSelection()?.toString()));
 
-    this.listen('parsePage', () => console.log('parsePage'));
-    this.listen('parseSelection', () => console.log('parseSelection'));
+    this.on('parseKey', () => {
+      if (window.getSelection()?.toString()) {
+        return this.parseSelection();
+      }
+
+      this.parsePage();
+    });
+
+    this.listen('parsePage', () => this.parsePage());
+    this.listen('parseSelection', () => this.parseSelection());
 
     onBroadcast('configurationUpdated', () => console.log('configuration-updated'));
   }
 }
 
-export default AJB.instance;
+new AJB();

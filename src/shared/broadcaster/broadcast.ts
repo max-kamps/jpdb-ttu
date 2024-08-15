@@ -1,6 +1,6 @@
-import { getTabs } from '@lib/extension/get-tabs';
-import { broadcastToBackground } from '@lib/extension/send-to-background';
-import { broadcastToTab } from '@lib/extension/send-to-tab';
+import { getTabs } from '@shared/extension/get-tabs';
+import { broadcastToBackground } from '@shared/extension/send-to-background';
+import { broadcastToTab } from '@shared/extension/send-to-tab';
 
 export const broadcast = async <TEvent extends keyof BroadcastEvents>(
   event: TEvent,

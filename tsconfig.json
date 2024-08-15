@@ -11,7 +11,7 @@
     "strictNullChecks": false,
     "baseUrl": "./",
     "paths": {
-      "@lib/*": ["src/lib/*"],
+      "@shared/*": ["src/shared/*"],
       "@styles/*": ["src/styles/*"]
     }
   }

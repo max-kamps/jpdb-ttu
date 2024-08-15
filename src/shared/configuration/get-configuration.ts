@@ -1,5 +1,5 @@
 import { DEFAULT_CONFIGURATION } from './default-configuration';
-import { readStorage } from '@lib/extension/read-storage';
+import { readStorage } from '@shared/extension/read-storage';
 
 type NumberKeys = FilterKeys<ConfigurationSchema, number>[];
 type BooleanKeys = FilterKeys<ConfigurationSchema, boolean>[];

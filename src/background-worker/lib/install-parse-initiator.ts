@@ -1,5 +1,5 @@
-import { addContextMenu } from '@lib/extension/add-context-menu';
-import { sendToTab } from '@lib/extension/send-to-tab';
+import { addContextMenu } from '@shared/extension/add-context-menu';
+import { sendToTab } from '@shared/extension/send-to-tab';
 
 export function installParseInitiator(): void {
   addContextMenu(

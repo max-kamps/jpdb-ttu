@@ -1,4 +1,4 @@
-import { onMessage } from '@lib/extension/on-message';
+import { onMessage } from '@shared/extension/on-message';
 
 const remoteListeners: Partial<Record<keyof BackgroundEvents, Function[]>> = {};
 

@@ -1,9 +1,9 @@
-import { getDecks } from '@lib/anki/get-decks';
-import { getModels } from '@lib/anki/get-models';
-import { getFields } from '@lib/anki/get-fields';
-import { getStyleUrl } from '@lib/extension/get-style-url';
-import { createElement } from '@lib/dom/create-element';
-import { displayToast } from '@lib/dom/display-toast';
+import { getDecks } from '@shared/anki/get-decks';
+import { getModels } from '@shared/anki/get-models';
+import { getFields } from '@shared/anki/get-fields';
+import { getStyleUrl } from '@shared/extension/get-style-url';
+import { createElement } from '@shared/dom/create-element';
+import { displayToast } from '@shared/dom/display-toast';
 
 const observedAttributes = ['value', 'name', 'fetch-url', 'title'] as const;
 type ObservedAttributes = (typeof observedAttributes)[number];

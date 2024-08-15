@@ -1,5 +1,5 @@
-import { addContextMenu } from '@lib/extension/add-context-menu';
-import { openNewTab } from '@lib/extension/open-new-tab';
+import { addContextMenu } from '@shared/extension/add-context-menu';
+import { openNewTab } from '@shared/extension/open-new-tab';
 import { onTabMessage } from './on-tab-message';
 
 function lookupText(text: string): void {
