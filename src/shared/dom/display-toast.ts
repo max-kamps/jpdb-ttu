@@ -13,7 +13,7 @@ function getOrCreateToastContainer(): HTMLDivElement {
 
     shadowRoot.append(
       createElement('link', {
-        attributes: { rel: 'stylesheet', href: getStyleUrl('styles/toast') },
+        attributes: { rel: 'stylesheet', href: getStyleUrl('css/toast') },
       }),
       createElement('ul', { id: 'ajb-toast-item-container', class: 'notifications' }),
     );

@@ -106,7 +106,7 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   protected installStyles() {
-    ['styles/theme', 'styles/common', 'views/settings'].forEach((style) => {
+    ['css/theme', 'css/common', 'views/settings'].forEach((style) => {
       this._shadow.appendChild(
         createElement('link', {
           attributes: {

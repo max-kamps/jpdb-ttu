@@ -5,7 +5,7 @@
   "description": "Mine from JPDB directly into Anki",
   "minimum_chrome_version": "116",
   "background": {
-    "service_worker": "background-worker/background-worker.js"
+    "service_worker": "js/background-worker.js"
   },
   "action": {
     "default_popup": "views/popup.html",
@@ -40,7 +40,7 @@
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
-      "resources": ["assets/*", "styles/*"],
+      "resources": ["assets/*", "css/*"],
       "matches": ["<all_urls>"]
     }
   ]
