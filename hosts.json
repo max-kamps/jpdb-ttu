@@ -83,6 +83,21 @@
     }
   },
   {
+    "host": "*://bunpro.jp/*",
+    "auto": true,
+    "allFrames": false,
+    "parseVisibleObserver": true,
+    "custom": "BunproParser",
+    "addedObserver": {
+      "notifyFor": "div.bp-quiz-question.relative",
+      "observeFrom": "body",
+      "config": {
+        "childList": true,
+        "subtree": true
+      }
+    }
+  },
+  {
     "host": "<all_urls>",
     "auto": true,
     "allFrames": true,

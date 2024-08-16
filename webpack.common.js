@@ -5,7 +5,7 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const views = ['settings', 'popup'];
 const styles = ['toast', 'word'];
 
-const apps = ['ajb', 'asbplayer']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
+const apps = ['ajb']; // ['ajb', 'asbplayer', 'nhk.or.jp', 'netflix.com', 'crunchyroll.com'];
 
 const generate = (array, prefix, target, source = 'ts', targetExt = 'js') =>
   array.reduce(

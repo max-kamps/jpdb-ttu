@@ -15,6 +15,7 @@ declare type HostMeta = {
   host: string | string[];
   auto: boolean;
   allFrames: boolean;
+  custom?: 'BunproParser';
   disabled?: boolean;
   parse?: string;
   css?: string;

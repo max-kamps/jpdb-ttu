@@ -1,5 +1,5 @@
 import { IntegrationScript } from './integration-script';
-import { BaseParser } from './parser/base-parser';
+import { BaseParser } from './parser/base.parser';
 
 export abstract class Integration extends IntegrationScript {
   protected parsers: BaseParser[] = [];

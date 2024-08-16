@@ -1,6 +1,6 @@
 import { IntegrationScript } from '../integration-script';
 import { KeybindManager } from '../keybind-manager';
-import { BaseParser } from './base-parser';
+import { BaseParser } from './base.parser';
 
 export class TriggerParser extends BaseParser {
   protected _parseKeyManager: KeybindManager;

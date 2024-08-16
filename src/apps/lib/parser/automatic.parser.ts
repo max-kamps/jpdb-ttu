@@ -1,4 +1,4 @@
-import { BaseParser } from './base-parser';
+import { BaseParser } from './base.parser';
 
 export class AutomaticParser extends BaseParser {
   protected _visibleObserver: IntersectionObserver | undefined;
@@ -47,15 +47,20 @@ export class AutomaticParser extends BaseParser {
   }
 
   protected setupAddedObserver(): void {
-    const callback = this._visibleObserver
-      ? (nodes: HTMLElement[]) => nodes.forEach((node) => this._visibleObserver!.observe(node))
-      : console.log;
-
     this._addedObserver = this.getAddedObserver(
       this._meta.addedObserver!.observeFrom,
       this._meta.addedObserver!.notifyFor,
       this._meta.addedObserver!.config,
-      callback,
+      (nodes) => this.addedObserverCallback(nodes),
     );
+  }
+
+  protected addedObserverCallback(nodes: HTMLElement[]): void {
+    if (!this._visibleObserver) {
+      // default parsing here!
+      return;
+    }
+
+    nodes.forEach((node) => this._visibleObserver.observe(node));
   }
 }

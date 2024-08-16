@@ -1,11 +1,10 @@
-import { isDisabled } from '@shared/host/is-disabled';
 import { Integration } from './lib/integration';
 import { KeybindManager } from './lib/keybind-manager';
-import { getHostMeta } from '@shared/host/get-host-meta';
 import { displayToast } from '@shared/dom/display-toast';
 import { HostEvaluator } from './lib/host-evaluator';
-import { TriggerParser } from './lib/parser/trigger-parser';
-import { AutomaticParser } from './lib/parser/automatic-parser';
+import { TriggerParser } from './lib/parser/trigger.parser';
+import { AutomaticParser } from './lib/parser/automatic.parser';
+import { BunproParser } from './lib/parser/custom-parsers/bunpro.parser';
 
 export class AJB extends Integration {
   private _lookupKeyManager = new KeybindManager(['lookupSelectionKey']);
@@ -59,6 +58,16 @@ export class AJB extends Integration {
         if (!meta.disabled) {
           this.installParser(meta, TriggerParser);
         }
+
+        continue;
+      }
+
+      if (meta.custom) {
+        const parser = {
+          BunproParser,
+        }[meta.custom];
+
+        this.installParser(meta, parser);
 
         continue;
       }
