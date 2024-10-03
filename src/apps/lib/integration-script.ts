@@ -118,10 +118,12 @@ export abstract class IntegrationScript {
     };
   }
 
-  protected getAbortableSequence<TData>(data: TData): AbortableSequence<void, TData> {
+  protected getAbortableSequence<TResult = void, TData = unknown>(
+    data: TData,
+  ): AbortableSequence<TResult, TData> {
     const sequence = ++IntegrationScript._nextSequence;
     const abortController = new AbortController();
-    const promise = new Promise<void>((resolve, reject) => {
+    const promise = new Promise<TResult>((resolve, reject) => {
       abortController.signal.addEventListener('abort', () => {
         sendToBackground('abortRequest', sequence);
       });

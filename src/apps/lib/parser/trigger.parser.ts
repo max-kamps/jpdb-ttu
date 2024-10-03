@@ -1,4 +1,3 @@
-import { IntegrationScript } from '../integration-script';
 import { KeybindManager } from '../keybind-manager';
 import { BaseParser } from './base.parser';
 

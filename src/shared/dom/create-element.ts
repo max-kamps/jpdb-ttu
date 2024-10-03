@@ -25,7 +25,9 @@ export function createElement(
   const e = document.createElement(tag);
   const id = options.id ?? `${tag}-${(document as any).ajb.id}`;
 
-  e.setAttribute('id', id);
+  if (options.id !== false) {
+    e.setAttribute('id', id as string);
+  }
 
   if (options.innerText !== undefined) {
     e.innerText = String(options.innerText);
@@ -37,6 +39,12 @@ export function createElement(
 
   if (options.handler) {
     e.onclick = options.handler;
+  }
+
+  if (options.events) {
+    for (const key of Object.keys(options.events)) {
+      (e as any)[key] = options.events[key];
+    }
   }
 
   if (options.attributes) {

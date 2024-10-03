@@ -56,7 +56,7 @@ export class ParagraphParser {
     while (!this._abortedState.aborted && textBatch.length) {
       const text = textBatch.shift();
       const relevantTokens = tokens[i];
-      const translatedTokens = relevantTokens.map((token: Token) => this.tokenToObject(token));
+      const translatedTokens = relevantTokens.map((token: RawToken) => this.tokenToObject(token));
 
       await paragraphParsed(
         this._sourceTab,
@@ -120,7 +120,7 @@ export class ParagraphParser {
     // });
   }
 
-  private tokenToObject(token: Token): TokenObject {
+  private tokenToObject(token: RawToken): TokenObject {
     return {
       vocabIndex: token[0],
       position: token[1],

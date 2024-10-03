@@ -1,11 +1,12 @@
 export interface DOMElementBaseOptions {
-  id?: string;
+  id?: string | false;
   class?: string | string[];
   attributes?: Record<string, string | boolean>;
   style?: Partial<CSSStyleDeclaration>;
   innerText?: string | number;
   innerHTML?: string;
   handler?: (ev?: MouseEvent) => void;
+  events?: Record<string, (ev: Event) => void>;
 }
 
 export type DOMElementOptions = DOMElementBaseOptions & {

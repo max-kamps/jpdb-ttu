@@ -2,6 +2,7 @@ import { sendToBackground } from '@shared/extension/send-to-background';
 import { IntegrationScript } from '../../integration-script';
 import { AbortableSequence } from '../../requests.type';
 import { getParagraphs } from './get-paragraphs';
+import { applyTokens } from './apply-tokens';
 
 /**
  * The BatchController is a class that manages the parsing of nodes.
@@ -11,7 +12,7 @@ import { getParagraphs } from './get-paragraphs';
 export class BatchController extends IntegrationScript {
   protected batches = new Map<
     Element | Node,
-    { abort: () => void; sent: boolean; sequences: AbortableSequence<unknown, Paragraph>[] }
+    { abort: () => void; sent: boolean; sequences: AbortableSequence<Token[], Paragraph>[] }
   >();
 
   /**
@@ -73,11 +74,17 @@ export class BatchController extends IntegrationScript {
       (s) => [s.sequence, s.data.map((f) => f.node.data).join('')] as [number, string],
     );
 
+    sequences.forEach((s) => {
+      s.promise.then((tokens) => {
+        applyTokens(s.data, tokens);
+      });
+    });
+
     sendToBackground('parse', sequenceData);
   }
 
   protected prepareParagraphs(node: Element | Node, paragraphs: Paragraph[]): void {
-    const batches = paragraphs.map(this.getAbortableSequence);
+    const batches = paragraphs.map((p) => this.getAbortableSequence<Token[], Paragraph>(p));
 
     this.batches.set(node, {
       sent: false,
