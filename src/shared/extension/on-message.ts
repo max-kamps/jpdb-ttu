@@ -1,17 +1,17 @@
 import { ExtensionMessage } from './extension-message.type';
 
-export const onMessage = <TEvent>(
+export const onMessage = <TEvent extends string>(
   handler: (
     event: TEvent,
     sender: chrome.runtime.MessageSender,
     ...args: any[]
   ) => void | Promise<void>,
-  filter: (message: ExtensionMessage, sender: chrome.runtime.MessageSender) => boolean = ({
+  filter: (message: ExtensionMessage<TEvent>, sender: chrome.runtime.MessageSender) => boolean = ({
     isBroadcast,
   }) => !isBroadcast,
 ): void => {
   chrome.runtime.onMessage.addListener(
-    (request: ExtensionMessage, sender, sendResponse): boolean => {
+    (request: ExtensionMessage<TEvent>, sender, sendResponse): boolean => {
       const { event, args } = request;
 
       if (filter && !filter(request, sender)) {

@@ -13,11 +13,11 @@ function send(event: string, tabId: number, isBroadcast: boolean, ...args: any[]
 export const sendToTab = <TEvent extends keyof TabEvents>(
   event: TEvent,
   tabId: number,
-  ...args: [...ArgumentsFor<TabEvents[TEvent]>]
-): Promise<ReturnType<TabEvents[TEvent]>> => send(event, tabId, false, ...args);
+  ...args: [...TabEvents[TEvent]]
+): Promise<void> => send(event, tabId, false, ...args);
 
 export const broadcastToTab = async <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
   tabId: number,
-  ...args: [...ArgumentsFor<BroadcastEvents[TEvent]>]
+  ...args: [...BroadcastEvents[TEvent]]
 ): Promise<void> => send(event, tabId, true, ...args);

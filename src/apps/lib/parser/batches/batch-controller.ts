@@ -1,10 +1,18 @@
+import { sendToBackground } from '@shared/extension/send-to-background';
+import { IntegrationScript } from '../../integration-script';
+import { AbortableSequence } from '../../requests.type';
+import { getParagraphs } from './get-paragraphs';
+
 /**
  * The BatchController is a class that manages the parsing of nodes.
  *
  * Nodes will be split in fragments, which will then be parsed in batches. Those batches can be canceled if they are no longer needed.
  */
-export class BatchController {
-  protected batches = new Map<Element | Node, unknown>();
+export class BatchController extends IntegrationScript {
+  protected batches = new Map<
+    Element | Node,
+    { abort: () => void; sent: boolean; sequences: AbortableSequence<unknown, Paragraph>[] }
+  >();
 
   /**
    * Register a node for later parsing.
@@ -26,7 +34,7 @@ export class BatchController {
       return;
     }
 
-    const paragraphs = this.getParagraphs(node, filter);
+    const paragraphs = getParagraphs(node, filter);
 
     if (!paragraphs.length) {
       onEmpty?.(node);
@@ -35,8 +43,6 @@ export class BatchController {
     }
 
     this.prepareParagraphs(node, paragraphs);
-
-    console.log('registerNode', node);
   }
 
   /**
@@ -55,22 +61,28 @@ export class BatchController {
       return;
     }
 
-    console.log('dismissNode', node);
+    this.batches.get(node)!.abort();
+    this.batches.delete(node);
   }
 
   /** Parse all nodes and its batches that are registered, but not yet started */
   public parseBatches(): void {
-    console.log('parse');
+    const batches = Array.from(this.batches.values()).filter((b) => !b.sent);
+    const sequences = batches.flatMap((b) => b.sequences);
+    const sequenceData = sequences.map(
+      (s) => [s.sequence, s.data.map((f) => f.node.data).join('')] as [number, string],
+    );
+
+    sendToBackground('parse', sequenceData);
   }
 
-  protected getParagraphs(
-    node: Element | Node,
-    filter?: (node: Element | Node) => boolean,
-  ): unknown[] {
-    return [];
-  }
+  protected prepareParagraphs(node: Element | Node, paragraphs: Paragraph[]): void {
+    const batches = paragraphs.map(this.getAbortableSequence);
 
-  protected prepareParagraphs(node: Element | Node, paragraphs: unknown[]): void {
-    console.log('prepareParagraphs', node, paragraphs);
+    this.batches.set(node, {
+      sent: false,
+      sequences: batches,
+      abort: () => batches.forEach((b) => b.abort()),
+    });
   }
 }

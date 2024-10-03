@@ -182,7 +182,7 @@ export abstract class BaseParser extends IntegrationScript {
         );
         this.batches.parseBatches();
       },
-      (elements) => elements.forEach(this.batches.dismissNode),
+      (elements) => elements.forEach((node) => this.batches.dismissNode(node)),
     );
 
     return observer;

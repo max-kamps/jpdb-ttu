@@ -1,5 +1,5 @@
-export interface ExtensionMessage {
-  event: string;
+export interface ExtensionMessage<TEvent extends string> {
+  event: TEvent;
   isBroadcast: boolean;
   args: any[];
 }

@@ -15,7 +15,7 @@ onMessage<keyof BroadcastEvents>(
 
 export const onBroadcast = <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
-  listener: BroadcastEvents[TEvent],
+  listener: EventFunction<BroadcastEvents[TEvent]>,
 ): void => {
   if (!listeners[event]) {
     listeners[event] = [];

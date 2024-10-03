@@ -12,10 +12,10 @@ function send(event: string, isBroadcast: boolean, ...args: any[]): Promise<any>
 
 export const sendToBackground = async <TEvent extends keyof BackgroundEvents>(
   event: TEvent,
-  ...args: [...ArgumentsFor<BackgroundEvents[TEvent]>]
-): Promise<ReturnType<BackgroundEvents[TEvent]>> => send(event, false, ...args);
+  ...args: [...BackgroundEvents[TEvent]]
+): Promise<void> => send(event, false, ...args);
 
 export const broadcastToBackground = async <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
-  ...args: [...ArgumentsFor<BroadcastEvents[TEvent]>]
+  ...args: [...BroadcastEvents[TEvent]]
 ): Promise<void> => send(event, true, ...args);

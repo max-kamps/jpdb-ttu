@@ -12,10 +12,7 @@ onMessage<keyof BackgroundEvents>((event, sender, ...args) => {
 
 export function onTabMessage<TEvent extends keyof BackgroundEvents>(
   event: TEvent,
-  listener: (
-    sender: chrome.runtime.MessageSender,
-    ...args: [...Parameters<BackgroundEvents[TEvent]>]
-  ) => ReturnType<BackgroundEvents[TEvent]>,
+  listener: (sender: chrome.runtime.MessageSender, ...args: [...BackgroundEvents[TEvent]]) => void,
 ): void {
   if (!remoteListeners[event]) {
     remoteListeners[event] = [];
