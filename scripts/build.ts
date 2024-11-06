@@ -12,8 +12,8 @@ const packageVersion = packageJson.version;
 const manifestVersion = JSON.parse(await fs.readFile('src/manifest.json', 'utf-8')).version;
 
 if (packageVersion !== manifestVersion) {
-    console.log(`Versions in package.json (${packageVersion}) and src/manifest.json (${manifestVersion}) don't match!`);
-    process.exit(1);
+  console.log(`Versions in package.json (${packageVersion}) and src/manifest.json (${manifestVersion}) don't match!`);
+  process.exit(1);
 }
 
 console.log(`Building version ${manifestVersion}`);
@@ -31,14 +31,14 @@ await resources.copy();
 
 const success = formatSuccessful && lintErrors === 0 && compileSuccessful;
 if (!success) {
-    console.log('\nCompilation failed! Reasons:');
-    if (!formatSuccessful) console.log('- Could not format source code');
-    if (lintErrors !== 0) console.log('- Unfixable lint errors are present');
-    if (!compileSuccessful) console.log('- Type errors are present');
+  console.log('\nCompilation failed! Reasons:');
+  if (!formatSuccessful) console.log('- Could not format source code');
+  if (lintErrors !== 0) console.log('- Unfixable lint errors are present');
+  if (!compileSuccessful) console.log('- Type errors are present');
 
-    process.exit(1);
+  process.exit(1);
 } else {
-    console.log('Compilation successful!');
+  console.log('Compilation successful!');
 }
 
 await fs.mkdir('dist');

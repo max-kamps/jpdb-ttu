@@ -12,17 +12,17 @@ Object.assign(parse_page.style, { position: 'fixed', top: '0', right: '0', zInde
 
 document.body.appendChild(parse_page);
 parse_page?.addEventListener('click', () => {
-    browser.tabs.executeScript({ file: '/integrations/contextmenu.js' });
+  browser.tabs.executeScript({ file: '/integrations/contextmenu.js' });
 });
 
 try {
-    const paragraphs = paragraphsInNode(document.body);
+  const paragraphs = paragraphsInNode(document.body);
 
-    if (paragraphs.length > 0) {
-        const [batches, applied] = parseParagraphs(paragraphs);
-        requestParse(batches);
-        Promise.allSettled(applied);
-    }
+  if (paragraphs.length > 0) {
+    const [batches, applied] = parseParagraphs(paragraphs);
+    requestParse(batches);
+    Promise.allSettled(applied);
+  }
 } catch (error) {
-    showError(error);
+  showError(error);
 }

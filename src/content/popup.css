@@ -1,228 +1,228 @@
 ::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(155, 155, 155, 0.5);
-    border-radius: 4px;
-    border: transparent;
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 4px;
+  border: transparent;
 }
 
 article {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
 
-    margin: 0;
-    padding: 1em;
-    max-width: 24em;
-    max-height: 40vh;
-    overflow-y: auto;
+  margin: 0;
+  padding: 1em;
+  max-width: 24em;
+  max-height: 40vh;
+  overflow-y: auto;
 
-    background-color: var(--color-background);
-    border-radius: var(--border-radius);
-    color: var(--color-text);
-    font-family: var(--font-family);
+  background-color: var(--color-background);
+  border-radius: var(--border-radius);
+  color: var(--color-text);
+  font-family: var(--font-family);
 
-    box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.5);
 }
 
 #mine-buttons,
 #review-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 0.25em;
-    font-size: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25em;
+  font-size: 12px;
 }
 
 button {
-    display: inline-block;
+  display: inline-block;
 
-    padding: 0.25em 0.5em;
-    margin: 0;
-    border: none;
+  padding: 0.25em 0.5em;
+  margin: 0;
+  border: none;
 
-    font-size: 85%;
-    border-radius: var(--border-radius);
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
+  font-size: 85%;
+  border-radius: var(--border-radius);
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
 
-    filter: saturate(50%);
+  filter: saturate(50%);
 }
 
 button:hover {
-    filter: brightness(120%);
+  filter: brightness(120%);
 }
 
 button:active {
-    filter: brightness(80%);
+  filter: brightness(80%);
 }
 
 #header {
-    display: flex;
-    flex-direction: row;
-    justify-content: left;
-    align-items: center;
-    gap: 0.5em;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  gap: 0.5em;
 
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 
-    font-size: 150%;
-    font-weight: bold;
+  font-size: 150%;
+  font-weight: bold;
 }
 
 #header a {
-    color: var(--color-text);
+  color: var(--color-text);
 }
 
 #header a::after {
-    content: ' 🔗';
-    font-size: 50%;
-    vertical-align: middle;
+  content: ' 🔗';
+  font-size: 50%;
+  vertical-align: middle;
 }
 
 .state {
-    display: flex;
-    flex-direction: column;
-    margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
 
-    font-size: 50%;
-    line-height: 100%;
+  font-size: 50%;
+  line-height: 100%;
 }
 
 .metainfo {
-    display: flex;
-    flex-direction: row;
-    font-size: 12px;
-    gap: 0.5em;
-    white-space: nowrap;
-    margin: 0.75em 0;
+  display: flex;
+  flex-direction: row;
+  font-size: 12px;
+  gap: 0.5em;
+  white-space: nowrap;
+  margin: 0.75em 0;
 }
 
 .pitch span {
-    padding: 1px 1px 1px 2px;
-    line-height: 1em;
-    border-style: solid;
-    border-image-slice: 2;
-    border-image-source: linear-gradient(to bottom, rgba(232, 104, 123, 0.8), rgba(75, 141, 255, 0.8));
+  padding: 1px 1px 1px 2px;
+  line-height: 1em;
+  border-style: solid;
+  border-image-slice: 2;
+  border-image-source: linear-gradient(to bottom, rgba(232, 104, 123, 0.8), rgba(75, 141, 255, 0.8));
 }
 
 .pitch .low {
-    border-width: 0 2px 2px 0;
-    margin-right: -2px;
+  border-width: 0 2px 2px 0;
+  margin-right: -2px;
 }
 .pitch .high {
-    border-width: 2px 2px 0 0;
-    margin-right: -2px;
+  border-width: 2px 2px 0 0;
+  margin-right: -2px;
 }
 .pitch .low-final {
-    border-width: 0 0 2px 0;
+  border-width: 0 0 2px 0;
 }
 .pitch .high-final {
-    border-width: 2px 0 0 0;
+  border-width: 2px 0 0 0;
 }
 .pitch .low-final {
-    border-width: 0 0 2px 0;
+  border-width: 0 0 2px 0;
 }
 .pitch .high-final {
-    border-width: 2px 0 0 0;
+  border-width: 2px 0 0 0;
 }
 
 h2 {
-    font-size: 0.75em;
-    filter: var(--less-contrast-filter);
-    margin-top: 1em;
-    margin-bottom: 0.5em;
+  font-size: 0.75em;
+  filter: var(--less-contrast-filter);
+  margin-top: 1em;
+  margin-bottom: 0.5em;
 }
 
 ol {
-    margin: 0;
-    padding: 0;
-    padding-left: 2em;
+  margin: 0;
+  padding: 0;
+  padding-left: 2em;
 }
 
 button.add,
 button.edit-add-review {
-    background-color: rgb(75, 141, 255);
+  background-color: rgb(75, 141, 255);
 }
 
 button.forq {
-    background-color: rgb(255, 69, 0);
+  background-color: rgb(255, 69, 0);
 }
 
 button.blacklist {
-    background-color: rgb(119, 119, 119);
+  background-color: rgb(119, 119, 119);
 }
 
 button.never-forget {
-    background-color: rgb(112, 192, 0);
+  background-color: rgb(112, 192, 0);
 }
 
 button.nothing {
-    background-color: rgb(255, 0, 0);
+  background-color: rgb(255, 0, 0);
 }
 
 button.something {
-    background-color: rgb(255, 0, 0);
+  background-color: rgb(255, 0, 0);
 }
 
 button.hard {
-    background-color: rgb(255, 69, 0);
+  background-color: rgb(255, 69, 0);
 }
 
 button.good {
-    background-color: rgb(112, 192, 0);
+  background-color: rgb(112, 192, 0);
 }
 
 button.easy {
-    background-color: rgb(75, 141, 255);
+  background-color: rgb(75, 141, 255);
 }
 
 /* .state .unparsed { } */
 
 .state .locked {
-    color: rgb(119, 119, 119);
+  color: rgb(119, 119, 119);
 }
 
 .state .suspended {
-    color: rgb(119, 119, 119);
+  color: rgb(119, 119, 119);
 }
 
 .state .blacklisted {
-    color: rgb(119, 119, 119);
+  color: rgb(119, 119, 119);
 }
 
 .state .never-forget {
-    color: rgb(112, 192, 0);
+  color: rgb(112, 192, 0);
 }
 
 .state .not-in-deck {
-    color: rgba(75, 141, 255);
+  color: rgba(75, 141, 255);
 }
 
 .state .new {
-    color: rgb(75, 141, 255);
+  color: rgb(75, 141, 255);
 }
 
 .state .learning {
-    color: rgb(94, 167, 128);
+  color: rgb(94, 167, 128);
 }
 
 .state .known {
-    color: rgb(112, 192, 0);
+  color: rgb(112, 192, 0);
 }
 
 .state .due {
-    color: rgb(255, 69, 0);
+  color: rgb(255, 69, 0);
 }
 
 .state .failed {
-    color: rgb(255, 0, 0);
+  color: rgb(255, 0, 0);
 }

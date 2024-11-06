@@ -6,124 +6,151 @@ export type Keybind = { key: string; code: string; modifiers: string[] } | null;
 export const CURRENT_SCHEMA_VERSION = 1;
 
 export type Config = {
-    schemaVersion: number;
+  schemaVersion: number;
 
-    apiToken: string | null;
+  apiToken: string | null;
 
-    miningDeckId: DeckId | null;
-    forqDeckId: DeckId | null;
-    blacklistDeckId: DeckId | null;
-    neverForgetDeckId: DeckId | null;
+  miningDeckId: DeckId | null;
+  forqDeckId: DeckId | null;
+  blacklistDeckId: DeckId | null;
+  neverForgetDeckId: DeckId | null;
 
-    contextWidth: number;
-    forqOnMine: boolean;
+  contextWidth: number;
+  forqOnMine: boolean;
 
-    customWordCSS: string;
-    customPopupCSS: string;
+  customWordCSS: string;
+  customPopupCSS: string;
 
-    showPopupOnHover: boolean;
-    touchscreenSupport: boolean;
-    disableFadeAnimation: boolean;
+  showPopupOnHover: boolean;
+  touchscreenSupport: boolean;
+  disableFadeAnimation: boolean;
 
-    showPopupKey: Keybind;
-    addKey: Keybind;
-    dialogKey: Keybind;
-    blacklistKey: Keybind;
-    neverForgetKey: Keybind;
-    nothingKey: Keybind;
-    somethingKey: Keybind;
-    hardKey: Keybind;
-    goodKey: Keybind;
-    easyKey: Keybind;
+  showPopupKey: Keybind;
+  addKey: Keybind;
+  dialogKey: Keybind;
+  blacklistKey: Keybind;
+  neverForgetKey: Keybind;
+  nothingKey: Keybind;
+  somethingKey: Keybind;
+  hardKey: Keybind;
+  goodKey: Keybind;
+  easyKey: Keybind;
 };
 
 export const defaultConfig: Config = {
-    schemaVersion: CURRENT_SCHEMA_VERSION,
+  schemaVersion: CURRENT_SCHEMA_VERSION,
 
-    apiToken: null,
+  apiToken: null,
 
-    miningDeckId: null,
-    forqDeckId: 'forq',
-    blacklistDeckId: 'blacklist',
-    neverForgetDeckId: 'never-forget',
-    contextWidth: 1,
-    forqOnMine: true,
+  miningDeckId: null,
+  forqDeckId: 'forq',
+  blacklistDeckId: 'blacklist',
+  neverForgetDeckId: 'never-forget',
+  contextWidth: 1,
+  forqOnMine: true,
 
-    customWordCSS: '',
-    customPopupCSS: '',
+  customWordCSS: `/* Easy reader dark mode (white text) colors */
+/* Change #FFF to #000 for light mode (black text) colors */
+.jpdb-word.blacklisted { color:  #FFF; }
+.jpdb-word.unparsed { color: #FFF; }
+.jpdb-word.known{ color: #FFF; }
+.jpdb-word.new{ color: #4b8dff; }
+.jpdb-word.not-in-deck{ color: #0277bd; }
 
-    showPopupOnHover: false,
-    touchscreenSupport: false,
-    disableFadeAnimation: false,
+/* Hide ttsu Reader furigana */
+.jpdb-word.known:not(:hover) .jpdb-furi { visibility: hidden; }
+.jpdb-word.learning:not(:hover) .jpdb-furi { visibility: hidden; }
+.jpdb-word.due .jpdb-furi { visibility: hidden; }
+.jpdb-word.failed .jpdb-furi { visibility: hidden; }
 
-    showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
-    addKey: null,
-    dialogKey: null,
-    blacklistKey: null,
-    neverForgetKey: null,
-    nothingKey: null,
-    somethingKey: null,
-    hardKey: null,
-    goodKey: null,
-    easyKey: null,
+/* E-ink screen new word visibility border - vertical */
+/* Change "border-left" to "border-bottom" for horizontal text*/
+.jpdb-word.new{ border-left: 2px solid }
+.jpdb-word.not-in-deck{ border-left: 2px dashed }
+`,
+
+  customPopupCSS: `/* Make review/mining buttons bigger for mobile */
+button { padding:20px 0; font-size: 14px; flex-grow:1 }
+#mine-buttons button { padding: 10px 0; }
+
+/* Hide never forget and edit buttons */
+button.edit-add-review,button.never-forget { display:none; }
+
+/* Increase max size of popup to accommodate larger buttons*/
+article { max-height: 50vh }`,
+
+  showPopupOnHover: false,
+  touchscreenSupport: false,
+  disableFadeAnimation: false,
+
+  showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
+  addKey: null,
+  dialogKey: null,
+  blacklistKey: null,
+  neverForgetKey: null,
+  nothingKey: null,
+  somethingKey: null,
+  hardKey: null,
+  goodKey: null,
+  easyKey: null,
 };
 
 function localStorageGet(key: string, fallback: any = null): any {
-    const data = localStorage.getItem(key);
-    if (data === null) return fallback;
+  const data = localStorage.getItem(key);
+  if (data === null) return fallback;
 
-    try {
-        return JSON.parse(data) ?? fallback;
-    } catch {
-        return fallback;
-    }
+  try {
+    return JSON.parse(data) ?? fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function localStorageSet(key: string, value: any) {
-    localStorage.setItem(key, JSON.stringify(value));
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
 export function migrateSchema(config: Config) {
-    if (config.schemaVersion === 0) {
-        // Keybinds changed from string to object
-        // We don't have all the information required to turn them into objects
-        // Just delete them and let users re-enter them
-        for (const key of [
-            'showPopupKey',
-            'blacklistKey',
-            'neverForgetKey',
-            'nothingKey',
-            'somethingKey',
-            'hardKey',
-            'goodKey',
-            'easyKey',
-        ] as const) {
-            config[key] = defaultConfig[key];
-        }
-
-        config.schemaVersion = 1;
+  if (config.schemaVersion === 0) {
+    // Keybinds changed from string to object
+    // We don't have all the information required to turn them into objects
+    // Just delete them and let users re-enter them
+    for (const key of [
+      'showPopupKey',
+      'blacklistKey',
+      'neverForgetKey',
+      'nothingKey',
+      'somethingKey',
+      'hardKey',
+      'goodKey',
+      'easyKey',
+    ] as const) {
+      config[key] = defaultConfig[key];
     }
+
+    config.schemaVersion = 1;
+  }
 }
 
 export function loadConfig(): Config {
-    const config = Object.fromEntries(
-        Object.entries(defaultConfig).map(([key, defaultValue]) => [key, localStorageGet(key, defaultValue)]),
-    ) as Config;
+  const config = Object.fromEntries(
+    Object.entries(defaultConfig).map(([key, defaultValue]) => [key, localStorageGet(key, defaultValue)]),
+  ) as Config;
 
-    config.schemaVersion = localStorageGet('schemaVersion', 0);
-    migrateSchema(config);
+  config.schemaVersion = localStorageGet('schemaVersion', 0);
+  migrateSchema(config);
 
-    // If the schema version is not the current version after applying all migrations, give up and refuse to load the config.
-    // Use the default as a fallback.
-    if (config.schemaVersion !== CURRENT_SCHEMA_VERSION) {
-        return defaultConfig;
-    }
+  // If the schema version is not the current version after applying all migrations, give up and refuse to load the config.
+  // Use the default as a fallback.
+  if (config.schemaVersion !== CURRENT_SCHEMA_VERSION) {
+    return defaultConfig;
+  }
 
-    return config;
+  return config;
 }
 
 export function saveConfig(config: Config) {
-    for (const [key, value] of Object.entries(config)) {
-        localStorageSet(key, value);
-    }
+  for (const [key, value] of Object.entries(config)) {
+    localStorageSet(key, value);
+  }
 }
