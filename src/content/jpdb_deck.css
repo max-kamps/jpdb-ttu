@@ -1,0 +1,82 @@
+div.entry.overdue ruby rt {
+  display: none;
+}
+
+q div.entry.overdue div div:last-of-type {
+  display: none;
+}
+
+div.entry.failed ruby rt {
+  display: none;
+}
+
+div.entry.failed div div:last-of-type {
+  display: none;
+}
+
+div.entry.learning div div:last-of-type {
+  display: none;
+}
+
+div.entry.learning ruby rt {
+  display: none;
+}
+
+.review-reveal {
+  max-width: 100%;
+}
+
+div.entry.overdue,
+div.entry.failed {
+  padding: 0 5px;
+  margin: 0;
+  flex-grow: 1;
+  align-items: center;
+}
+
+div.entry.overdue div,
+div.entry.failed div {
+  justify-content: center;
+  display: flex;
+}
+
+.vocabulary-list {
+  max-width: 100%;
+  flex-wrap: wrap;
+  font-size: 26px;
+  gap: 10px;
+  flex-direction: row !important;
+}
+
+.vocabulary-list .vocabulary-spelling a {
+  white-space: nowrap;
+}
+
+.entry.overdue div:nth-child(2) {
+  display: none !important;
+}
+
+.vocabulary-list .vocabulary-spelling a {
+  margin-right: 0;
+}
+
+body > button:last-of-type {
+  display: none;
+}
+
+.pagination {
+  margin-bottom: 0 !important;
+  padding-top: 1rem !important;
+  margin-top: -1rem !important;
+}
+.pagination a {
+  padding: 1rem !important;
+  margin-top: -0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  min-width: 0 !important;
+}
+.vocabulary-list {
+  margin-top: 0 !important;
+}
