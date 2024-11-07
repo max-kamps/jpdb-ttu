@@ -49,20 +49,17 @@ export const defaultConfig: Config = {
   contextWidth: 1,
   forqOnMine: true,
 
-  customWordCSS: `/***** Make new in-deck and out-of-deck words a little easier to see *****/
-.jpdb-word.new{ color: #4b8dff; }
-.jpdb-word.not-in-deck{ color: #0277bd; }
-
+  customWordCSS: `/**** Ideas & Options *****
+Remove the slash+asterisks surrounding the code parts below to enable experimental styling ideas
+I personally use but don't want to enable by default or add as full-on options */
+  
 /***** Hide furigana on known/learning words unless hovering *****/
+/*
 .jpdb-word.known:not(:hover) .jpdb-furi { visibility: hidden; }
 .jpdb-word.learning:not(:hover) .jpdb-furi { visibility: hidden; }
 .jpdb-word.due .jpdb-furi { visibility: hidden; }
 .jpdb-word.failed .jpdb-furi { visibility: hidden; }
-
-
-/**** Ideas & Options *****
-Remove the slash+asterisks surrounding the code parts below to enable experimental styling ideas
-I personally use but don't want to enable by default or add as full-on options */
+*/
 
 /***** ttsu reader dark mode (white text) colors *****/
 /* Change "white" to "black" for light mode (black text) colors */
@@ -92,14 +89,16 @@ html.dark-mode, html.dark-mode body {
 */`,
 
   customPopupCSS: `/* Make review/mining buttons bigger for mobile */
+/*
 button { padding:20px 0; font-size: 14px; flex-grow:1 }
 #mine-buttons button { padding: 10px 0; }
+article { max-height: 50vh }
+*/
 
 /* Hide never forget and edit buttons */
+/*
 button.edit-add-review,button.never-forget { display:none; }
-
-/* Increase max size of popup to accommodate larger buttons*/
-article { max-height: 50vh }`,
+*/`,
 
   showPopupOnHover: false,
   touchscreenSupport: false,
