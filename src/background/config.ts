@@ -21,6 +21,9 @@ export type Config = {
   customWordCSS: string;
   customPopupCSS: string;
 
+  keepReviewBlankSpaceHidden: boolean;
+  disable2DReviews: boolean;
+
   showPopupOnHover: boolean;
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
@@ -49,24 +52,36 @@ export const defaultConfig: Config = {
   contextWidth: 1,
   forqOnMine: true,
 
-  customWordCSS: `/* Easy reader dark mode (white text) colors */
-/* Change #FFF to #000 for light mode (black text) colors */
+  customWordCSS: `/***** Easy reader dark mode (white text) colors *****/
+/* Change "#FFF" to "#000" for light mode (black text) colors */
 .jpdb-word.blacklisted { color:  #FFF; }
 .jpdb-word.unparsed { color: #FFF; }
 .jpdb-word.known{ color: #FFF; }
 .jpdb-word.new{ color: #4b8dff; }
 .jpdb-word.not-in-deck{ color: #0277bd; }
 
-/* Hide ttsu Reader furigana */
+/***** Hide ttsu Reader furigana *****/
 .jpdb-word.known:not(:hover) .jpdb-furi { visibility: hidden; }
 .jpdb-word.learning:not(:hover) .jpdb-furi { visibility: hidden; }
 .jpdb-word.due .jpdb-furi { visibility: hidden; }
 .jpdb-word.failed .jpdb-furi { visibility: hidden; }
 
-/* E-ink screen new word visibility border - vertical */
-/* Change "border-left" to "border-bottom" for horizontal text*/
+
+/**** Ideas & Options *****
+Remove the slash+asterisks surrounding the code parts below to enable experimental styling ideas
+I personally use but don't want to enable by default or add as full-on options */
+
+/* E-ink screen new word visibility border - vertical text version */
+/*
 .jpdb-word.new{ border-left: 2px solid }
 .jpdb-word.not-in-deck{ border-left: 2px dashed }
+*/
+
+/* E-ink screen new word visibility border - horizontal text version */
+/*
+.jpdb-word.new { border-bottom: 2px solid }
+.jpdb-word.not-in-deck { border-bottom: 2px dashed }
+*/
 `,
 
   customPopupCSS: `/* Make review/mining buttons bigger for mobile */
@@ -78,6 +93,9 @@ button.edit-add-review,button.never-forget { display:none; }
 
 /* Increase max size of popup to accommodate larger buttons*/
 article { max-height: 50vh }`,
+
+  keepReviewBlankSpaceHidden: false,
+  disable2DReviews: false,
 
   showPopupOnHover: false,
   touchscreenSupport: false,

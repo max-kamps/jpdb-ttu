@@ -1,9 +1,8 @@
 // @reader content-script
 
 import { paragraphsInNode, parseParagraphs } from './common.js';
-import { requestParse } from '../content/background_comms.js';
+import { config, requestParse } from '../content/background_comms.js';
 import { showError } from '../content/toast.js';
-import { config } from '../content/background_comms.js';
 
 let shouldShow = false;
 
@@ -29,7 +28,7 @@ const removeLinksFromVocabWords = () => {
 };
 
 try {
-  if (!config.apiToken) {
+  if (!config || !config.apiToken) {
     throw new Error(
       'API Token not found, please input your JPDB API Token in the JPDBreader Settings page (found in the extension menu)',
     );
@@ -58,6 +57,43 @@ try {
     showing_of_progress_p.style.margin = '1rem 0';
     showing_of_progress_p.style.lineHeight = '34px';
 
+    if (config && !config.keepReviewBlankSpaceHidden) {
+      const spacer = document.createElement('div');
+      Object.assign(spacer.style, {
+        padding: '0px',
+        margin: '0px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: 'calc(100dvh - 239px)',
+      });
+
+      const hide_space_button = document.createElement('button');
+      hide_space_button.innerText = 'Hide Blank Space';
+      Object.assign(hide_space_button.style, {
+        padding: '0px 18px',
+        margin: '0px',
+        color: '#424242',
+        backgroundColor: 'transparent',
+        border: 'none', //'1px solid #424242',
+        borderRadius: '7px',
+        textAlign: 'center',
+        boxShadow: 'none',
+        transform: 'none',
+        height: 'auto',
+        width: 'auto',
+      });
+
+      spacer.appendChild(hide_space_button);
+
+      showing_of_progress_p.insertAdjacentElement('afterend', spacer);
+
+      hide_space_button.addEventListener('click', () => {
+        spacer.style.display = 'none';
+      });
+    }
+
     const show_hidden_elements_button = document.createElement('button');
     show_hidden_elements_button.innerHTML = 'Show/Hide';
     Object.assign(show_hidden_elements_button.style, {
@@ -68,7 +104,7 @@ try {
       padding: '0px 12px',
       fontSize: '16px',
       height: 'auto',
-      borderRadius: '6px',
+      borderRadius: '7px',
     });
     showing_of_progress_p.prepend(show_hidden_elements_button);
 

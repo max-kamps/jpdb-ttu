@@ -1,29 +1,13 @@
-div.entry.overdue ruby rt {
-  display: none;
-}
-
-q div.entry.overdue div div:last-of-type {
-  display: none;
-}
-
-div.entry.failed ruby rt {
-  display: none;
-}
-
-div.entry.failed div div:last-of-type {
-  display: none;
-}
-
-div.entry.learning div div:last-of-type {
-  display: none;
-}
-
+div.entry.overdue ruby rt,
+div.entry.failed ruby rt,
 div.entry.learning ruby rt {
   display: none;
 }
 
-.review-reveal {
-  max-width: 100%;
+div.entry.overdue div div:last-of-type,
+div.entry.failed div div:last-of-type,
+div.entry.learning div div:last-of-type {
+  display: none;
 }
 
 div.entry.overdue,
@@ -35,9 +19,14 @@ div.entry.failed {
 }
 
 div.entry.overdue div,
-div.entry.failed div {
+div.entry.failed div,
+div.entry.learning div {
   justify-content: center;
   display: flex;
+}
+
+.review-reveal {
+  max-width: 100%;
 }
 
 .vocabulary-list {
@@ -69,14 +58,16 @@ body > button:last-of-type {
   padding-top: 1rem !important;
   margin-top: -1rem !important;
 }
+
 .pagination a {
-  padding: 1rem !important;
+  padding: 0.5rem !important;
   margin-top: -0.5rem !important;
   margin-bottom: 0.5rem !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   min-width: 0 !important;
 }
+
 .vocabulary-list {
   margin-top: 0 !important;
 }
