@@ -505,25 +505,53 @@ export class Popup {
 
     const bbox = getClosestClientRect(word, mouseX, mouseY);
 
+    //console.log('-------------------START-------------------');
     const wordLeft = window.scrollX + bbox.left;
     const wordTop = window.scrollY + bbox.top;
     const wordRight = window.scrollX + bbox.right;
     const wordBottom = window.scrollY + bbox.bottom;
 
+    // console.log(`const wordLeft(${wordLeft}) = window.scrollX(${window.scrollX}) + bbox.left(${bbox.left});`);
+    // console.log(`const wordTop(${wordTop}) = window.scrollY(${window.scrollY}) + bbox.top(${bbox.top});`);
+    // console.log(`const wordRight(${wordRight}) = window.scrollX(${window.scrollX}) + bbox.right(${bbox.right});`);
+    // console.log(`const wordBottom(${wordBottom}) = window.scrollY(${window.scrollY}) + bbox.bottom(${bbox.bottom});`);
+    // console.log('');
+
     // window.innerWidth/Height technically contains the scrollbar, so it's not 100% accurate
     // Good enough for this though
     const leftSpace = bbox.left;
     const topSpace = bbox.top;
-    const rightSpace = window.innerWidth - bbox.right;
-    const bottomSpace = window.innerHeight - bbox.bottom;
+    const rightSpace = document.documentElement.clientWidth - bbox.right;
+    const bottomSpace = document.documentElement.clientHeight - bbox.bottom;
+
+    // console.log(`const leftSpace(${leftSpace}) = bbox.left(${bbox.left});`);
+    // console.log(`const topSpace(${leftSpace}) = bbox.top(${bbox.top});`);
+    // console.log(
+    //   `const rightSpace(${rightSpace}) = document.documentElement.clientWidth(${document.documentElement.clientWidth}) - bbox.right(${bbox.right});`,
+    // );
+    // console.log(
+    //   `const bottomSpace(${bottomSpace}) = document.documentElement.clientHeight(${document.documentElement.clientHeight}) - bbox.bottom(${bbox.bottom});`,
+    // );
 
     const popupHeight = this.#element.offsetHeight;
     const popupWidth = this.#element.offsetWidth;
 
+    //console.log(`popupHeight = ${popupHeight}, popupWidth = ${popupWidth}`);
+
     const minLeft = window.scrollX;
-    const maxLeft = window.scrollX + window.innerWidth - popupWidth;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - popupWidth;
     const minTop = window.scrollY;
-    const maxTop = window.scrollY + window.innerHeight - popupHeight;
+    const maxTop = window.scrollY + document.documentElement.clientHeight - popupHeight;
+
+    // console.log('');
+    // console.log(`const minLeft(${minLeft}) = window.scrollX(${window.scrollX});`);
+    // console.log(
+    //   `const maxLeft(${maxLeft}) = window.scrollX(${window.scrollX}) + document.documentElement.clientWidth(${document.documentElement.clientWidth}) - popupWidth(${popupWidth});`,
+    // );
+    // console.log(`const minTop(${minTop}) = window.scrollY(${window.scrollY});`);
+    // console.log(
+    //   `const maxTop(${maxTop}) = window.scrollY(${window.scrollY}) + document.documentElement.clientHeight(${document.documentElement.clientHeight}) - popupHeight(${popupHeight});`,
+    // );
 
     let popupLeft: number;
     let popupTop: number;
@@ -533,14 +561,37 @@ export class Popup {
     if (writingMode.startsWith('horizontal')) {
       popupTop = clamp(bottomSpace > topSpace ? wordBottom : wordTop - popupHeight, minTop, maxTop);
       popupLeft = clamp(rightSpace > leftSpace ? wordLeft : wordRight - popupWidth, minLeft, maxLeft);
+
+      // console.log(`writingMode.startsWith('horizontal')`);
+      // console.log(
+      //   `${popupTop} = clamp(${bottomSpace} > ${topSpace} ? ${wordBottom} : ${wordTop} - ${popupHeight}, ${minTop}, ${maxTop})`,
+      // );
+      // console.log(
+      //   `${popupLeft} = clamp(${rightSpace} > ${leftSpace} ? ${wordLeft} : ${wordRight} - ${popupWidth}, ${minLeft}, ${maxLeft})`,
+      // );
+
+      // console.log(`popupTop = clamp(bottomSpace > topSpace ? wordBottom : wordTop - popupHeight, minTop, maxTop);`);
+      // console.log(`popupLeft = clamp(rightSpace > leftSpace ? wordLeft : wordRight - popupWidth, minLeft, maxLeft);`);
     } else {
       popupTop = clamp(bottomSpace > topSpace ? wordTop : wordBottom - popupHeight, minTop, maxTop);
       popupLeft = clamp(rightSpace > leftSpace ? wordRight : wordLeft - popupWidth, minLeft, maxLeft);
+
+      // console.log(`ELSE`);
+      // console.log(
+      //   `${popupTop} = clamp(${bottomSpace} > ${topSpace} ? ${wordTop} : ${wordBottom} - ${popupHeight}, ${minTop}, ${maxTop});`,
+      // );
+      // console.log(
+      //   `${popupLeft} = clamp(${rightSpace} > ${leftSpace} ? ${wordRight} : ${wordLeft} - ${popupWidth}, ${minLeft}, ${maxLeft});`,
+      // );
+
+      // console.log(`popupTop = clamp(bottomSpace > topSpace ? wordTop : wordBottom - popupHeight, minTop, maxTop);`);
+      // console.log(`popupLeft = clamp(rightSpace > leftSpace ? wordRight : wordLeft - popupWidth, minLeft, maxLeft);`);
     }
 
     this.#outerStyle.transform = `translate(${popupLeft}px,${popupTop}px)`;
 
     this.fadeIn();
+    //console.log('-------------------END-------------------');
   }
 
   updateStyle(newCSS = config.customPopupCSS) {

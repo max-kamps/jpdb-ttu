@@ -21,9 +21,6 @@ export type Config = {
   customWordCSS: string;
   customPopupCSS: string;
 
-  keepReviewBlankSpaceHidden: boolean;
-  disable2DReviews: boolean;
-
   showPopupOnHover: boolean;
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
@@ -52,15 +49,11 @@ export const defaultConfig: Config = {
   contextWidth: 1,
   forqOnMine: true,
 
-  customWordCSS: `/***** Easy reader dark mode (white text) colors *****/
-/* Change "#FFF" to "#000" for light mode (black text) colors */
-.jpdb-word.blacklisted { color:  #FFF; }
-.jpdb-word.unparsed { color: #FFF; }
-.jpdb-word.known{ color: #FFF; }
+  customWordCSS: `/***** Make new in-deck and out-of-deck words a little easier to see *****/
 .jpdb-word.new{ color: #4b8dff; }
 .jpdb-word.not-in-deck{ color: #0277bd; }
 
-/***** Hide ttsu Reader furigana *****/
+/***** Hide furigana on known/learning words unless hovering *****/
 .jpdb-word.known:not(:hover) .jpdb-furi { visibility: hidden; }
 .jpdb-word.learning:not(:hover) .jpdb-furi { visibility: hidden; }
 .jpdb-word.due .jpdb-furi { visibility: hidden; }
@@ -71,18 +64,32 @@ export const defaultConfig: Config = {
 Remove the slash+asterisks surrounding the code parts below to enable experimental styling ideas
 I personally use but don't want to enable by default or add as full-on options */
 
-/* E-ink screen new word visibility border - vertical text version */
+/***** ttsu reader dark mode (white text) colors *****/
+/* Change "white" to "black" for light mode (black text) colors */
 /*
-.jpdb-word.new{ border-left: 2px solid }
-.jpdb-word.not-in-deck{ border-left: 2px dashed }
+.w-full.h-full .jpdb-word.known { color: white }
+.w-full.h-full .jpdb-word.blacklisted { color:  white }
+.w-full.h-full .jpdb-word.unparsed { color: white }
 */
 
-/* E-ink screen new word visibility border - horizontal text version */
+/***** Black screen for OLED on JPDB *****/
+/*
+html.dark-mode, html.dark-mode body {
+  background-color: black !important
+}
+*/
+
+/***** E-ink screen new word visibility border - horizontal text version *****/
 /*
 .jpdb-word.new { border-bottom: 2px solid }
 .jpdb-word.not-in-deck { border-bottom: 2px dashed }
 */
-`,
+
+/***** E-ink screen new word visibility border - vertical text version *****/
+/*
+.jpdb-word.new{ border-left: 2px solid }
+.jpdb-word.not-in-deck{ border-left: 2px dashed }
+*/`,
 
   customPopupCSS: `/* Make review/mining buttons bigger for mobile */
 button { padding:20px 0; font-size: 14px; flex-grow:1 }
@@ -93,9 +100,6 @@ button.edit-add-review,button.never-forget { display:none; }
 
 /* Increase max size of popup to accommodate larger buttons*/
 article { max-height: 50vh }`,
-
-  keepReviewBlankSpaceHidden: false,
-  disable2DReviews: false,
 
   showPopupOnHover: false,
   touchscreenSupport: false,
