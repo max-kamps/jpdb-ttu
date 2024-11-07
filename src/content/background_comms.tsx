@@ -91,7 +91,8 @@ export const port = browser.runtime.connect();
 port.onDisconnect.addListener(() => {
   console.error('disconnect:', port);
 });
-port.onMessage.addListener((message: BackgroundToContentMessage, port) => {
+port.onMessage.addListener((message: BackgroundToContentMessage) => {
+  //, port) => {
   //console.log('message:', message, port);
 
   switch (message.type) {

@@ -1,6 +1,15 @@
+# Version ＋α 1.2
+
+Small fix that improves the QOL of mobile reviewing 10x
+
+- Fixed popup positioning so the popup will (should) never be bigger than the screen
+- Prevent webpage from extending randomly across the x-axis when the popup is large
+- Some other small fixes that I forgot about but they're probably important
+
 # Version ＋α 1.1
 
 Added:
+
 - Links to take you to the 2D review page on home and learn pages
 - Blank space to push down 2D reviews for a less overwhelming experience
 - Added setting to disable blank space
