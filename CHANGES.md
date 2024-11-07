@@ -1,3 +1,11 @@
+# Version ＋α 1.1
+
+Added:
+- Links to take you to the 2D review page on home and learn pages
+- Blank space to push down 2D reviews for a less overwhelming experience
+- Added setting to disable blank space
+- Added custom logo! Pretty basic and not good looking but it'll do for now lol
+
 # Version ＋α 1.0
 
 Adding first functionality for 2D reviewing (from https://jpdb.io/deck?id=global)

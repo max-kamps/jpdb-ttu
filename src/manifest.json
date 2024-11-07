@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "JPDBreader＋α",
-  "version": "1.0",
+  "version": "1.1",
   "description": "JPDB parsing and mining in your browser",
   "icons": {
     "16": "icons/logo_16.png",
@@ -26,6 +26,14 @@
     "default_popup": "browser_popup/popup.html"
   },
   "content_scripts": [
+    {
+      "matches": ["*://jpdb.io/"],
+      "js": ["jpdb_plus_alpha/home_page_additions.js"]
+    },
+    {
+      "matches": ["*://jpdb.io/learn"],
+      "js": ["jpdb_plus_alpha/learn_page_additions.js"]
+    },
     {
       "matches": ["*://jpdb.io/deck?id=global*"],
       "js": ["integrations/jpdb_deck.js"],
