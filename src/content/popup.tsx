@@ -310,7 +310,9 @@ export class Popup {
               demoMode
                 ? undefined
                 : async () => {
-                    this.fadeOut();
+                    if (config && !config.disablePopupAutoClose) {
+                      this.fadeOut();
+                    }
                     await requestReview(this.#data.token.card, 'hard');
                   }
             }>
@@ -322,7 +324,9 @@ export class Popup {
               demoMode
                 ? undefined
                 : async () => {
-                    this.fadeOut();
+                    if (config && !config.disablePopupAutoClose) {
+                      this.fadeOut();
+                    }
                     await requestReview(this.#data.token.card, 'good');
                   }
             }>
@@ -334,7 +338,9 @@ export class Popup {
               demoMode
                 ? undefined
                 : async () => {
-                    this.fadeOut();
+                    if (config && !config.disablePopupAutoClose) {
+                      this.fadeOut();
+                    }
                     await requestReview(this.#data.token.card, 'easy');
                   }
             }>

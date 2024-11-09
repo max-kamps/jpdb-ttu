@@ -96,36 +96,38 @@ const prepareTopSection = (config: any) => {
     });
   }
 
-  const pagination_div = document.querySelector<HTMLElement>('.pagination');
+  const progress_report = document.createElement('span');
+  progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_reviews_count}</span>`;
+
+  let pagination_div = document.querySelector<HTMLElement>('.pagination');
   if (pagination_div) {
     pagination_div.classList.remove(...['without-prev', 'without-next']);
 
-    const progress_report = document.createElement('span');
-    progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_reviews_count}</span>`;
+    if (pagination_div.childElementCount === 1) {
+      const existing_pagination_link_wrapper = document.createElement('div');
+      existing_pagination_link_wrapper.appendChild(pagination_div.firstChild!);
+      pagination_div.appendChild(existing_pagination_link_wrapper);
+      const missing_pagination_link_wrapper = document.createElement('div');
+      const missing_pagination_link = document.createElement('a');
+      missing_pagination_link_wrapper.appendChild(missing_pagination_link);
 
-    if (pagination_div.childElementCount === 0) {
-      pagination_div.style.justifyContent = 'center';
-      pagination_div.appendChild(progress_report);
-    } else {
-      if (pagination_div.childElementCount === 1) {
-        const existing_pagination_link_wrapper = document.createElement('div');
-        existing_pagination_link_wrapper.appendChild(pagination_div.firstChild!);
-        pagination_div.appendChild(existing_pagination_link_wrapper);
-        const missing_pagination_link_wrapper = document.createElement('div');
-        const missing_pagination_link = document.createElement('a');
-        missing_pagination_link_wrapper.appendChild(missing_pagination_link);
-
-        if (existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'next page') {
-          pagination_div.prepend(missing_pagination_link_wrapper);
-        } else if (
-          existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'previous page'
-        ) {
-          pagination_div.appendChild(missing_pagination_link_wrapper);
-        }
+      if (existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'next page') {
+        pagination_div.prepend(missing_pagination_link_wrapper);
+      } else if (
+        existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'previous page'
+      ) {
+        pagination_div.appendChild(missing_pagination_link_wrapper);
       }
-
-      pagination_div.insertBefore(progress_report, pagination_div.childNodes[1]);
     }
+
+    pagination_div.insertBefore(progress_report, pagination_div.childNodes[1]);
+  } else {
+    const vocabulary_list = document.getElementsByClassName('vocabulary-list')[0];
+    pagination_div = document.createElement('div');
+    pagination_div.classList.add('pagination');
+    vocabulary_list.insertAdjacentElement('beforebegin', pagination_div);
+    pagination_div.style.justifyContent = 'center';
+    pagination_div.appendChild(progress_report);
   }
 };
 

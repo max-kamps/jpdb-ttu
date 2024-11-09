@@ -27,6 +27,7 @@ export type Config = {
 
   disableExtraSpace: boolean;
   disable2DReviewing: boolean;
+  disablePopupAutoClose: boolean;
   disableJPDBAutoParsing: boolean;
 
   showPopupKey: Keybind;
@@ -110,6 +111,7 @@ button.edit-add-review,button.never-forget { display:none; }
 
   disableExtraSpace: false,
   disable2DReviewing: false,
+  disablePopupAutoClose: false,
   disableJPDBAutoParsing: false,
 
   showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },

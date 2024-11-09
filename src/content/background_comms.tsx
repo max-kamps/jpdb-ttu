@@ -73,8 +73,6 @@ export function requestMine(card: Card, forq: boolean, sentence?: string, transl
 }
 
 export function requestReview(card: Card, rating: Grade) {
-  console.log(rating);
-  console.log(rating === 'good');
   if (['hard', 'good', 'easy'].includes(rating)) {
     incrementReviewsDone();
   }
@@ -160,11 +158,8 @@ port.onMessage.addListener((message: BackgroundToContentMessage) => {
     case 'updateConfig':
       {
         config = message.config;
-        console.log('Config loaded in background comms, calling functions in list');
-        console.log(config);
 
         callOnConfigLoad.forEach(func => {
-          console.log('Running function after config load! ' + func.name);
           func(config);
         });
         Popup.get().updateStyle();

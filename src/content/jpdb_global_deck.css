@@ -54,7 +54,7 @@ body > button:last-of-type {
 }
 
 .pagination {
-  justify-content: space-between !important;
+  justify-content: space-between;
   margin-bottom: 0 !important;
   padding-top: 1rem !important;
   margin-top: -1rem !important;
