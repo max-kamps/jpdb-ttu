@@ -1,9 +1,12 @@
 // @reader content-script
 
-import { config, callOnConfigLoad } from '../content/background_comms.js';
+import { runFunctionWhenConfigLoaded, runFunctionWhenReviewDone } from '../content/background_comms.js';
 import { showError } from '../content/toast.js';
 
 let shouldShow = false;
+const initial_reviews_count = Number(
+  document.querySelector<HTMLElement>('.nav > .nav-item:first-of-type > span')?.innerText ?? 0,
+);
 
 const toggleUnimportantElements = (forceHide = false) => {
   const should_hide = forceHide || shouldShow;
@@ -12,6 +15,118 @@ const toggleUnimportantElements = (forceHide = false) => {
   unimportant_info!.style.display = should_hide ? 'none' : 'block';
 
   shouldShow = !shouldShow;
+};
+
+const updateReviewsDoneCount = (reviewsDone: number) => {
+  document.getElementById('reviews_done')!.innerText = `${reviewsDone}`;
+  document.getElementById('total_reviews')!.innerText = `${initial_reviews_count - reviewsDone}`;
+};
+runFunctionWhenReviewDone(updateReviewsDoneCount);
+
+const prepareTopSection = (config: any) => {
+  const showing_of_progress_p = document.querySelector<HTMLElement>('.container > p');
+  if (showing_of_progress_p) {
+    let showing_of_message = showing_of_progress_p.firstChild!.textContent || '';
+    showing_of_message = showing_of_message.replace('Showing ', '');
+    showing_of_message = showing_of_message.replace('..', '-');
+    showing_of_message = showing_of_message.replace('from', 'of');
+    showing_of_message = showing_of_message.replace(' entries', '');
+
+    showing_of_progress_p.firstChild!.textContent = showing_of_message;
+    showing_of_progress_p.style.display = 'flex';
+    showing_of_progress_p.style.justifyContent = 'space-between';
+    showing_of_progress_p.style.margin = '1rem 0';
+    showing_of_progress_p.style.lineHeight = '34px';
+
+    if (!config.disableExtraSpace) {
+      const spacer = document.createElement('div');
+      Object.assign(spacer.style, {
+        padding: '0px',
+        margin: '0px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: 'calc(100dvh - 234px)',
+      });
+
+      const hide_space_button = document.createElement('button');
+      hide_space_button.innerText = 'Hide Blank Space';
+      Object.assign(hide_space_button.style, {
+        padding: '0px 18px',
+        margin: '0px',
+        color: 'var(--text-color)',
+        opacity: '0.4',
+        backgroundColor: 'transparent',
+        border: 'none',
+        borderRadius: '7px',
+        textAlign: 'center',
+        boxShadow: 'none',
+        transform: 'none',
+        height: 'auto',
+        width: 'auto',
+      });
+
+      spacer.appendChild(hide_space_button);
+
+      showing_of_progress_p.insertAdjacentElement('afterend', spacer);
+
+      hide_space_button.addEventListener('click', () => {
+        spacer.style.display = 'none';
+      });
+    }
+
+    const show_hidden_elements_button = document.createElement('input');
+    show_hidden_elements_button.setAttribute('type', 'button');
+    show_hidden_elements_button.setAttribute('value', 'Show/Hide');
+    show_hidden_elements_button.classList.add('outline');
+
+    Object.assign(show_hidden_elements_button.style, {
+      padding: '0px 12px',
+      height: 'auto',
+      color: 'var(--text-color)',
+      borderColor: 'var(--text-color)',
+      textDecoration: 'none',
+      margin: 0,
+    });
+    showing_of_progress_p.prepend(show_hidden_elements_button);
+
+    show_hidden_elements_button.addEventListener('click', () => {
+      toggleUnimportantElements();
+    });
+  }
+
+  const pagination_div = document.querySelector<HTMLElement>('.pagination');
+  if (pagination_div) {
+    pagination_div.classList.remove(...['without-prev', 'without-next']);
+
+    const progress_report = document.createElement('span');
+    progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_reviews_count}</span>`;
+
+    if (pagination_div.childElementCount === 0) {
+      pagination_div.style.justifyContent = 'center';
+      pagination_div.appendChild(progress_report);
+    } else {
+      if (pagination_div.childElementCount === 1) {
+        const existing_pagination_link_wrapper = document.createElement('div');
+        existing_pagination_link_wrapper.appendChild(pagination_div.firstChild!);
+        pagination_div.appendChild(existing_pagination_link_wrapper);
+        const missing_pagination_link_wrapper = document.createElement('div');
+        const missing_pagination_link = document.createElement('a');
+        missing_pagination_link_wrapper.appendChild(missing_pagination_link);
+
+        if (existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'next page') {
+          pagination_div.prepend(missing_pagination_link_wrapper);
+        } else if (
+          existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'previous page'
+        ) {
+          pagination_div.appendChild(missing_pagination_link_wrapper);
+        }
+      }
+
+      pagination_div.insertBefore(progress_report, pagination_div.childNodes[1]);
+    }
+  }
 };
 
 const jpdb_global_deck_main = (config: any) => {
@@ -29,87 +144,14 @@ const jpdb_global_deck_main = (config: any) => {
 
     document.querySelector<HTMLElement>('.container')?.prepend(unimportant_info);
 
-    const showing_of_progress_p = document.querySelector<HTMLElement>('.container > p');
-    if (showing_of_progress_p) {
-      let showing_of_message = showing_of_progress_p.firstChild!.textContent || '';
-      showing_of_message = showing_of_message.replace('Showing ', '');
-      showing_of_message = showing_of_message.replace('..', '-');
-      showing_of_message = showing_of_message.replace('from', 'of');
-      showing_of_message = showing_of_message.replace(' entries', '');
+    prepareTopSection(config);
 
-      showing_of_progress_p.firstChild!.textContent = showing_of_message;
-      showing_of_progress_p.style.display = 'flex';
-      showing_of_progress_p.style.justifyContent = 'space-between';
-      showing_of_progress_p.style.margin = '1rem 0';
-      showing_of_progress_p.style.lineHeight = '34px';
-
-      if (!config.disableExtraSpace) {
-        const spacer = document.createElement('div');
-        Object.assign(spacer.style, {
-          padding: '0px',
-          margin: '0px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: '100%',
-          height: 'calc(100dvh - 234px)',
-        });
-
-        const hide_space_button = document.createElement('button');
-        hide_space_button.innerText = 'Hide Blank Space';
-        Object.assign(hide_space_button.style, {
-          padding: '0px 18px',
-          margin: '0px',
-          color: '#424242',
-          backgroundColor: 'transparent',
-          border: 'none', //'1px solid #424242',
-          borderRadius: '7px',
-          textAlign: 'center',
-          boxShadow: 'none',
-          transform: 'none',
-          height: 'auto',
-          width: 'auto',
-        });
-
-        spacer.appendChild(hide_space_button);
-
-        showing_of_progress_p.insertAdjacentElement('afterend', spacer);
-
-        hide_space_button.addEventListener('click', () => {
-          spacer.style.display = 'none';
-        });
-      }
-
-      const show_hidden_elements_button = document.createElement('button');
-      show_hidden_elements_button.innerHTML = 'Show/Hide';
-      Object.assign(show_hidden_elements_button.style, {
-        backgroundColor: 'transparent',
-        border: '1px solid white',
-        transform: 'none',
-        boxShadow: 'none',
-        padding: '0px 12px',
-        fontSize: '16px',
-        height: 'auto',
-        borderRadius: '7px',
-      });
-      showing_of_progress_p.prepend(show_hidden_elements_button);
-
-      show_hidden_elements_button.addEventListener('click', () => {
-        toggleUnimportantElements();
-      });
-
-      const head = document.head;
-      head.innerHTML +=
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">';
-    }
+    const head = document.head;
+    head.innerHTML +=
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">';
   } catch (error) {
     showError(error);
   }
 };
 
-// If config already loaded, run main, otherwise register main as a callback
-if (config) {
-  jpdb_global_deck_main(config);
-} else {
-  callOnConfigLoad.push(jpdb_global_deck_main);
-}
+runFunctionWhenConfigLoaded(jpdb_global_deck_main);

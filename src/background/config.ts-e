@@ -162,6 +162,7 @@ export function migrateSchema(config: Config) {
 }
 
 export function loadConfig(): Config {
+  console.log('LOADING CONFIG');
   const config = Object.fromEntries(
     Object.entries(defaultConfig).map(([key, defaultValue]) => [key, localStorageGet(key, defaultValue)]),
   ) as Config;
@@ -175,6 +176,7 @@ export function loadConfig(): Config {
     return defaultConfig;
   }
 
+  console.log(config);
   return config;
 }
 

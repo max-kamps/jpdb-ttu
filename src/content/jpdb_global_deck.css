@@ -54,9 +54,15 @@ body > button:last-of-type {
 }
 
 .pagination {
+  justify-content: space-between !important;
   margin-bottom: 0 !important;
   padding-top: 1rem !important;
   margin-top: -1rem !important;
+  padding-bottom: 1rem !important;
+}
+.pagination a {
+  flex-grow: 1;
+  flex-basis: 0;
 }
 
 .pagination a {
@@ -68,6 +74,22 @@ body > button:last-of-type {
   min-width: 0 !important;
 }
 
+.pagination div {
+  flex-grow: 1 !important;
+  flex-basis: 0 !important;
+}
+
+.pagination div:last-of-type {
+  text-align: end;
+}
+.pagination div:first-of-type {
+  text-align: start;
+}
+
 .vocabulary-list {
   margin-top: 0 !important;
+}
+
+#reviews_done {
+  color: #70c000;
 }

@@ -201,6 +201,7 @@ export function parseJpdbVocabulary(vidSidPairs: VidSidPair[]) {
   //: [ParseBatch[], Promise<void>[]] {
   const vidSidFormatted = vidSidPairs.map(vs => [vs.vid, vs.sid]);
   console.log(vidSidFormatted);
+
   // const batches = vids.map(createParseBatch);
   // const applied = batches.map(({ paragraph, promise }) =>
   //   promise
