@@ -108,6 +108,7 @@
     "themes.css"
   ],
   "permissions": [
+    "storage",
     "tabs",
     "activeTab",
     "contextMenus",

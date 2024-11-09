@@ -9,7 +9,28 @@ import { showError } from './toast.js';
 // Background script communication
 
 export let config: Config;
-export const callOnConfigLoad: ((config: any) => void)[] = [];
+const callOnConfigLoad: ((config: any) => void)[] = [];
+
+let reviewsDone = 0;
+const callOnReviewDone: ((reviewsCount: number) => void)[] = [];
+
+export const runFunctionWhenConfigLoaded = (func: (config: any) => void) => {
+  // If config is already created, run immediately, otherwise register as callback
+  if (config) {
+    func(config);
+  } else {
+    callOnConfigLoad.push(func);
+  }
+};
+
+export const runFunctionWhenReviewDone = (func: (reviewCount: number) => void) => {
+  callOnReviewDone.push(func);
+};
+
+export const incrementReviewsDone = () => {
+  reviewsDone++;
+  callOnReviewDone.map(func => func(reviewsDone));
+};
 
 const waitingPromises = new Map<number, PromiseHandle<unknown>>();
 let nextSeq = 0;
@@ -52,6 +73,11 @@ export function requestMine(card: Card, forq: boolean, sentence?: string, transl
 }
 
 export function requestReview(card: Card, rating: Grade) {
+  console.log(rating);
+  console.log(rating === 'good');
+  if (['hard', 'good', 'easy'].includes(rating)) {
+    incrementReviewsDone();
+  }
   return requestUnabortable({ type: 'review', rating, vid: card.vid, sid: card.sid });
 }
 
@@ -134,7 +160,13 @@ port.onMessage.addListener((message: BackgroundToContentMessage) => {
     case 'updateConfig':
       {
         config = message.config;
-        callOnConfigLoad.forEach(func => func(config));
+        console.log('Config loaded in background comms, calling functions in list');
+        console.log(config);
+
+        callOnConfigLoad.forEach(func => {
+          console.log('Running function after config load! ' + func.name);
+          func(config);
+        });
         Popup.get().updateStyle();
       }
       break;
