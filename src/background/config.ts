@@ -44,7 +44,7 @@ export type Config = {
 export const defaultConfig: Config = {
   schemaVersion: CURRENT_SCHEMA_VERSION,
 
-  apiToken: 'null', //null,
+  apiToken: null,
 
   miningDeckId: null,
   forqDeckId: 'forq',
