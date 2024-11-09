@@ -3,6 +3,8 @@ import { applyTokens, displayCategory, Fragment, Paragraph } from '../content/pa
 import { showError } from '../content/toast.js';
 import { Canceled } from '../util.js';
 
+export type VidSidPair = { vid: number; sid: number };
+
 export function paragraphsInNode(node: Node, filter: (node: Node) => boolean = () => true): Paragraph[] {
   let offset = 0;
   const fragments: Fragment[] = [];
@@ -70,6 +72,16 @@ export function paragraphsInNode(node: Node, filter: (node: Node) => boolean = (
   recurse(node, false);
   return paragraphs;
 }
+
+export const vidSidPairsInNode = (node: Element): VidSidPair[] => {
+  const vidSidPairs = [...node.children].map(node => {
+    const vid = node.querySelector('input[name=v]')?.getAttribute('value');
+    const sid = node.querySelector('input[name=s]')?.getAttribute('value');
+    return { vid: Number(vid), sid: Number(sid) };
+  });
+
+  return vidSidPairs;
+};
 
 export function visibleObserver(
   enterCallback: (elements: HTMLElement[]) => void,
@@ -168,10 +180,7 @@ export function parseVisibleObserver(filter: (node: Node) => boolean = () => tru
 }
 
 export function parseParagraphs(paragraphs: Paragraph[]): [ParseBatch[], Promise<void>[]] {
-  console.log(paragraphs);
   const batches = paragraphs.map(createParseBatch);
-  console.log('BATCHES BELOW');
-  console.log(batches);
   const applied = batches.map(({ paragraph, promise }) =>
     promise
       .then(tokens => {
@@ -186,4 +195,26 @@ export function parseParagraphs(paragraphs: Paragraph[]): [ParseBatch[], Promise
   );
 
   return [batches, applied];
+}
+
+export function parseJpdbVocabulary(vidSidPairs: VidSidPair[]) {
+  //: [ParseBatch[], Promise<void>[]] {
+  const vidSidFormatted = vidSidPairs.map(vs => [vs.vid, vs.sid]);
+  console.log(vidSidFormatted);
+  // const batches = vids.map(createParseBatch);
+  // const applied = batches.map(({ paragraph, promise }) =>
+  //   promise
+  //     .then(tokens => {
+  //       applyTokens(paragraph, tokens);
+  //     })
+  //     .catch(error => {
+  //       if (!(error instanceof Canceled)) {
+  //         showError(error);
+  //       }
+  //       throw error;
+  //     }),
+  // );
+
+  // return [batches, applied];
+  //return [0, 0];
 }
