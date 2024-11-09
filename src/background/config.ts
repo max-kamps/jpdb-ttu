@@ -25,6 +25,10 @@ export type Config = {
   touchscreenSupport: boolean;
   disableFadeAnimation: boolean;
 
+  disableExtraSpace: boolean;
+  disable2DReviewing: boolean;
+  disableJPDBAutoParsing: boolean;
+
   showPopupKey: Keybind;
   addKey: Keybind;
   dialogKey: Keybind;
@@ -103,6 +107,10 @@ button.edit-add-review,button.never-forget { display:none; }
   showPopupOnHover: false,
   touchscreenSupport: false,
   disableFadeAnimation: false,
+
+  disableExtraSpace: false,
+  disable2DReviewing: false,
+  disableJPDBAutoParsing: false,
 
   showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
   addKey: null,

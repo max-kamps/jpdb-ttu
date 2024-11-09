@@ -9,6 +9,7 @@ import { showError } from './toast.js';
 // Background script communication
 
 export let config: Config;
+export const callOnConfigLoad: ((config: any) => void)[] = [];
 
 const waitingPromises = new Map<number, PromiseHandle<unknown>>();
 let nextSeq = 0;
@@ -133,6 +134,7 @@ port.onMessage.addListener((message: BackgroundToContentMessage) => {
     case 'updateConfig':
       {
         config = message.config;
+        callOnConfigLoad.forEach(func => func(config));
         Popup.get().updateStyle();
       }
       break;
