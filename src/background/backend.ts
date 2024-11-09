@@ -175,6 +175,104 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
   return [[tokens, cards], API_RATELIMIT];
 }
 
+
+export async function parseJpdbWords(text: string[]): Response<[Token[][], Card[]]> {
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.apiToken}`,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      text,
+      // furigana: [[position, length reading], ...] // TODO pass furigana to parse endpoint
+      position_length_encoding: 'utf16',
+      token_fields: TOKEN_FIELDS,
+      vocabulary_fields: VOCAB_FIELDS,
+    }),
+  };
+
+  const response = await fetch('https://jpdb.io/api/v1/parse', options);
+
+  if (!(200 <= response.status && response.status <= 299)) {
+    const data = (await response.json()) as JpdbError;
+    throw Error(`${data.error_message} while parsing 「${truncate(text.join(' '), 20)}」`);
+  }
+
+  const data = (await response.json()) as {
+    tokens: MapFieldTuple<typeof TOKEN_FIELDS, TokenFields>[][];
+    vocabulary: MapFieldTuple<typeof VOCAB_FIELDS, VocabFields>[];
+  };
+
+  const cards: Card[] = data.vocabulary.map(vocab => {
+    // NOTE: If you change these, make sure to change VOCAB_FIELDS too
+    const [
+      vid,
+      sid,
+      rid,
+      spelling,
+      reading,
+      frequencyRank,
+      partOfSpeech,
+      meaningsChunks,
+      meaningsPartOfSpeech,
+      cardState,
+      pitchAccent,
+    ] = vocab;
+
+    return {
+      vid,
+      sid,
+      rid,
+      spelling,
+      reading,
+      frequencyRank,
+      partOfSpeech,
+      meanings: meaningsChunks.map((glosses, i) => ({ glosses, partOfSpeech: meaningsPartOfSpeech[i] })),
+      state: cardState ?? ['not-in-deck'],
+      pitchAccent: pitchAccent ?? [], // HACK not documented... in case it can be null, better safe than sorry
+    };
+  });
+
+  const tokens: Token[][] = data.tokens.map(tokens =>
+    tokens.map(token => {
+      // This is type-safe, but not... variable name safe :/
+      // NOTE: If you change these, make sure to change TOKEN_FIELDS too
+      const [vocabularyIndex, position, length, furigana] = token;
+
+      const card = cards[vocabularyIndex];
+
+      let offset = position;
+      const rubies =
+        furigana === null
+          ? []
+          : furigana.flatMap(part => {
+              if (typeof part === 'string') {
+                offset += part.length;
+                return [];
+              } else {
+                const [base, ruby] = part;
+                const start = offset;
+                const length = base.length;
+                const end = (offset = start + length);
+                return { text: ruby, start, end, length };
+              }
+            });
+
+      return {
+        card,
+        start: position,
+        end: position + length,
+        length: length,
+        rubies,
+      };
+    }),
+  );
+
+  return [[tokens, cards], API_RATELIMIT];
+}
+
 export function addToDeck(vid: number, sid: number, deckId: DeckId): Response {
   if (deckId === 'forq') {
     return addToForqScrape(vid, sid);

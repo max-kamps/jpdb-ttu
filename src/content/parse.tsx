@@ -102,7 +102,7 @@ function wrap(node: Node, wrapper: HTMLElement) {
 
 export const reverseIndex = new Map<string, { className: string; elements: JpdbWord[] }>();
 export function applyTokens(fragments: Paragraph, tokens: Token[]) {
-  // console.log('Applying results:', fragments, tokens);
+  console.log('Applying results:', fragments, tokens);
 
   let fragmentIndex = 0;
   let curOffset = 0;

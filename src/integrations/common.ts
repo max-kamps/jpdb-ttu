@@ -168,7 +168,10 @@ export function parseVisibleObserver(filter: (node: Node) => boolean = () => tru
 }
 
 export function parseParagraphs(paragraphs: Paragraph[]): [ParseBatch[], Promise<void>[]] {
+  console.log(paragraphs);
   const batches = paragraphs.map(createParseBatch);
+  console.log('BATCHES BELOW');
+  console.log(batches);
   const applied = batches.map(({ paragraph, promise }) =>
     promise
       .then(tokens => {

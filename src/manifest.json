@@ -36,8 +36,13 @@
     },
     {
       "matches": ["*://jpdb.io/deck?id=global*"],
-      "js": ["integrations/jpdb_deck.js"],
-      "css": ["content/word.css", "content/jpdb_deck.css"]
+      "js": ["integrations/jpdb_global_deck.js"],
+      "css": ["content/jpdb_global_deck.css"]
+    },
+    {
+      "matches": ["*://jpdb.io/*/vocabulary-list", "*://jpdb.io/deck*"],
+      "js": ["integrations/jpdb_vocabulary_lists.js"],
+      "css": ["content/word.css"]
     },
     {
       "matches": ["*://reader.ttsu.app/*", "*://ttu-ebook.web.app/*"],
@@ -106,7 +111,7 @@
     "tabs",
     "activeTab",
     "contextMenus",
-    "https://jpdb.io/*",
+    "*://jpdb.io/*",
     "*://reader.ttsu.app/*",
     "*://ttu-ebook.web.app/*",
     "*://anacreondjt.gitlab.io/texthooker.html",

@@ -118,7 +118,7 @@ document.addEventListener('mousedown', e => {
 export function onWordHoverStart({ target, x, y }: MouseEvent) {
   if (target === null) return;
   currentHover = [target as JpdbWord, x, y];
-  if (popupKeyHeld || config.showPopupOnHover) {
+  if (popupKeyHeld || config.showPopupOnHover || config.touchscreenSupport) {
     // On mobile devices, the position of the popup is occasionally adjusted to ensure
     // it remains on the screen. However, due to the interaction between the 'onmouseenter'
     // event and the popup, there are instances where the popup appears and at the same
