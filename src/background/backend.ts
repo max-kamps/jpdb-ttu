@@ -175,7 +175,6 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
   return [[tokens, cards], API_RATELIMIT];
 }
 
-
 export async function parseJpdbWords(text: string[]): Response<[Token[][], Card[]]> {
   const options = {
     method: 'POST',
