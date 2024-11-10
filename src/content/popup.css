@@ -227,3 +227,8 @@ button.easy {
 .state .failed {
   color: rgb(255, 0, 0);
 }
+
+.vocab-content {
+  flex-shrink: 1;
+  overflow-y: scroll;
+}
