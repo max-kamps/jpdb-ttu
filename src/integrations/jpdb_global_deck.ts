@@ -4,9 +4,19 @@ import { runFunctionWhenConfigLoaded, runFunctionWhenReviewDone } from '../conte
 import { showError } from '../content/toast.js';
 
 let shouldShow = false;
-const initial_reviews_count = Number(
+let initial_reviews_count = Number(
   document.querySelector<HTMLElement>('.nav > .nav-item:first-of-type > span')?.innerText ?? 0,
 );
+
+// I know this is gross! I'll fix it...someday
+const showing_cards = window.location.href
+  .split('&')
+  .filter(part => part.startsWith('show_only'))[0]
+  .replace('show_only=', '')
+  .split(',');
+
+const in_review_mode =
+  showing_cards.length == 2 && showing_cards.includes('overdue') && showing_cards.includes('failed');
 
 const toggleUnimportantElements = (forceHide = false) => {
   const should_hide = forceHide || shouldShow;
@@ -24,6 +34,15 @@ const updateReviewsDoneCount = (reviewsDone: number) => {
 runFunctionWhenReviewDone(updateReviewsDoneCount);
 
 const prepareTopSection = (config: any) => {
+  // Hide all unimportant containers and add button to show them
+  const unimportant_info_elements = document.querySelectorAll<HTMLElement>('.container > *:nth-child(-n+8)');
+  const unimportant_info = document.createElement('div');
+  unimportant_info.id = 'unimportant_info';
+  unimportant_info.append(...unimportant_info_elements);
+  unimportant_info.style.display = 'none';
+
+  document.querySelector<HTMLElement>('.container')?.prepend(unimportant_info);
+
   const showing_of_progress_p = document.querySelector<HTMLElement>('.container > p');
   if (showing_of_progress_p) {
     let showing_of_message = showing_of_progress_p.firstChild!.textContent || '';
@@ -32,13 +51,16 @@ const prepareTopSection = (config: any) => {
     showing_of_message = showing_of_message.replace('from', 'of');
     showing_of_message = showing_of_message.replace(' entries', '');
 
+    initial_reviews_count = Number(showing_of_message.split(' ')[showing_of_message.split(' ').length - 1]);
+
     showing_of_progress_p.firstChild!.textContent = showing_of_message;
     showing_of_progress_p.style.display = 'flex';
     showing_of_progress_p.style.justifyContent = 'space-between';
     showing_of_progress_p.style.margin = '1rem 0';
     showing_of_progress_p.style.lineHeight = '34px';
 
-    if (!config.disableExtraSpace) {
+    // Only add spacer if enabled and on due/failed only
+    if (!config.disableExtraSpace && in_review_mode) {
       const spacer = document.createElement('div');
       Object.assign(spacer.style, {
         padding: '0px',
@@ -116,8 +138,11 @@ const prepareTopSection = (config: any) => {
       } else if (
         existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'previous page'
       ) {
+        existing_pagination_link_wrapper.firstElementChild.innerHTML = 'Prev page'; // Shorten this lol
         pagination_div.appendChild(missing_pagination_link_wrapper);
       }
+    } else if (pagination_div.childElementCount === 2) {
+      pagination_div.firstElementChild!.innerHTML = 'Prev page'; // Shorten this lol
     }
 
     pagination_div.insertBefore(progress_report, pagination_div.childNodes[1]);
@@ -137,19 +162,15 @@ const jpdb_global_deck_main = (config: any) => {
   }
 
   try {
-    // Hide all unimportant containers and add button to show them
-    const unimportant_info_elements = document.querySelectorAll<HTMLElement>('.container > *:nth-child(-n+8)');
-    const unimportant_info = document.createElement('div');
-    unimportant_info.id = 'unimportant_info';
-    unimportant_info.append(...unimportant_info_elements);
-    unimportant_info.style.display = 'none';
-
-    document.querySelector<HTMLElement>('.container')?.prepend(unimportant_info);
-
     prepareTopSection(config);
 
-    const head = document.head;
-    head.innerHTML +=
+    if (in_review_mode && config.hideVocabOSuccessfulGrade) {
+      const styleTag = document.createElement('style');
+      styleTag.innerHTML = '.entry.overdue:has(.known), .entry.overdue:has(.learning) { display: none; }';
+      document.head.insertAdjacentElement('beforeend', styleTag);
+    }
+
+    document.head.innerHTML +=
       '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">';
   } catch (error) {
     showError(error);

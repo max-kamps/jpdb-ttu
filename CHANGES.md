@@ -1,3 +1,13 @@
+# Version ＋α 1.3
+
+Some more small improvements (basically me just procrastinating before I have to change the last big thing before "release" lol)
+
+- Add links to learn new word pages in the JPDB home and learn pages! Click those to be taken to an auto-parsed page of your all-word/global deck ordered by frequency across the whole corpus
+- Add ability to switch the JPDB buttons to be on the bottom of the popup (defaulted to this but may switch if people don't like it
+- Add ability to have successfully-graded words hide in 2D reviews! not sure I'd use this myself but it's really satisfying
+- Add new settings related to new functionality
+- Add progress message to 2D reviews (done_count / remaining_count)
+
 # Version ＋α 1.2
 
 Small fix that improves the QOL of mobile reviewing 10x

@@ -26,8 +26,11 @@ export type Config = {
   disableFadeAnimation: boolean;
 
   disableExtraSpace: boolean;
-  disable2DReviewing: boolean;
   disablePopupAutoClose: boolean;
+  hideVocabOSuccessfulGrade: boolean;
+  disable2DReviewing: boolean;
+
+  gradeButtonsAtBottom: boolean;
   disableJPDBAutoParsing: boolean;
 
   showPopupKey: Keybind;
@@ -110,8 +113,11 @@ button.edit-add-review,button.never-forget { display:none; }
   disableFadeAnimation: false,
 
   disableExtraSpace: false,
-  disable2DReviewing: false,
   disablePopupAutoClose: false,
+  hideVocabOSuccessfulGrade: false,
+  disable2DReviewing: false,
+
+  gradeButtonsAtBottom: true,
   disableJPDBAutoParsing: false,
 
   showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },

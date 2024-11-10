@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "JPDBreader＋α",
-  "version": "1.2",
+  "version": "1.3",
   "description": "JPDB parsing and mining in your browser",
   "icons": {
     "16": "icons/logo_16.png",

@@ -1,12 +1,14 @@
+div.entry {
+  flex-grow: 1;
+}
+
 div.entry.overdue ruby rt,
-div.entry.failed ruby rt,
-div.entry.learning ruby rt {
+div.entry.failed ruby rt {
   display: none;
 }
 
 div.entry.overdue div div:last-of-type,
-div.entry.failed div div:last-of-type,
-div.entry.learning div div:last-of-type {
+div.entry.failed div div:last-of-type {
   display: none;
 }
 
@@ -14,15 +16,17 @@ div.entry.overdue,
 div.entry.failed {
   padding: 0 5px;
   margin: 0;
-  flex-grow: 1;
   align-items: center;
 }
 
 div.entry.overdue div,
-div.entry.failed div,
-div.entry.learning div {
+div.entry.failed div {
   justify-content: center;
   display: flex;
+}
+
+div.entry.new {
+  overflow-x: scroll;
 }
 
 .review-reveal {
@@ -79,10 +83,12 @@ body > button:last-of-type {
   flex-basis: 0 !important;
 }
 
-.pagination div:last-of-type {
+.pagination div:last-of-type,
+.pagination a:last-of-type {
   text-align: end;
 }
-.pagination div:first-of-type {
+.pagination div:first-of-type,
+.pagination a:first-of-type {
   text-align: start;
 }
 
