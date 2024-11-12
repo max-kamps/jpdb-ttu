@@ -61,6 +61,13 @@ export const defaultConfig: Config = {
 These are easily editable or deletable styling options that I'm leaving on by default and think others would like too.
 Feel free to delete them or surround the options you don't want with /* and */
 
+/***** Don't change colors for known, blacklisted, or unparsed words *****
+ * This keeps all colors for JPDB.io pages (for 2D reviewing etc.)  */
+
+.jpdb-word.known:not(div.vocabulary-list .jpdb-word.known) { color: inherit }
+.jpdb-word.blacklisted:not(div.vocabulary-list .jpdb-word.blacklisted) { color: inherit }
+.jpdb-word.unparsed:not(div.vocabulary-list .jpdb-word.unparsed) { color: inherit }
+
 /***** Black screen for OLED on JPDB *****/
 
 html.dark-mode, html.dark-mode body {
@@ -76,10 +83,10 @@ html.dark-mode, html.dark-mode body {
 
 
 /**** Ideas & Options *****
-Remove the slash+asterisks surrounding the code parts below to enable experimental styling ideas
-I personally use but don't want to enable by default or add as full-on options */
+ * Remove the slash+asterisks surrounding the code parts below to enable experimental styling ideas.
+ * These are all off by default! */
 
-/***** Make parsed-text colors more visible on grayscale displays *****/
+/***** Make parsed-text colors more visible on grayscale displays (super ugly though) *****/
 /*
 .jpdb-word.new { color: #18FFFF}
 .jpdb-word.not-in-deck { color: #40C4FF }
@@ -89,14 +96,6 @@ I personally use but don't want to enable by default or add as full-on options *
 .jpdb-word.failed { color: #FF8A80 }
 .jpdb-word.unparsed { color: #616161 }
 .jpdb-word.blacklisted { color:  #616161 }
-*/
-
-/***** ttsu reader dark mode (white text) colors *****/
-/* Change "white" to "black" for light mode (black text) colors */
-/*
-.w-full.h-full .jpdb-word.known { color: white }
-.w-full.h-full .jpdb-word.blacklisted { color:  white }
-.w-full.h-full .jpdb-word.unparsed { color: white }
 */
 
 /***** E-ink screen new word visibility border - horizontal text version *****/
