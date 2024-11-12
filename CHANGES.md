@@ -3,7 +3,7 @@
 This will hopefully be the final version before the "release" - still in the branch but will be merged someday lol
 
 - Pull JPDB words from the lookup-vocabulary endpoint using word IDs so there should be no more mis-parses on jpdb.io pages!
-    - Still needs major cleanup and debugging, the popup window is way off where it should be like 40% of the time
+  - Still needs major cleanup and debugging, the popup window is way off where it should be like 40% of the time
 
 # Version ＋α 1.3
 

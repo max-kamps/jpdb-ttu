@@ -64,10 +64,6 @@ body > button:last-of-type {
   margin-top: -1rem !important;
   padding-bottom: 1rem !important;
 }
-.pagination a {
-  flex-grow: 1;
-  flex-basis: 0;
-}
 
 .pagination a {
   padding: 0.5rem !important;
@@ -78,7 +74,8 @@ body > button:last-of-type {
   min-width: 0 !important;
 }
 
-.pagination div {
+.pagination div,
+.pagination a {
   flex-grow: 1 !important;
   flex-basis: 0 !important;
 }

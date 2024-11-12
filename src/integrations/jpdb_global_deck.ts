@@ -2,6 +2,7 @@
 
 import { runFunctionWhenConfigLoaded, runFunctionWhenReviewDone } from '../content/background_comms.js';
 import { showError } from '../content/toast.js';
+import { wrap } from '../util.js';
 
 let shouldShow = false;
 let initial_reviews_count = Number(
@@ -121,32 +122,34 @@ const prepareTopSection = (config: any) => {
   const progress_report = document.createElement('span');
   progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_reviews_count}</span>`;
 
-  let pagination_div = document.querySelector<HTMLElement>('.pagination');
-  if (pagination_div) {
+  let pagination_divs = [...(document.querySelectorAll<HTMLElement>('.pagination') ?? [])];
+  pagination_divs.map((pagination_div: HTMLElement, index) => {
     pagination_div.classList.remove(...['without-prev', 'without-next']);
-
-    if (pagination_div.childElementCount === 1) {
-      const existing_pagination_link_wrapper = document.createElement('div');
-      existing_pagination_link_wrapper.appendChild(pagination_div.firstChild!);
-      pagination_div.appendChild(existing_pagination_link_wrapper);
-      const missing_pagination_link_wrapper = document.createElement('div');
-      const missing_pagination_link = document.createElement('a');
-      missing_pagination_link_wrapper.appendChild(missing_pagination_link);
-
-      if (existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'next page') {
-        pagination_div.prepend(missing_pagination_link_wrapper);
-      } else if (
-        existing_pagination_link_wrapper.firstElementChild?.innerHTML.trim().toLowerCase() === 'previous page'
-      ) {
-        existing_pagination_link_wrapper.firstElementChild.innerHTML = 'Prev page'; // Shorten this lol
-        pagination_div.appendChild(missing_pagination_link_wrapper);
+    if (pagination_div.children.length === 1) {
+      if (pagination_div.firstElementChild?.innerHTML.toLowerCase().trim() === 'previous page') {
+        pagination_div.appendChild(document.createElement('a'));
+      } else {
+        pagination_div.prepend(document.createElement('a'));
       }
-    } else if (pagination_div.childElementCount === 2) {
-      pagination_div.firstElementChild!.innerHTML = 'Prev page'; // Shorten this lol
     }
 
-    pagination_div.insertBefore(progress_report, pagination_div.childNodes[1]);
-  } else {
+    [...pagination_div.children].forEach(child => {
+      if (child.innerHTML.trim().toLowerCase() === 'previous page') {
+        child.innerHTML = 'Prev page';
+      }
+      const existing_pagination_link_wrapper = document.createElement('div');
+      existing_pagination_link_wrapper.appendChild(child);
+      pagination_div.appendChild(existing_pagination_link_wrapper);
+    });
+
+    // Add progress bar to first pagination div only
+    if (index === 0) {
+      pagination_div.insertBefore(progress_report, pagination_div.childNodes[1]);
+    }
+  });
+
+  if (pagination_divs.length === 0) {
+    let pagination_div = document.querySelector<HTMLElement>('.pagination');
     const vocabulary_list = document.getElementsByClassName('vocabulary-list')[0];
     pagination_div = document.createElement('div');
     pagination_div.classList.add('pagination');
