@@ -1,3 +1,4 @@
+import { VidSidPair } from '../content/parse.js';
 import { Card, CardState, DeckId, Token } from '../types.js';
 import { assertNonNull, truncate } from '../util.js';
 import { config } from './background.js';
@@ -79,6 +80,7 @@ const VOCAB_FIELDS = [
 ] as const;
 
 export async function parse(text: string[]): Response<[Token[][], Card[]]> {
+  console.log('ASYNC PARSE IN BACKEND IS RUNNING WITH TEXT', text);
   const options = {
     method: 'POST',
     headers: {
@@ -94,104 +96,6 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
       vocabulary_fields: VOCAB_FIELDS,
     }),
   };
-
-  const response = await fetch('https://jpdb.io/api/v1/parse', options);
-
-  if (!(200 <= response.status && response.status <= 299)) {
-    const data = (await response.json()) as JpdbError;
-    throw Error(`${data.error_message} while parsing 「${truncate(text.join(' '), 20)}」`);
-  }
-
-  const data = (await response.json()) as {
-    tokens: MapFieldTuple<typeof TOKEN_FIELDS, TokenFields>[][];
-    vocabulary: MapFieldTuple<typeof VOCAB_FIELDS, VocabFields>[];
-  };
-
-  const cards: Card[] = data.vocabulary.map(vocab => {
-    // NOTE: If you change these, make sure to change VOCAB_FIELDS too
-    const [
-      vid,
-      sid,
-      rid,
-      spelling,
-      reading,
-      frequencyRank,
-      partOfSpeech,
-      meaningsChunks,
-      meaningsPartOfSpeech,
-      cardState,
-      pitchAccent,
-    ] = vocab;
-
-    return {
-      vid,
-      sid,
-      rid,
-      spelling,
-      reading,
-      frequencyRank,
-      partOfSpeech,
-      meanings: meaningsChunks.map((glosses, i) => ({ glosses, partOfSpeech: meaningsPartOfSpeech[i] })),
-      state: cardState ?? ['not-in-deck'],
-      pitchAccent: pitchAccent ?? [], // HACK not documented... in case it can be null, better safe than sorry
-    };
-  });
-
-  const tokens: Token[][] = data.tokens.map(tokens =>
-    tokens.map(token => {
-      // This is type-safe, but not... variable name safe :/
-      // NOTE: If you change these, make sure to change TOKEN_FIELDS too
-      const [vocabularyIndex, position, length, furigana] = token;
-
-      const card = cards[vocabularyIndex];
-
-      let offset = position;
-      const rubies =
-        furigana === null
-          ? []
-          : furigana.flatMap(part => {
-              if (typeof part === 'string') {
-                offset += part.length;
-                return [];
-              } else {
-                const [base, ruby] = part;
-                const start = offset;
-                const length = base.length;
-                const end = (offset = start + length);
-                return { text: ruby, start, end, length };
-              }
-            });
-
-      return {
-        card,
-        start: position,
-        end: position + length,
-        length: length,
-        rubies,
-      };
-    }),
-  );
-
-  return [[tokens, cards], API_RATELIMIT];
-}
-
-export async function parseJpdbWords(text: string[]): Response<[Token[][], Card[]]> {
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.apiToken}`,
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({
-      text,
-      // furigana: [[position, length reading], ...] // TODO pass furigana to parse endpoint
-      position_length_encoding: 'utf16',
-      token_fields: TOKEN_FIELDS,
-      vocabulary_fields: VOCAB_FIELDS,
-    }),
-  };
-
   const response = await fetch('https://jpdb.io/api/v1/parse', options);
 
   if (!(200 <= response.status && response.status <= 299)) {
@@ -469,6 +373,7 @@ export async function review(vid: number, sid: number, rating: keyof typeof REVI
 }
 
 export async function getCardState(vid: number, sid: number): Response<CardState> {
+  console.log('HOW BOUT NOW IN NEW STUFF IDK');
   const options = {
     method: 'POST',
     headers: {
@@ -496,4 +401,99 @@ export async function getCardState(vid: number, sid: number): Response<CardState
   if (vocabInfo === null) throw Error(`Can't get state for word ${vid}/${sid}, word does not exist`);
 
   return [vocabInfo[0] ?? ['not-in-deck'], API_RATELIMIT];
+}
+
+export async function parseJpdbWordsByVidSidPairs(vidSidPairs: VidSidPair[]): Response<Card[]> {
+  //: Response<[Token[][], Card[]]> {
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.apiToken}`,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      list: vidSidPairs.map(vidSidPair => [vidSidPair.vid, vidSidPair.sid]),
+      // furigana: [[position, length reading], ...] // TODO pass furigana to parse endpoint
+      fields: VOCAB_FIELDS,
+    }),
+  };
+
+  const response = await fetch('https://jpdb.io/api/v1/lookup-vocabulary', options);
+
+  if (!(200 <= response.status && response.status <= 299)) {
+    const data = (await response.json()) as JpdbError;
+    throw Error(`${data.error_message} while parsing`);
+  }
+
+  const data = (await response.json()) as {
+    vocabulary_info: MapFieldTuple<typeof VOCAB_FIELDS, VocabFields>[];
+  };
+
+  const cards: Card[] = data.vocabulary_info.map(vocab => {
+    // NOTE: If you change these, make sure to change VOCAB_FIELDS too
+    const [
+      vid,
+      sid,
+      rid,
+      spelling,
+      reading,
+      frequencyRank,
+      partOfSpeech,
+      meaningsChunks,
+      meaningsPartOfSpeech,
+      cardState,
+      pitchAccent,
+    ] = vocab;
+
+    return {
+      vid,
+      sid,
+      rid,
+      spelling,
+      reading,
+      frequencyRank,
+      partOfSpeech,
+      meanings: meaningsChunks.map((glosses, i) => ({ glosses, partOfSpeech: meaningsPartOfSpeech[i] })),
+      state: cardState ?? ['not-in-deck'],
+      pitchAccent: pitchAccent ?? [], // HACK not documented... in case it can be null, better safe than sorry
+    };
+  });
+
+  // const tokens: Token[][] = data.tokens.map(tokens =>
+  //   tokens.map(token => {
+  //     // This is type-safe, but not... variable name safe :/
+  //     // NOTE: If you change these, make sure to change TOKEN_FIELDS too
+  //     const [vocabularyIndex, position, length, furigana] = token;
+
+  //     const card = cards[vocabularyIndex];
+
+  //     let offset = position;
+  //     const rubies =
+  //       furigana === null
+  //         ? []
+  //         : furigana.flatMap(part => {
+  //             if (typeof part === 'string') {
+  //               offset += part.length;
+  //               return [];
+  //             } else {
+  //               const [base, ruby] = part;
+  //               const start = offset;
+  //               const length = base.length;
+  //               const end = (offset = start + length);
+  //               return { text: ruby, start, end, length };
+  //             }
+  //           });
+
+  //     return {
+  //       card,
+  //       start: position,
+  //       end: position + length,
+  //       length: length,
+  //       rubies,
+  //     };
+  //   }),
+  // );
+
+  return [cards, API_RATELIMIT];
 }

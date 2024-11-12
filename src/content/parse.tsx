@@ -1,4 +1,4 @@
-import { Token } from '../types.js';
+import { Card, Token } from '../types.js';
 import { nonNull } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
 import { onWordHoverStart, onWordHoverStop } from './content.js';
@@ -18,6 +18,13 @@ export type Fragment = {
  * in the source html corresponds to their own Paragraph.
  */
 export type Paragraph = Fragment[];
+
+export type VidSidPair = {
+  vocab: string;
+  vid: number;
+  sid: number;
+  node: Text;
+};
 
 export function displayCategory(node: Node): 'text' | 'ruby' | 'ruby-text' | 'inline' | 'block' | 'none' {
   if (node instanceof Text || node instanceof CDATASection) {
@@ -102,7 +109,7 @@ function wrap(node: Node, wrapper: HTMLElement) {
 
 export const reverseIndex = new Map<string, { className: string; elements: JpdbWord[] }>();
 export function applyTokens(fragments: Paragraph, tokens: Token[]) {
-  //console.log('Applying results:', fragments, tokens);
+  console.log('Applying REAL results:', fragments, tokens);
 
   let fragmentIndex = 0;
   let curOffset = 0;
@@ -194,4 +201,112 @@ export function applyTokens(fragments: Paragraph, tokens: Token[]) {
     // console.log('Unparsed original:', fragment.node.data);
     wrap(fragment.node, <span class='jpdb-word unparsed'></span>);
   }
+}
+
+export function applyCardToJPDBVocab(vidSidPair: VidSidPair, card: Card) {
+  console.log('Applying card:', vidSidPair, card);
+
+  let fragmentIndex = 0;
+  let curOffset = 0;
+  const text = vidSidPair.vocab;
+
+  //for (const token of tokens) {
+  if (!text) return;
+  // console.log('at', curOffset, 'fragment', fragment, 'token', token);
+
+  // Wrap all unparsed fragments that appear before the token
+  // while (curOffset < token.start) {
+  //   if (fragment.end > token.start) {
+  //     // Only the beginning of the node is unparsed. Split it.
+  //     splitFragment(fragments, fragmentIndex, token.start);
+  //   }
+
+  //   // console.log('Unparsed original:', fragment.node.data);
+  //   wrap(fragment.node, <span class='jpdb-word unparsed'></span>);
+
+  //   curOffset += fragment.length;
+
+  //   fragment = fragments[++fragmentIndex];
+  //   if (!fragment) return;
+  // }
+
+  // Accumulate fragments until we have enough to fit the current token
+  // while (curOffset < token.end) {
+  //   if (fragment.end > token.end) {
+  //     // Only the beginning of the node is part of the token. Split it.
+  //     splitFragment(fragments, fragmentIndex, token.end);
+  //   }
+
+  // console.log('Part of token:', fragment.node.data);
+  const className = `jpdb-word ${card.state.join(' ')}`;
+  const wrapper = (
+    <span class={className} onmouseenter={onWordHoverStart} onmouseleave={onWordHoverStop}></span>
+  ) as JpdbWord;
+
+  const idx = reverseIndex.get(`${card.vid}/${card.sid}`);
+  if (idx === undefined) {
+    reverseIndex.set(`${card.vid}/${card.sid}`, { className, elements: [wrapper] });
+  } else {
+    idx.elements.push(wrapper);
+  }
+
+  const length = vidSidPair.vocab.length;
+  wrapper.jpdbData = {
+    token: { start: 0, end: length - 1, rubies: [], length: length, card: card },
+    context: text,
+    contextOffset: curOffset,
+  };
+
+  console.log(vidSidPair.node);
+  //wrap(vidSidPair.node, wrapper);
+  // Wrap ruby nodes
+
+  var childrenToWrap: ChildNode[] = [...vidSidPair.node.childNodes];
+  // vidSidPair.node.childNodes.forEach(child => {
+  //   console.log(child.nodeName);
+  //   console.log(child);
+  //   //insertBefore(wrapper, child);
+  //   childrenToWrap.push(child);
+  // });
+
+  childrenToWrap.forEach(child => {
+    //insertBefore(wrapper, child);
+    //wrap(child, wrapper);
+    //wrapper.append(child);
+    wrap(child, wrapper);
+  });
+
+  // if (!fragment.hasRuby) {
+  //   for (const ruby of token.rubies) {
+  //     if (ruby.start >= fragment.start && ruby.end <= fragment.end) {
+  //       // Ruby is contained in fragment
+  //       if (ruby.start > fragment.start) {
+  //         splitFragment(fragments, fragmentIndex, ruby.start);
+  //         insertAfter(<rt></rt>, fragment.node);
+  //         fragment = fragment = fragments[++fragmentIndex];
+  //       }
+
+  //       if (ruby.end < fragment.end) {
+  //         splitFragment(fragments, fragmentIndex, ruby.end);
+  //         insertAfter(<rt class='jpdb-furi'>{ruby.text}</rt>, fragment.node);
+  //         fragment = fragment = fragments[++fragmentIndex];
+  //       } else {
+  //         insertAfter(<rt class='jpdb-furi'>{ruby.text}</rt>, fragment.node);
+  //       }
+  //     }
+  //   }
+  // }
+
+  //curOffset = fragment.end;
+
+  //fragment = fragments[++fragmentIndex];
+  //if (!fragment) break;
+  //}
+  //}
+
+  // Wrap any left-over fragments in unparsed wrappers
+  // for (const fragment of fragments.slice(fragmentIndex)) {
+  //   // console.log('Unparsed original:', fragment.node.data);
+  //   wrap(fragment.node, <span class='jpdb-word unparsed'></span>);
+  // }
 }

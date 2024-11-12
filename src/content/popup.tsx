@@ -510,7 +510,12 @@ export class Popup {
 
     this.setData(data); // Because we need the dimensions of the popup with the new data
 
+    console.log(data);
+    console.log(word);
+
     const bbox = getClosestClientRect(word, mouseX, mouseY);
+    console.log(bbox);
+    console.log(mouseX, mouseY);
 
     const wordLeft = window.scrollX + bbox.left;
     const wordTop = window.scrollY + bbox.top;

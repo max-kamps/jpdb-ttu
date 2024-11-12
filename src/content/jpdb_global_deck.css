@@ -99,3 +99,8 @@ body > button:last-of-type {
 #reviews_done {
   color: #70c000;
 }
+
+.vocabulary-list .vocabulary-spelling a {
+  margin-right: 0 !important;
+  border: 0 !important;
+}

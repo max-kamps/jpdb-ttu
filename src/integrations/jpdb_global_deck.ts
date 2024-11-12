@@ -161,6 +161,11 @@ const jpdb_global_deck_main = (config: any) => {
     return;
   }
 
+  if (!config.apiToken) {
+    showError(new Error('API Token not found, please input it in the JPDBreader settings'));
+    return;
+  }
+
   try {
     prepareTopSection(config);
 

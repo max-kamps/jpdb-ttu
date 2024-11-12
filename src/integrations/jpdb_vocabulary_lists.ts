@@ -1,6 +1,11 @@
 // @reader content-script
 import { paragraphsInNode, parseParagraphs, parseJpdbVocabulary, vidSidPairsInNode } from './common.js';
-import { requestParse, runFunctionWhenConfigLoaded } from '../content/background_comms.js';
+import {
+  createJPDBVocabParseBatch,
+  requestJpdbVocabParse,
+  requestParse,
+  runFunctionWhenConfigLoaded,
+} from '../content/background_comms.js';
 import { showError } from '../content/toast.js';
 
 // Register this script as a callback to run once config is loaded
@@ -25,38 +30,38 @@ const jpdb_vocabulary_lists_main = (config: any) => {
     return;
   }
 
-  // NEW FUNCTIONALITY
-  // try {
-  //   console.log('Running new functionality');
-  //   const vidSidPairs = vidSidPairsInNode(document.getElementsByClassName('vocabulary-list')[0]);
-
-  //   if (vidSidPairs.length > 0) {
-  //     parseJpdbVocabulary(vidSidPairs);
-  //     //const [batches, applied] = parseJpdbVocabulary(vidSidPairs);
-  //     // requestParse(batches);
-  //     // Promise.allSettled(applied);
-  //   }
-
-  //   // removeLinksFromVocabWords();
-  // } catch (error) {
-  //   showError(error);
-  // }
-
-  // TRIED AND TRUE FUNCTIONALITY
+  //NEW FUNCTIONALITY
   try {
-    console.log('Running vocab list parsing');
-    const paragraphs = paragraphsInNode(document.getElementsByClassName('vocabulary-list')[0]);
+    console.log('Running new functionality');
+    const vidSidPairs = vidSidPairsInNode(document.getElementsByClassName('vocabulary-list')[0]);
 
-    if (paragraphs.length > 0) {
-      const [batches, applied] = parseParagraphs(paragraphs);
-      requestParse(batches);
-      Promise.allSettled(applied);
+    if (vidSidPairs.length > 0) {
+      const [batches, applied] = parseJpdbVocabulary(vidSidPairs);
+      requestJpdbVocabParse(batches);
+      //createJPDBVocabParseBatch(batches);
+      Promise.allSettled([applied]);
     }
 
     removeLinksFromVocabWords();
   } catch (error) {
     showError(error);
   }
+
+  // TRIED AND TRUE FUNCTIONALITY
+  // try {
+  //   console.log('Running vocab list parsing');
+  //   const paragraphs = paragraphsInNode(document.getElementsByClassName('vocabulary-list')[0]);
+
+  //   if (paragraphs.length > 0) {
+  //     const [batches, applied] = parseParagraphs(paragraphs);
+  //     requestParse(batches);
+  //     Promise.allSettled(applied);
+  //   }
+
+  //   removeLinksFromVocabWords();
+  // } catch (error) {
+  //   showError(error);
+  // }
 };
 
 runFunctionWhenConfigLoaded(jpdb_vocabulary_lists_main);

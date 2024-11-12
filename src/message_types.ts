@@ -1,6 +1,7 @@
-import { CardState, Grade, Token } from './types.js';
+import { Card, CardState, Grade, Token } from './types.js';
 import { Config } from './background/config.js';
 import { Satisfies } from './util.js';
+import { VidSidPair } from './content/parse.js';
 
 // NOTE All of these types must be JSON round-trip-able.
 // That also means you cannot use undefined or ? optional fields
@@ -9,6 +10,7 @@ export type ContentToBackgroundMessage =
   | CancelCommand
   | UpdateConfigRequest
   | ParseRequest
+  | ParseJpdbPageRequest
   | SetFlagRequest
   | ReviewRequest
   | MineRequest;
@@ -17,6 +19,7 @@ export type BackgroundToContentMessage =
   | UpdateConfigCommand
   | UpdateWordStateCommand
   | ParseResponse
+  | ParseJpdbPageResponse
   | NullResponse
   | ErrorResponse
   | CanceledResponse;
@@ -25,6 +28,7 @@ export type ResponseTypeMap = Satisfies<
   {
     updateConfig: NullResponse;
     parse: ParseResponse;
+    parseJpdbPage: ParseJpdbPageResponse;
     setFlag: NullResponse;
     review: NullResponse;
     mine: NullResponse;
@@ -46,6 +50,11 @@ export type UpdateConfigRequest = {
 export type ParseRequest = {
   type: 'parse';
   texts: [number, string][];
+};
+
+export type ParseJpdbPageRequest = {
+  type: 'parseJpdbPage';
+  texts: [number, VidSidPair][];
 };
 
 export type SetFlagRequest = {
@@ -98,6 +107,11 @@ export type NullResponse = ResponseCommon & {
 export type ParseResponse = ResponseCommon & {
   type: 'success';
   result: Token[];
+};
+
+export type ParseJpdbPageResponse = ResponseCommon & {
+  type: 'success';
+  result: Card;
 };
 
 export type UpdateConfigCommand = {

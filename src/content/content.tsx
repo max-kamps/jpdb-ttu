@@ -71,16 +71,25 @@ async function hotkeyListener(event: KeyboardEvent | MouseEvent) {
 
       if (matchesHotkey(event, config.hardKey)) {
         event.preventDefault();
+        if (config && !config.disablePopupAutoClose) {
+          Popup.get().fadeOut();
+        }
         await requestReview(card, 'hard');
       }
 
       if (matchesHotkey(event, config.goodKey)) {
         event.preventDefault();
+        if (config && !config.disablePopupAutoClose) {
+          Popup.get().fadeOut();
+        }
         await requestReview(card, 'good');
       }
 
       if (matchesHotkey(event, config.easyKey)) {
         event.preventDefault();
+        if (config && !config.disablePopupAutoClose) {
+          Popup.get().fadeOut();
+        }
         await requestReview(card, 'easy');
       }
     }
