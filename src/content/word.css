@@ -3,6 +3,14 @@
   pointer-events: none;
 }
 
+.vocabulary-list .entry {
+  transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.jpdb-word {
+  transition: color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 :where(.jpdb-word ruby, .jpdb-word rt) {
   color: inherit !important;
   font-size: inherit;

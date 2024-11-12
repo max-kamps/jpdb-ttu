@@ -234,7 +234,10 @@ export class Popup {
   #outerStyle: CSSStyleDeclaration;
   #vocabSection: HTMLElement;
   #mineButtons: HTMLElement;
+  #originalLinkArea: HTMLElement;
   #data: JpdbWordData;
+  // #originalLink: string | null;
+  // #originalLinkTitle: string | null;
 
   static #popup: Popup;
 
@@ -281,6 +284,20 @@ export class Popup {
       (this.#customStyle = <style></style>),
       <article lang='ja'>
         {config && config.gradeButtonsAtBottom ? (this.#vocabSection = <section id='vocab-content'></section>) : ''}
+        {config && config.gradeButtonsAtBottom
+          ? (this.#originalLinkArea = <section id='original-link-area'></section>)
+          : ''}
+        {/* {!config || !config.gradeButtonsAtBottom ? (
+          this.#originalLink ? (
+            <div id='original-link'>
+              <a href={this.#originalLink}>{this.#originalLinkTitle}</a>
+            </div>
+          ) : (
+            ''
+          )
+        ) : (
+          ''
+        )} */}
         {(this.#mineButtons = <section id='mine-buttons'></section>)}
         <section id='review-buttons'>
           <button
@@ -349,6 +366,9 @@ export class Popup {
           </button>
         </section>
         {!config || !config.gradeButtonsAtBottom ? (this.#vocabSection = <section id='vocab-content'></section>) : ''}
+        {!config || !config.gradeButtonsAtBottom
+          ? (this.#originalLinkArea = <section id='original-link-area'></section>)
+          : ''}
       </article>,
     );
 
@@ -415,6 +435,8 @@ export class Popup {
         lastPOS = meaning.partOfSpeech;
       }
     }
+
+    //this.#originalLinkArea.replaceChildren(<div>YOOO</div>);
 
     this.#vocabSection.replaceChildren(
       <div id='header'>
@@ -495,6 +517,21 @@ export class Popup {
     this.render();
   }
 
+  setOriginalLink(href: string | null) {
+    if (href) {
+      let title = href.replace('https://', '').replace('www.', ''); //.substring(0, 20);
+      if (title.length > 20) {
+        title = `${title.substring(0, 20)}...`;
+      }
+
+      this.#originalLinkArea.replaceChildren(
+        <div>
+          <a href={href}>orig. link: {title}</a>
+        </div>,
+      );
+    }
+  }
+
   containsMouse(event: MouseEvent): boolean {
     const targetElement = event.target as HTMLElement;
 
@@ -506,16 +543,11 @@ export class Popup {
   }
 
   showForWord(word: JpdbWord, mouseX = 0, mouseY = 0) {
+    this.setOriginalLink((word as HTMLElement).getAttribute('chicken-nugget'));
     const data = word.jpdbData;
-
     this.setData(data); // Because we need the dimensions of the popup with the new data
 
-    console.log(data);
-    console.log(word);
-
     const bbox = getClosestClientRect(word, mouseX, mouseY);
-    console.log(bbox);
-    console.log(mouseX, mouseY);
 
     const wordLeft = window.scrollX + bbox.left;
     const wordTop = window.scrollY + bbox.top;
@@ -541,7 +573,11 @@ export class Popup {
     const { writingMode } = getComputedStyle(word);
 
     if (writingMode.startsWith('horizontal')) {
-      popupTop = clamp(bottomSpace > topSpace ? wordBottom : wordTop - popupHeight, minTop, maxTop);
+      if (config.prioritizePopupAboveWord) {
+        popupTop = clamp(popupHeight <= topSpace ? wordTop - popupHeight : wordBottom, minTop, maxTop);
+      } else {
+        popupTop = clamp(bottomSpace > topSpace ? wordBottom : wordTop - popupHeight, minTop, maxTop);
+      }
       popupLeft = clamp(rightSpace > leftSpace ? wordLeft : wordRight - popupWidth, minLeft, maxLeft);
     } else {
       popupTop = clamp(bottomSpace > topSpace ? wordTop : wordBottom - popupHeight, minTop, maxTop);

@@ -4,3 +4,4 @@ dist
 .vscode
 *.code-workspace
 README.md
+**/progressbar.js

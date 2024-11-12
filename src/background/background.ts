@@ -97,8 +97,6 @@ async function batchJpdbPageParses() {
   }
 
   if (vidSidPairs.length === 0) return [null, 0] as [null, number];
-
-  console.log('YO we at the place we wanna be! Here are the pairs:', vidSidPairs);
   try {
     const [cards, timeout] = await backend.parseJpdbWordsByVidSidPairs(vidSidPairs);
 
@@ -155,6 +153,8 @@ async function batchParses() {
 
 export function enqueueParse(seq: number, text: string): Promise<Token[]> {
   return new Promise((resolve, reject) => {
+    //console.log('OLD TEXT FOR ENCODING: ' + text);
+    //console.log(new TextEncoder().encode(text).length + 7);
     pendingParagraphs.set(seq, {
       text,
       // HACK work around the ○○ we will add later
@@ -166,8 +166,9 @@ export function enqueueParse(seq: number, text: string): Promise<Token[]> {
 }
 
 export function enqueueJpdbPageParse(seq: number, vidSidPair: VidSidPair): Promise<Card> {
-  console.log('Boutta enqueue this guy: ', seq, vidSidPair);
   return new Promise((resolve, reject) => {
+    //console.log('NEW TEXT FOR ENCODING: ' + vidSidPair.vocab);
+    //console.log(new TextEncoder().encode(vidSidPair.vocab).length + 7);
     pendingVidSidPair.set(seq, {
       vidSidPair,
       // HACK work around the ○○ we will add later
@@ -247,7 +248,6 @@ const messageHandlers: {
   },
 
   async parse(request, port) {
-    console.log('parse', request, port);
     for (const [seq, text] of request.texts) {
       enqueueParse(seq, text)
         .then(tokens => post(port, { type: 'success', seq: seq, result: tokens }))
@@ -257,7 +257,6 @@ const messageHandlers: {
   },
 
   async parseJpdbPage(request, port) {
-    console.log('parseJpdbPage', request, port);
     for (const [seq, text] of request.texts) {
       enqueueJpdbPageParse(seq, text)
         .then(card => post(port, { type: 'success', seq: seq, result: card }))

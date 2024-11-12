@@ -32,6 +32,7 @@ export type Config = {
 
   gradeButtonsAtBottom: boolean;
   disableJPDBAutoParsing: boolean;
+  prioritizePopupAboveWord: boolean;
 
   showPopupKey: Keybind;
   addKey: Keybind;
@@ -67,6 +68,11 @@ Feel free to delete them or surround the options you don't want with /* and */
 .jpdb-word.known:not(div.vocabulary-list .jpdb-word.known) { color: inherit }
 .jpdb-word.blacklisted:not(div.vocabulary-list .jpdb-word.blacklisted) { color: inherit }
 .jpdb-word.unparsed:not(div.vocabulary-list .jpdb-word.unparsed) { color: inherit }
+
+/***** Dim known vocab in JPDB *****/
+
+.vocabulary-list .entry:has(.known),
+.vocabulary-list .entry:has(.learning) { opacity: 0.25 }
 
 /***** Black screen for OLED on JPDB *****/
 
@@ -112,7 +118,7 @@ html.dark-mode, html.dark-mode body {
 
   customPopupCSS: `/* Make review/mining buttons bigger for mobile */
 
-button { padding:20px 0; font-size: 14px; flex-grow:1 }
+button { padding:20px 10px; font-size: 14px; flex-grow:1 }
 #mine-buttons button { padding: 10px 0; }
 article { max-height: 50vh }
 
@@ -131,6 +137,7 @@ button.edit-add-review,button.never-forget { display:none; }`,
   disable2DReviewing: false,
 
   gradeButtonsAtBottom: true,
+  prioritizePopupAboveWord: true,
   disableJPDBAutoParsing: false,
 
   showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },

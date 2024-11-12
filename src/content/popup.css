@@ -19,8 +19,8 @@ article {
 
   margin: 0;
   padding: 1em;
-  max-width: min(100%, 24em);
-  max-height: min(100%, 40vh);
+  max-width: 24em;
+  max-height: 40vh;
   overflow-x: auto;
   overflow-y: auto;
 
@@ -228,7 +228,16 @@ button.easy {
   color: rgb(255, 0, 0);
 }
 
-.vocab-content {
+#vocab-content {
   flex-shrink: 1;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+#original-link-area > div {
+  text-align: right;
+}
+#original-link-area > div > a {
+  color: #e0e0e0;
+  font-size: 12px;
+  font-style: italic;
 }

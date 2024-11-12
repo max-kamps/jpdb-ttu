@@ -1,11 +1,11 @@
 // @reader content-script
 
-import { runFunctionWhenConfigLoaded, runFunctionWhenReviewDone } from '../content/background_comms.js';
-import { showError } from '../content/toast.js';
-import { wrap } from '../util.js';
+import { runFunctionWhenConfigLoaded, runFunctionWhenReviewDone } from './background_comms.js';
+import { showError } from './toast.js';
 
 let shouldShow = false;
-let initial_reviews_count = Number(
+let initial_reviews_count = 0;
+const initial_reviews_on_page_count = Number(
   document.querySelector<HTMLElement>('.nav > .nav-item:first-of-type > span')?.innerText ?? 0,
 );
 
@@ -28,9 +28,24 @@ const toggleUnimportantElements = (forceHide = false) => {
   shouldShow = !shouldShow;
 };
 
+const progressBarElement = document.createElement('div');
+progressBarElement.id = 'reviews_progress_bar';
+document.documentElement.prepend(progressBarElement);
+
+const topProgressBar = new window.ProgressBar.Line('#reviews_progress_bar', {
+  strokeWidth: 4,
+  easing: 'easeInOut',
+  duration: 500,
+  color: 'var(--text-strong-color)',
+  trailColor: 'transparent',
+  trailWidth: 4,
+  svgStyle: { width: '100%', height: '100%' },
+});
+
 const updateReviewsDoneCount = (reviewsDone: number) => {
   document.getElementById('reviews_done')!.innerText = `${reviewsDone}`;
   document.getElementById('total_reviews')!.innerText = `${initial_reviews_count - reviewsDone}`;
+  topProgressBar.animate(Math.max(0, reviewsDone) / Math.max(initial_reviews_on_page_count, 0.0001));
 };
 runFunctionWhenReviewDone(updateReviewsDoneCount);
 
@@ -122,7 +137,7 @@ const prepareTopSection = (config: any) => {
   const progress_report = document.createElement('span');
   progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_reviews_count}</span>`;
 
-  let pagination_divs = [...(document.querySelectorAll<HTMLElement>('.pagination') ?? [])];
+  const pagination_divs = [...(document.querySelectorAll<HTMLElement>('.pagination') ?? [])];
   pagination_divs.map((pagination_div: HTMLElement, index) => {
     pagination_div.classList.remove(...['without-prev', 'without-next']);
     if (pagination_div.children.length === 1) {

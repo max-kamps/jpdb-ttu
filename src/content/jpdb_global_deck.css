@@ -101,3 +101,13 @@ body > button:last-of-type {
   margin-right: 0 !important;
   border: 0 !important;
 }
+
+#reviews_progress_bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  display: flex;
+  z-index: 5;
+}
