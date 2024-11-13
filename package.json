@@ -1,6 +1,6 @@
 {
   "name": "jpd-breader-plus-alpha",
-  "version": "1.4",
+  "version": "1.5",
   "scripts": {
     "preinstall": "git config core.hooksPath ./scripts/git_hooks",
     "format": "ts-node --esm scripts/format.ts",
