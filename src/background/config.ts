@@ -27,12 +27,15 @@ export type Config = {
 
   disableExtraSpace: boolean;
   disablePopupAutoClose: boolean;
+  hideProgressBar: boolean;
   hideVocabOSuccessfulGrade: boolean;
   disable2DReviewing: boolean;
 
-  gradeButtonsAtBottom: boolean;
   disableJPDBAutoParsing: boolean;
+  gradeButtonsAtBottom: boolean;
+  moveLinksToPopup: boolean;
   prioritizePopupAboveWord: boolean;
+  prioritizePopupToRightOfWord: boolean;
 
   showPopupKey: Keybind;
   addKey: Keybind;
@@ -134,11 +137,15 @@ button.edit-add-review,button.never-forget { display:none; }`,
   disableExtraSpace: false,
   disablePopupAutoClose: false,
   hideVocabOSuccessfulGrade: false,
-  disable2DReviewing: false,
+  hideProgressBar: false,
 
+  disable2DReviewing: false,
+  disableJPDBAutoParsing: false,
+
+  moveLinksToPopup: true,
   gradeButtonsAtBottom: true,
   prioritizePopupAboveWord: true,
-  disableJPDBAutoParsing: false,
+  prioritizePopupToRightOfWord: true,
 
   showPopupKey: { key: 'Shift', code: 'ShiftLeft', modifiers: [] },
   addKey: null,

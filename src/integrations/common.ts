@@ -211,7 +211,6 @@ export function parseParagraphs(paragraphs: Paragraph[]): [ParseBatch[], Promise
 
 export function parseJpdbVocabulary(vidSidPairs: VidSidPair[]): [ParseVidSidBatch[], Promise<void>[]] {
   const batches = vidSidPairs.map(createJPDBVocabParseBatch);
-  console.log(batches);
   const applied = batches.map(({ vidSidPair, promise }) =>
     promise
       .then(card => {

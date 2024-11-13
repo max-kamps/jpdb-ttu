@@ -6,6 +6,7 @@ import { showError } from '../content/toast.js';
 import { parseParagraphs, visibleObserver } from './common.js';
 
 try {
+  console.log('YOOOO MOKURO TIME');
   const pendingBatches = new Map<HTMLElement, ParseBatch[]>();
 
   const visible = visibleObserver(

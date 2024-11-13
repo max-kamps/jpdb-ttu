@@ -1,3 +1,14 @@
+# Version ＋α 1.5
+
+I'm hoping there's nothing else major I need to change before I release the video about this (but also I hope there's nothing major I need to fix AFTER I release it lol)
+
+- Move links on parsed text into the popup and turn it on by default (I may change this to being off by default but for now I like it on at the start)
+- Add link to learn page when on the last page of 2D reviews
+- Add progress bar to top of review & learn screens
+- Add options to prioritize popup to show on top or to the right of the word (for easier reviewing & reading)
+- Add Mokuro support for mokuro.moe
+- Clean up like a million little bugs and visual oddities
+
 # Version ＋α 1.4
 
 This will hopefully be the final version before the "release" - still in the branch but will be merged someday lol

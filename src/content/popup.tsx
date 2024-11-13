@@ -236,8 +236,6 @@ export class Popup {
   #mineButtons: HTMLElement;
   #originalLinkArea: HTMLElement;
   #data: JpdbWordData;
-  // #originalLink: string | null;
-  // #originalLinkTitle: string | null;
 
   static #popup: Popup;
 
@@ -287,17 +285,6 @@ export class Popup {
         {config && config.gradeButtonsAtBottom
           ? (this.#originalLinkArea = <section id='original-link-area'></section>)
           : ''}
-        {/* {!config || !config.gradeButtonsAtBottom ? (
-          this.#originalLink ? (
-            <div id='original-link'>
-              <a href={this.#originalLink}>{this.#originalLinkTitle}</a>
-            </div>
-          ) : (
-            ''
-          )
-        ) : (
-          ''
-        )} */}
         {(this.#mineButtons = <section id='mine-buttons'></section>)}
         <section id='review-buttons'>
           <button
@@ -436,8 +423,6 @@ export class Popup {
       }
     }
 
-    //this.#originalLinkArea.replaceChildren(<div>YOOO</div>);
-
     this.#vocabSection.replaceChildren(
       <div id='header'>
         <a lang='ja' href={url} target='_blank'>
@@ -529,6 +514,9 @@ export class Popup {
           <a href={href}>orig. link: {title}</a>
         </div>,
       );
+    } else {
+      this.#originalLinkArea.style.display = 'none';
+      this.#originalLinkArea.replaceChildren(<div></div>);
     }
   }
 
@@ -543,7 +531,7 @@ export class Popup {
   }
 
   showForWord(word: JpdbWord, mouseX = 0, mouseY = 0) {
-    this.setOriginalLink((word as HTMLElement).getAttribute('chicken-nugget'));
+    this.setOriginalLink((word as HTMLElement).getAttribute('original-link'));
     const data = word.jpdbData;
     this.setData(data); // Because we need the dimensions of the popup with the new data
 
@@ -581,7 +569,12 @@ export class Popup {
       popupLeft = clamp(rightSpace > leftSpace ? wordLeft : wordRight - popupWidth, minLeft, maxLeft);
     } else {
       popupTop = clamp(bottomSpace > topSpace ? wordTop : wordBottom - popupHeight, minTop, maxTop);
-      popupLeft = clamp(rightSpace > leftSpace ? wordRight : wordLeft - popupWidth, minLeft, maxLeft);
+
+      if (config.prioritizePopupToRightOfWord) {
+        popupLeft = clamp(popupWidth <= rightSpace ? wordRight : wordLeft - popupWidth, minLeft, maxLeft);
+      } else {
+        popupLeft = clamp(rightSpace > leftSpace ? wordRight : wordLeft - popupWidth, minLeft, maxLeft);
+      }
     }
 
     this.#outerStyle.transform = `translate(${popupLeft}px,${popupTop}px)`;

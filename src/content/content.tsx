@@ -8,24 +8,23 @@ import { getSentences, JpdbWord } from './word.js';
 export let currentHover: [JpdbWord, number, number] | null = null;
 let popupKeyHeld = false;
 
-function moveParentLinkIfExists(element: HTMLElement | undefined): string {
-  if (!element) {
-    return '';
+function moveParentLinkIfExists(element: HTMLElement | undefined) {
+  if (!element || (config && !config.moveLinksToPopup)) {
+    return;
   }
-  // TODO - ONLY IF TOUCHSCREEN SUPPORT ON
+
   let parent = element.parentElement;
   while (parent) {
     if (parent.tagName.toLowerCase() === 'a' && parent.getAttribute('href')) {
       const href = `${parent.getAttribute('href')}`;
-      console.log(href);
       parent.removeAttribute('href');
-      element.setAttribute('chicken-nugget', href);
+      element.setAttribute('original-link', href);
       return href;
     }
     parent = parent.parentElement;
   }
 
-  return '';
+  return;
 }
 
 function matchesHotkey(event: KeyboardEvent | MouseEvent, hotkey: Keybind) {

@@ -3,11 +3,30 @@
 import { runFunctionWhenConfigLoaded, runFunctionWhenReviewDone } from './background_comms.js';
 import { showError } from './toast.js';
 
+const getInitialReviewCounts = () => {
+  let initial_reviews_in_page_load_count = 0,
+    initial_total_review_count = 0;
+
+  const vocabularyList = document.querySelector('.vocabulary-list');
+  const dueSpans = vocabularyList?.querySelectorAll('.entry') ?? [];
+  initial_reviews_in_page_load_count = dueSpans.length;
+
+  const showing_of_message = document.querySelectorAll<HTMLElement>('.container > p')[1].firstChild?.textContent ?? '';
+
+  if (showing_of_message === 'No matching entries found') {
+    initial_total_review_count = 0;
+  } else if (showing_of_message === 'Showing 1 entry') {
+    initial_total_review_count = 1;
+  } else if (showing_of_message !== '') {
+    initial_total_review_count = Number(showing_of_message.split('from ')[1].split(' ')[0]);
+    initial_total_review_count = isNaN(initial_total_review_count) ? 0 : initial_total_review_count;
+  }
+
+  return [initial_reviews_in_page_load_count, initial_total_review_count];
+};
+
 let shouldShow = false;
-let initial_reviews_count = 0;
-const initial_reviews_on_page_count = Number(
-  document.querySelector<HTMLElement>('.nav > .nav-item:first-of-type > span')?.innerText ?? 0,
-);
+const [initial_reviews_in_page_load_count, initial_total_review_count] = getInitialReviewCounts();
 
 // I know this is gross! I'll fix it...someday
 const showing_cards = window.location.href
@@ -42,14 +61,26 @@ const topProgressBar = new window.ProgressBar.Line('#reviews_progress_bar', {
   svgStyle: { width: '100%', height: '100%' },
 });
 
+// Capture configuration needed here when it's loaded
+let hide_progress_bar = false;
 const updateReviewsDoneCount = (reviewsDone: number) => {
   document.getElementById('reviews_done')!.innerText = `${reviewsDone}`;
-  document.getElementById('total_reviews')!.innerText = `${initial_reviews_count - reviewsDone}`;
-  topProgressBar.animate(Math.max(0, reviewsDone) / Math.max(initial_reviews_on_page_count, 0.0001));
+  document.getElementById('total_reviews')!.innerText = `${initial_total_review_count - reviewsDone}`;
+
+  if (!hide_progress_bar) {
+    topProgressBar.animate(Math.max(0, reviewsDone) / Math.max(initial_reviews_in_page_load_count, 0.0001));
+  }
 };
-runFunctionWhenReviewDone(updateReviewsDoneCount);
 
 const prepareTopSection = (config: any) => {
+  runFunctionWhenReviewDone(updateReviewsDoneCount);
+
+  if (config && config.hideProgressBar) {
+    hide_progress_bar = true;
+    document.getElementById('reviews_progress_bar')?.remove();
+    topProgressBar.destroy();
+  }
+
   // Hide all unimportant containers and add button to show them
   const unimportant_info_elements = document.querySelectorAll<HTMLElement>('.container > *:nth-child(-n+8)');
   const unimportant_info = document.createElement('div');
@@ -62,12 +93,13 @@ const prepareTopSection = (config: any) => {
   const showing_of_progress_p = document.querySelector<HTMLElement>('.container > p');
   if (showing_of_progress_p) {
     let showing_of_message = showing_of_progress_p.firstChild!.textContent || '';
-    showing_of_message = showing_of_message.replace('Showing ', '');
-    showing_of_message = showing_of_message.replace('..', '-');
-    showing_of_message = showing_of_message.replace('from', 'of');
-    showing_of_message = showing_of_message.replace(' entries', '');
 
-    initial_reviews_count = Number(showing_of_message.split(' ')[showing_of_message.split(' ').length - 1]);
+    if (initial_total_review_count > 1) {
+      showing_of_message = showing_of_message.replace('Showing ', '');
+      showing_of_message = showing_of_message.replace('..', '-');
+      showing_of_message = showing_of_message.replace('from', 'of');
+      showing_of_message = showing_of_message.replace(' entries', '');
+    }
 
     showing_of_progress_p.firstChild!.textContent = showing_of_message;
     showing_of_progress_p.style.display = 'flex';
@@ -135,11 +167,13 @@ const prepareTopSection = (config: any) => {
   }
 
   const progress_report = document.createElement('span');
-  progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_reviews_count}</span>`;
+  progress_report.innerHTML = `<span id="reviews_done">0</span> / <span id="total_reviews">${initial_total_review_count}</span>`;
 
   const pagination_divs = [...(document.querySelectorAll<HTMLElement>('.pagination') ?? [])];
   pagination_divs.map((pagination_div: HTMLElement, index) => {
     pagination_div.classList.remove(...['without-prev', 'without-next']);
+
+    // If only a one of the links (only prev or next but not both), add blank link for styling purposes
     if (pagination_div.children.length === 1) {
       if (pagination_div.firstElementChild?.innerHTML.toLowerCase().trim() === 'previous page') {
         pagination_div.appendChild(document.createElement('a'));
@@ -148,10 +182,15 @@ const prepareTopSection = (config: any) => {
       }
     }
 
-    [...pagination_div.children].forEach(child => {
+    [...pagination_div.children].forEach((child, index) => {
       if (child.innerHTML.trim().toLowerCase() === 'previous page') {
         child.innerHTML = 'Prev page';
+      } else if (child.innerHTML.trim() === '' && index > 0) {
+        // Next page link but it's blank
+        child.innerHTML = 'Learn vocab';
+        child.setAttribute('href', 'https://jpdb.io/deck?id=global&show_only=new&sort_by=by-frequency-global#a');
       }
+
       const existing_pagination_link_wrapper = document.createElement('div');
       existing_pagination_link_wrapper.appendChild(child);
       pagination_div.appendChild(existing_pagination_link_wrapper);

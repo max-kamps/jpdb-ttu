@@ -139,6 +139,16 @@ List of classes:
 
 ## Building
 
+(Note from Togeffet):
+I was only able to get this to build when I used an older version of node. My commands were:
+```sh
+$ nvm install v16.20.0
+$ nvm use v16.20.0
+```
+You can probably use a newer version but Max mentioned on Discord that he was on 16.20.2 and it was working for him so that's what I went with lol.
+
+(End note)
+
 You can run the following command to build the release zip file:
 ```sh
 $ npm install
