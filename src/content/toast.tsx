@@ -1,5 +1,5 @@
-import { browser } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
+import { browser } from '../webextension.js';
 
 const toastContainer = <div></div>;
 const shadow = toastContainer.attachShadow({ mode: 'closed' });

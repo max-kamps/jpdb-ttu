@@ -1,12 +1,7 @@
-export const [browser, isChrome] = (() => {
-    if (globalThis.browser !== undefined) {
-        return [globalThis.browser, false];
-    } else {
-        return [chrome, true];
-    }
-})();
+import { JsonObject } from 'type-fest';
+import { browser } from './webextension.js';
 
-export type Satisfies<T extends U, U> = T;
+export type EnsureJson<T extends JsonObject> = T;
 
 export function assert(condition: boolean, message: string): asserts condition {
     if (!condition) {
@@ -65,10 +60,6 @@ export async function readExtFile(path: string): Promise<string> {
     }
 }
 
-export function snakeToCamel(string: string): string {
-    return string.replaceAll(/(?<!^_*)_(.)/g, (_match, group1) => group1.toUpperCase());
-}
-
 export function truncate(string: string, maxLength: number): string {
     return string.length <= maxLength ? string : string.slice(0, maxLength - 1) + '…';
 }
@@ -77,5 +68,3 @@ export type PromiseHandle<T> = {
     resolve(value: T): void;
     reject(reason: { message: string }): void;
 };
-
-export class Canceled extends Error {}

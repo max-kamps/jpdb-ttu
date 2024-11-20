@@ -1,11 +1,20 @@
 import { Card, CardState, DeckId, Token } from '../types.js';
 import { assert, assertNonNull, nonNull, truncate } from '../util.js';
-import { config } from './background.js';
+import { config } from '../config.js';
+import { BackendResponse } from './backend_queue.js';
 
 const API_RATELIMIT = 0.2; // seconds between requests
 const SCRAPE_RATELIMIT = 1.1; // seconds between requests
 
-export type Response<T = null> = Promise<[T, number]>;
+async function headers() {
+    const apiToken = await config.apiToken;
+    if (apiToken === null) throw Error('No API token set');
+    return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiToken}`,
+        Accept: 'application/json',
+    };
+}
 
 type JpdbError = {
     error:
@@ -78,14 +87,10 @@ const VOCAB_FIELDS = [
     'pitch_accent',
 ] as const;
 
-export async function parse(text: string[]): Response<[Token[][], Card[]]> {
+export async function parse(text: string[]): Promise<BackendResponse<{ tokens: Token[][]; cards: Card[] }>> {
     const options = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiToken}`,
-            Accept: 'application/json',
-        },
+        headers: await headers(),
         body: JSON.stringify({
             text,
             // furigana: [[position, length reading], ...] // TODO pass furigana to parse endpoint
@@ -178,10 +183,13 @@ export async function parse(text: string[]): Response<[Token[][], Card[]]> {
         }),
     );
 
-    return [[tokens, cards], API_RATELIMIT];
+    return {
+        result: { tokens, cards },
+        ratelimitSleep: API_RATELIMIT,
+    };
 }
 
-export function addToDeck(vid: number, sid: number, deckId: DeckId): Response {
+export function addToDeck(vid: number, sid: number, deckId: DeckId): Promise<BackendResponse<null>> {
     if (deckId === 'forq') {
         return addToForqScrape(vid, sid);
     } else {
@@ -189,14 +197,14 @@ export function addToDeck(vid: number, sid: number, deckId: DeckId): Response {
     }
 }
 
-async function addToDeckAPI(vid: number, sid: number, deckId: number | 'blacklist' | 'never-forget'): Response {
+async function addToDeckAPI(
+    vid: number,
+    sid: number,
+    deckId: number | 'blacklist' | 'never-forget',
+): Promise<BackendResponse<null>> {
     const options = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiToken}`,
-            Accept: 'application/json',
-        },
+        headers: await headers(),
         body: JSON.stringify({
             id: deckId,
             vocabulary: [[vid, sid]],
@@ -210,10 +218,13 @@ async function addToDeckAPI(vid: number, sid: number, deckId: number | 'blacklis
         throw Error(`${data.error_message} while adding word ${vid}/${sid} to deck "${deckId}"`);
     }
 
-    return [null, API_RATELIMIT];
+    return {
+        result: null,
+        ratelimitSleep: API_RATELIMIT,
+    };
 }
 
-async function addToForqScrape(vid: number, sid: number): Response {
+async function addToForqScrape(vid: number, sid: number): Promise<BackendResponse<null>> {
     const response = await fetch('https://jpdb.io/prioritize', {
         method: 'POST',
         credentials: 'include',
@@ -233,10 +244,13 @@ async function addToForqScrape(vid: number, sid: number): Response {
     if (doc.querySelector('a[href="/login"]') !== null)
         throw Error(`You are not logged in to jpdb.io - Adding cards to the FORQ requires being logged in`);
 
-    return [null, SCRAPE_RATELIMIT];
+    return {
+        result: null,
+        ratelimitSleep: SCRAPE_RATELIMIT,
+    };
 }
 
-export function removeFromDeck(vid: number, sid: number, deckId: DeckId): Response {
+export function removeFromDeck(vid: number, sid: number, deckId: DeckId): Promise<BackendResponse<null>> {
     if (deckId === 'forq') {
         return removeFromForqScrape(vid, sid);
     } else {
@@ -244,14 +258,14 @@ export function removeFromDeck(vid: number, sid: number, deckId: DeckId): Respon
     }
 }
 
-async function removeFromDeckAPI(vid: number, sid: number, deckId: number | 'blacklist' | 'never-forget'): Response {
+async function removeFromDeckAPI(
+    vid: number,
+    sid: number,
+    deckId: number | 'blacklist' | 'never-forget',
+): Promise<BackendResponse<null>> {
     const options = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiToken}`,
-            Accept: 'application/json',
-        },
+        headers: await headers(),
         body: JSON.stringify({
             id: deckId,
             vocabulary: [[vid, sid]],
@@ -265,10 +279,13 @@ async function removeFromDeckAPI(vid: number, sid: number, deckId: number | 'bla
         throw Error(`${data.error_message} while removing word ${vid}/${sid} from deck "${deckId}"`);
     }
 
-    return [null, API_RATELIMIT];
+    return {
+        result: null,
+        ratelimitSleep: API_RATELIMIT,
+    };
 }
 
-async function removeFromForqScrape(vid: number, sid: number): Response {
+async function removeFromForqScrape(vid: number, sid: number): Promise<BackendResponse<null>> {
     const response = await fetch('https://jpdb.io/deprioritize', {
         method: 'POST',
         credentials: 'include',
@@ -287,21 +304,25 @@ async function removeFromForqScrape(vid: number, sid: number): Response {
     if (doc.querySelector('a[href="/login"]') !== null)
         throw Error(`You are not logged in to jpdb.io - Removing cards from the FORQ requires being logged in`);
 
-    return [null, SCRAPE_RATELIMIT];
+    return {
+        result: null,
+        ratelimitSleep: SCRAPE_RATELIMIT,
+    };
 }
 
-export async function setSentence(vid: number, sid: number, sentence?: string, translation?: string): Response {
+export async function setSentence(
+    vid: number,
+    sid: number,
+    sentence?: string,
+    translation?: string,
+): Promise<BackendResponse<null>> {
     const body: any = { vid, sid };
     if (sentence) body.sentence = sentence;
     if (translation) body.translation = translation;
 
     const options = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiToken}`,
-            Accept: 'application/json',
-        },
+        headers: await headers(),
         body: JSON.stringify(body),
     };
 
@@ -316,7 +337,10 @@ export async function setSentence(vid: number, sid: number, sentence?: string, t
         );
     }
 
-    return [null, API_RATELIMIT];
+    return {
+        result: null,
+        ratelimitSleep: API_RATELIMIT,
+    };
 }
 
 const REVIEW_GRADES = {
@@ -334,7 +358,11 @@ const REVIEW_GRADES = {
     never_forget: 'w',
     blacklist: '-1',
 };
-export async function review(vid: number, sid: number, rating: keyof typeof REVIEW_GRADES): Response {
+export async function review(
+    vid: number,
+    sid: number,
+    rating: keyof typeof REVIEW_GRADES,
+): Promise<BackendResponse<null>> {
     // Get current review number
     const response = await fetch(`https://jpdb.io/review?c=vf%2C${vid}%2C${sid}`, {
         method: 'GET',
@@ -374,17 +402,16 @@ export async function review(vid: number, sid: number, rating: keyof typeof REVI
         throw Error(`HTTP error ${response.statusText} while adding ${rating} review to word ${vid}/${sid}`);
     }
 
-    return [null, 2 * SCRAPE_RATELIMIT];
+    return {
+        result: null,
+        ratelimitSleep: 2 * SCRAPE_RATELIMIT,
+    };
 }
 
-export async function getCardState(vid: number, sid: number): Response<CardState> {
+export async function getCardState(vid: number, sid: number): Promise<BackendResponse<CardState>> {
     const options = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiToken}`,
-            Accept: 'application/json',
-        },
+        headers: await headers(),
         body: JSON.stringify({
             list: [[vid, sid]],
             fields: ['card_state'],
@@ -404,5 +431,10 @@ export async function getCardState(vid: number, sid: number): Response<CardState
     const vocabInfo = data.vocabulary_info[0];
     if (vocabInfo === null) throw Error(`Can't get state for word ${vid}/${sid}, word does not exist`);
 
-    return [vocabInfo[0] ?? ['not-in-deck'], API_RATELIMIT];
+    const cardState = vocabInfo[0] ?? ['not-in-deck'];
+
+    return {
+        result: cardState,
+        ratelimitSleep: API_RATELIMIT,
+    };
 }

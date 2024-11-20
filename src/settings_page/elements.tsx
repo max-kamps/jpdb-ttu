@@ -1,4 +1,4 @@
-import { defaultConfig, Keybind } from '../background/config.js';
+import { defaultConfig, Keybind } from '../config.js';
 import { jsxCreateElement } from '../jsx.js';
 import { markUnsavedChanges } from './settings.js';
 

@@ -1,8 +1,9 @@
-import { browser, clamp, nonNull } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
-import { config, requestMine, requestReview, requestSetFlag } from './background_comms.js';
+import { clamp, nonNull } from '../util.js';
+import { browser } from '../webextension.js';
+import { requestMine, requestReview, requestSetFlag } from './content.js';
 import { Dialog } from './dialog.js';
-import { getSentences, JpdbWord, JpdbWordData } from './word.js';
+import { JpdbWord, JpdbWordData, getSentences } from './word.js';
 
 const PARTS_OF_SPEECH: { [k: string]: string } = {
     n: 'Noun', // JMDict: "noun (common) (futsuumeishi)"
@@ -328,6 +329,7 @@ export class Popup {
     fadeIn() {
         // Necessary because in settings page, config is undefined
         // TODO is this still true? ~hmry(2023-08-08)
+        // @ts-expect-error TODO config
         if (config && !config.disableFadeAnimation) {
             this.#outerStyle.transition = 'opacity 60ms ease-in, visibility 60ms';
         }
@@ -338,6 +340,7 @@ export class Popup {
     fadeOut() {
         // Necessary because in settings page, config is undefined
         // TODO is this still true? ~hmry(2023-08-08)
+        // @ts-expect-error TODO config
         if (config && !config.disableFadeAnimation) {
             this.#outerStyle.transition = 'opacity 200ms ease-in, visibility 200ms';
         }
@@ -429,7 +432,9 @@ export class Popup {
                         : () =>
                               requestMine(
                                   this.#data!.token.card,
+                                  // @ts-expect-error TODO config
                                   config.forqOnMine,
+                                  // @ts-expect-error TODO config
                                   getSentences(this.#data!, config.contextWidth).trim() || undefined,
                                   undefined,
                               )
@@ -522,6 +527,7 @@ export class Popup {
         this.fadeIn();
     }
 
+    // @ts-expect-error TODO config
     updateStyle(newCSS = config.customPopupCSS) {
         this.#customStyle.textContent = newCSS;
     }

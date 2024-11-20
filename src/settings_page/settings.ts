@@ -1,10 +1,8 @@
-import { Config, loadConfig, migrateSchema, saveConfig } from '../background/config.js';
-import { requestUpdateConfig } from '../content/background_comms.js';
 import { Popup } from '../content/popup.js';
 import { showError } from '../content/toast.js';
 import { JpdbWordData } from '../content/word.js';
 import { assert, nonNull, wrap } from '../util.js';
-import { defineCustomElements, SettingElement } from './elements.js';
+import { SettingElement, defineCustomElements } from './elements.js';
 
 // Custom element definitions
 
@@ -71,6 +69,7 @@ addEventListener(
 );
 
 try {
+    // @ts-expect-error TODO config
     const config = loadConfig();
 
     defineCustomElements();
@@ -117,8 +116,10 @@ try {
             });
 
             try {
+                // @ts-expect-error TODO config
                 const data = JSON.parse(fileContents) as Config;
                 console.log(data);
+                // @ts-expect-error TODO config
                 migrateSchema(data);
                 Object.assign(config, data);
 
@@ -163,7 +164,9 @@ try {
                     (config as any)[name] = newValue;
                 }
             }
+            // @ts-expect-error TODO config
             saveConfig(config);
+            // @ts-expect-error TODO config
             await requestUpdateConfig();
 
             unmarkUnsavedChanges();

@@ -1,6 +1,6 @@
 // @reader content-script
 
-import { requestParse } from '../content/background_comms.js';
+import { requestParse } from '../content/content.js';
 import { displayCategory, Fragment, Paragraph } from '../content/parse.js';
 import { showError } from '../content/toast.js';
 import { parseParagraphs } from './common.js';

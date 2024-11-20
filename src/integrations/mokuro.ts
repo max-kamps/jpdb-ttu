@@ -1,15 +1,16 @@
 // @reader content-script
 
-import { ParseBatch, requestParse } from '../content/background_comms.js';
 import { Fragment } from '../content/parse.js';
 import { showError } from '../content/toast.js';
 import { parseParagraphs, visibleObserver } from './common.js';
 
 try {
+    // @ts-expect-error TODO batch parsing
     const pendingBatches = new Map<HTMLElement, ParseBatch[]>();
 
     const visible = visibleObserver(
         elements => {
+            // @ts-expect-error TODO batch parsing
             const batches: ParseBatch[] = [];
             for (const page of elements) {
                 if (pendingBatches.get(page) !== undefined) continue;
@@ -54,6 +55,7 @@ try {
                 batches.push(...pageBatches);
                 page.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
             }
+            // @ts-expect-error TODO batch parsing
             requestParse(batches);
         },
         elements => {

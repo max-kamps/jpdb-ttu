@@ -1,111 +1,95 @@
-import { CardState, Grade, Token } from './types.js';
-import { Config } from './background/config.js';
-import { Satisfies } from './util.js';
+import { JsonObject, JsonValue } from 'type-fest';
+import { CardState, Grade, Ruby, Token } from './types.js';
 
-// NOTE All of these types must be JSON round-trip-able.
-// That also means you cannot use undefined or ? optional fields
+// Messages are what the content script and background page/worker use to communicate with each other.
 
-export type ContentToBackgroundMessage =
-    | CancelCommand
-    | UpdateConfigRequest
-    | ParseRequest
-    | SetFlagRequest
-    | ReviewRequest
-    | MineRequest;
-
-export type BackgroundToContentMessage =
-    | UpdateConfigCommand
-    | UpdateWordStateCommand
-    | ParseResponse
-    | NullResponse
-    | ErrorResponse
-    | CanceledResponse;
-
-export type ResponseTypeMap = Satisfies<
-    {
-        updateConfig: NullResponse;
-        parse: ParseResponse;
-        setFlag: NullResponse;
-        review: NullResponse;
-        mine: NullResponse;
-        cancel: never;
-    },
-    Record<ContentToBackgroundMessage['type'], BackgroundToContentMessage | never>
->;
-
-export type CancelCommand = {
-    type: 'cancel';
-    seq: number;
-};
-
-export type UpdateConfigRequest = {
-    type: 'updateConfig';
-    seq: number;
-};
-
-export type ParseRequest = {
-    type: 'parse';
-    texts: [number, string][];
-};
-
-export type SetFlagRequest = {
-    type: 'setFlag';
-    seq: number;
-    vid: number;
-    sid: number;
-    flag: 'forq' | 'blacklist' | 'never-forget';
-    state: boolean;
-};
-
-export type ReviewRequest = {
-    type: 'review';
-    seq: number;
-    vid: number;
-    sid: number;
-    rating: Grade;
-};
-
-export type MineRequest = {
-    type: 'mine';
-    seq: number;
-    vid: number;
-    sid: number;
-    forq: boolean;
-    sentence: string | null;
-    translation: string | null;
-    review: Grade;
-};
-
-type ResponseCommon = {
+type MessageInfo = {
     type: string;
-    seq: number;
+    direction: 'content to background' | 'background to content' | 'either';
+    payload: JsonObject;
+    response: JsonValue | void;
 };
+type NewMessageInfo<T extends MessageInfo> = T;
 
-export type ErrorResponse = ResponseCommon & {
-    type: 'error';
-    error: Error | { message: string; stack: string | undefined };
-};
+export type Message<I extends MessageInfo> = { type: I['type']; abortHandle?: number } & I['payload'];
+export type Response<I extends MessageInfo> = I['response'];
 
-export type CanceledResponse = ResponseCommon & {
-    type: 'canceled';
-};
+export type InfoFor<M extends Message<AnyMessageInfo>> = Extract<AnyMessageInfo, { type: M['type'] }>;
+export type ResponseFor<M extends Message<AnyMessageInfo>> = Response<InfoFor<M>>;
 
-export type NullResponse = ResponseCommon & {
-    type: 'success';
-    result: null;
-};
+export type BackgroundBoundMessageInfo = Extract<AnyMessageInfo, { direction: 'content to background' | 'either' }>;
+export type ContentBoundMessageInfo = Extract<AnyMessageInfo, { direction: 'background to content' | 'either' }>;
 
-export type ParseResponse = ResponseCommon & {
-    type: 'success';
-    result: Token[];
-};
+export type AnyMessageInfo =
+    | AbortMessageInfo
+    | ParseMessageInfo
+    | SetFlagMessageInfo
+    | ReviewMessageInfo
+    | MineMessageInfo
+    | UpdateWordStateMessageInfo;
 
-export type UpdateConfigCommand = {
-    type: 'updateConfig';
-    config: Config;
-};
+export type AbortMessageInfo = NewMessageInfo<{
+    type: 'abort';
+    direction: 'content to background';
+    payload: {
+        handle: number;
+    };
+    response: void;
+}>;
 
-export type UpdateWordStateCommand = {
+export type ParseMessageInfo = NewMessageInfo<{
+    type: 'parse';
+    direction: 'content to background';
+    payload: {
+        text: string;
+        rubies: Ruby[];
+    };
+    response: {
+        result: Token[];
+    };
+}>;
+
+export type SetFlagMessageInfo = NewMessageInfo<{
+    type: 'setFlag';
+    direction: 'content to background';
+    payload: {
+        vid: number;
+        sid: number;
+        flag: 'forq' | 'blacklist' | 'never-forget';
+        state: boolean;
+    };
+    response: void;
+}>;
+
+export type ReviewMessageInfo = NewMessageInfo<{
+    type: 'review';
+    direction: 'content to background';
+    payload: {
+        vid: number;
+        sid: number;
+        rating: Grade;
+    };
+    response: void;
+}>;
+
+export type MineMessageInfo = NewMessageInfo<{
+    type: 'mine';
+    direction: 'content to background';
+    payload: {
+        vid: number;
+        sid: number;
+        forq: boolean;
+        sentence: string | null;
+        translation: string | null;
+    };
+    response: void;
+}>;
+
+export type UpdateWordStateMessageInfo = NewMessageInfo<{
     type: 'updateWordState';
-    words: [number, number, CardState][];
-};
+    direction: 'background to content';
+    payload: {
+        words: [number, number, CardState][];
+    };
+    response: void;
+}>;

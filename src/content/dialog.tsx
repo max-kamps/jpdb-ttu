@@ -1,6 +1,7 @@
 import { jsxCreateElement } from '../jsx.js';
-import { assertNonNull, browser } from '../util.js';
-import { config, requestMine, requestReview } from './background_comms.js';
+import { assertNonNull } from '../util.js';
+import { browser } from '../webextension.js';
+import { requestMine, requestReview } from './content.js';
 import { getSentences, JpdbWordData } from './word.js';
 
 export class Dialog {
@@ -92,6 +93,7 @@ export class Dialog {
                             Also add to FORQ:{' '}
                             {
                                 (addToForq = (
+                                    // @ts-expect-error TODO config
                                     <input type='checkbox' id='add-to-forq' checked={config.forqOnMine} />
                                 ) as HTMLInputElement)
                             }
@@ -158,6 +160,7 @@ export class Dialog {
 
     setData(data: JpdbWordData) {
         this.#data = data;
+        // @ts-expect-error TODO config
         this.#contextWidth = config.contextWidth;
         this.render();
     }

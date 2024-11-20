@@ -1,7 +1,5 @@
-import { createParseBatch, ParseBatch, requestParse } from '../content/background_comms.js';
 import { applyTokens, displayCategory, Fragment, Paragraph } from '../content/parse.js';
 import { showError } from '../content/toast.js';
-import { Canceled } from '../util.js';
 
 export function paragraphsInNode(node: Node, filter: (node: Node) => boolean = () => true): Paragraph[] {
     let offset = 0;
@@ -128,10 +126,12 @@ export function addedObserver(selector: string, callback: (elements: HTMLElement
 }
 
 export function parseVisibleObserver(filter: (node: Node) => boolean = () => true) {
+    // @ts-expect-error TODO batch parsing
     const pendingBatches = new Map<HTMLElement, ParseBatch[]>();
 
     const visible = visibleObserver(
         elements => {
+            // @ts-expect-error TODO batch parsing
             const batches: ParseBatch[] = [];
             for (const element of elements) {
                 if (pendingBatches.get(element) !== undefined) continue;
@@ -153,6 +153,7 @@ export function parseVisibleObserver(filter: (node: Node) => boolean = () => tru
                 pendingBatches.set(element, elemBatches);
                 batches.push(...elemBatches);
             }
+            // @ts-expect-error TODO batch parsing
             requestParse(batches);
         },
         elements => {
@@ -168,20 +169,26 @@ export function parseVisibleObserver(filter: (node: Node) => boolean = () => tru
     return visible;
 }
 
+// @ts-expect-error TODO batch parsing
 export function parseParagraphs(paragraphs: Paragraph[]): [ParseBatch[], Promise<void>[]] {
+    // @ts-expect-error TODO batch parsing
     const batches = paragraphs.map(createParseBatch);
+    // @ts-expect-error TODO batch parsing
     const applied = batches.map(({ paragraph, promise }) =>
         promise
+            // @ts-expect-error TODO batch parsing
             .then(tokens => {
                 applyTokens(paragraph, tokens);
             })
+            // @ts-expect-error TODO batch parsing
             .catch(error => {
+                // @ts-expect-error TODO batch parsing
                 if (!(error instanceof Canceled)) {
                     showError(error);
                 }
                 throw error;
             }),
     );
-
+    // @ts-expect-error TODO batch parsing
     return [batches, applied];
 }

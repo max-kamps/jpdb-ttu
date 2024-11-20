@@ -1,320 +1,169 @@
-import { BackgroundToContentMessage, ContentToBackgroundMessage, ResponseTypeMap } from '../message_types.js';
+import { BackgroundBoundMessageInfo, ContentBoundMessageInfo, Message, Response } from '../message_types.js';
 import { DeckId, Grade, Token } from '../types.js';
-import { loadConfig } from './config.js';
-import { assert, browser, isChrome, PromiseHandle, sleep } from '../util.js';
-import * as backend from './backend.js';
+import { PromiseHandle, assert } from '../util.js';
+import { browser } from '../webextension.js';
 
-export let config = loadConfig();
-
-// API call queue
-
-type Call<T> = PromiseHandle<T> & {
-    func(): backend.Response<T>;
-};
-
-const pendingAPICalls: Call<unknown>[] = [];
-let callerRunning = false;
-
-async function apiCaller() {
-    // If no API calls are pending, stop running
-    if (callerRunning || pendingAPICalls.length === 0)
-        // Only run one instance of this function at a time
-        return;
-
-    callerRunning = true;
-
-    while (pendingAPICalls.length > 0) {
-        // Get first call from queue
-
-        // Safety: We know this can't be undefined, because we checked that the length > 0
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const call = pendingAPICalls.shift()!;
-
-        try {
-            const [result, wait] = await call.func();
-            call.resolve(result);
-            await sleep(wait);
-        } catch (error) {
-            call.reject(error as Error);
-            // TODO implement exponential backoff
-            await sleep(1500);
-        }
-    }
-
-    callerRunning = false;
-}
-
-function enqueue<T>(func: () => backend.Response<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-        pendingAPICalls.push({ func, resolve, reject });
-        apiCaller();
-    });
-}
-
-export async function addToDeck(vid: number, sid: number, deckId: DeckId) {
-    return enqueue(() => backend.addToDeck(vid, sid, deckId));
-}
-export async function removeFromDeck(vid: number, sid: number, deckId: DeckId) {
-    return enqueue(() => backend.removeFromDeck(vid, sid, deckId));
-}
-export async function setSentence(vid: number, sid: number, sentence?: string, translation?: string) {
-    return enqueue(() => backend.setSentence(vid, sid, sentence, translation));
-}
-export async function review(vid: number, sid: number, rating: Grade) {
-    return enqueue(() => backend.review(vid, sid, rating));
-}
-export async function getCardState(vid: number, sid: number) {
-    return enqueue(() => backend.getCardState(vid, sid));
-}
-
-const maxParseLength = 16384;
-
-type PendingParagraph = PromiseHandle<Token[]> & {
-    text: string;
-    length: number;
-};
-const pendingParagraphs = new Map<number, PendingParagraph>();
-
-async function batchParses() {
-    // Greedily take as many paragraphs as can fit
-    let length = 0;
-    const strings: string[] = [];
-    const handles: PromiseHandle<Token[]>[] = [];
-
-    for (const [seq, paragraph] of pendingParagraphs) {
-        length += paragraph.length;
-        if (length > maxParseLength) break;
-        strings.push(paragraph.text);
-        handles.push(paragraph);
-        pendingParagraphs.delete(seq);
-    }
-
-    if (strings.length === 0) return [null, 0] as [null, number];
-
-    try {
-        const [[tokenBatches, cards], timeout] = await backend.parse(strings);
-
-        assert(tokenBatches.length === handles.length, 'Number of token batches does not match number of handles');
-
-        for (const [i, handle] of handles.entries()) {
-            handle.resolve(tokenBatches[i]!);
-        }
-
-        broadcast({ type: 'updateWordState', words: cards.map(card => [card.vid, card.sid, card.state]) });
-
-        return [null, timeout] as [null, number];
-    } catch (error) {
-        for (const handle of handles) {
-            handle.reject(error as Error);
-        }
-
-        throw error;
-    }
-}
-
-export function enqueueParse(seq: number, text: string): Promise<Token[]> {
-    return new Promise((resolve, reject) => {
-        pendingParagraphs.set(seq, {
-            text,
-            // HACK work around the ○○ we will add later
-            length: new TextEncoder().encode(text).length + 7,
-            resolve,
-            reject,
-        });
-    });
-}
-
-export function startParse() {
-    pendingAPICalls.push({ func: batchParses, resolve: () => {}, reject: () => {} });
-    apiCaller();
-}
+// NOTE Do not use top level await in this file. As Chromium uses a service worker to run the background script, top level await is not supported.
 
 // Content script communication
 
-const ports = new Set<browser.runtime.ContentScriptPort>();
-
-function post(port: browser.runtime.Port, message: BackgroundToContentMessage) {
-    port.postMessage(message);
+function broadcast(message: ContentBoundMessageInfo) {
+    // TODO
+    browser.tabs.query({}).then(tabs => {
+        for (const tab of tabs) {
+            // @ts-expect-error TODO XXX
+            browser.tabs.sendMessage(tab.id!, message);
+        }
+    });
 }
 
-function broadcast(message: BackgroundToContentMessage) {
-    for (const port of ports) port.postMessage(message);
-}
+// async function broadcastNewWordState(vid: number, sid: number) {
+//     broadcast({ type: 'updateWordState', words: [[vid, sid, await getCardState(vid, sid)]] });
+// }
 
-function postResponse<T extends ContentToBackgroundMessage & { seq: number }>(
-    port: browser.runtime.Port,
-    request: T,
-    result: ResponseTypeMap[T['type']]['result'],
-) {
-    port.postMessage({ type: 'success', seq: request.seq, result });
-}
+// // Chrome can't send Error objects over background ports, so we have to serialize and deserialize them...
+// // (To be specific, Firefox can send any structuredClone-able object, while Chrome can only send JSON-stringify-able objects)
+// const serializeError = isChrome ? (err: Error) => ({ message: err.message, stack: err.stack }) : (err: Error) => err;
 
-function onPortDisconnect(port: browser.runtime.Port) {
-    console.log('disconnect:', port);
-    ports.delete(port);
-}
-
-async function broadcastNewWordState(vid: number, sid: number) {
-    broadcast({ type: 'updateWordState', words: [[vid, sid, await getCardState(vid, sid)]] });
-}
-
-// Chrome can't send Error objects over background ports, so we have to serialize and deserialize them...
-// (To be specific, Firefox can send any structuredClone-able object, while Chrome can only send JSON-stringify-able objects)
-const serializeError = isChrome ? (err: Error) => ({ message: err.message, stack: err.stack }) : (err: Error) => err;
-
+// @ts-expect-error TODO XXX
 const messageHandlers: {
-    [Req in ContentToBackgroundMessage as Req['type']]: (request: Req, port: browser.runtime.Port) => Promise<void>;
+    [I in BackgroundBoundMessageInfo as Message<I>['type']]: (request: Message<I>) => Promise<Response<I>>;
 } = {
-    async cancel(request, port) {
-        // Right now, only parse requests can actually be canceled
-        pendingParagraphs.delete(request.seq);
-        post(port, { type: 'canceled', seq: request.seq });
+    async abort(payload) {
+        pendingParagraphs.delete(payload.handle);
     },
-
-    async updateConfig(request, port) {
-        const oldCSS = config.customWordCSS;
-
-        config = loadConfig();
-
-        if (config.customWordCSS !== oldCSS) {
-            for (const port of ports) {
-                browser.tabs.insertCSS(port.sender.tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
-                browser.tabs.removeCSS(port.sender.tab.id, { code: oldCSS });
-            }
-        }
-
-        postResponse(port, request, null);
-        broadcast({ type: 'updateConfig', config });
-    },
-
-    async parse(request, port) {
-        for (const [seq, text] of request.texts) {
-            enqueueParse(seq, text)
-                .then(tokens => post(port, { type: 'success', seq: seq, result: tokens }))
-                .catch(error => post(port, { type: 'error', seq: seq, error: serializeError(error) }));
-        }
-        startParse();
-    },
-
-    async setFlag(request, port) {
-        const deckId = request.flag === 'blacklist' ? config.blacklistDeckId : config.neverForgetDeckId;
-
-        if (deckId === null) {
-            throw Error(`No deck ID set for ${request.flag}, check the settings page`);
-        }
-
-        if (request.state === true) {
-            await addToDeck(request.vid, request.sid, deckId);
-        } else {
-            await removeFromDeck(request.vid, request.sid, deckId);
-        }
-
-        postResponse(port, request, null);
-        await broadcastNewWordState(request.vid, request.sid);
-    },
-
-    async review(request, port) {
-        await review(request.vid, request.sid, request.rating);
-        postResponse(port, request, null);
-        await broadcastNewWordState(request.vid, request.sid);
-    },
-
-    async mine(request, port) {
-        if (config.miningDeckId === null) {
-            throw Error(`No mining deck ID set, check the settings page`);
-        }
-
-        if (request.forq && config.forqDeckId === null) {
-            throw Error(`No forq deck ID set, check the settings page`);
-        }
-
-        // Safety: This is safe, because we early-errored for this condition
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await addToDeck(request.vid, request.sid, config.miningDeckId!);
-
-        if (request.sentence || request.translation) {
-            await setSentence(
-                request.vid,
-                request.sid,
-                request.sentence ?? undefined,
-                request.translation ?? undefined,
-            );
-        }
-
-        if (request.forq) {
-            // Safety: This is safe, because we early-errored for this condition
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            await addToDeck(request.vid, request.sid, config.forqDeckId!);
-        }
-
-        if (request.review) {
-            await review(request.vid, request.sid, request.review);
-        }
-
-        postResponse(port, request, null);
-        await broadcastNewWordState(request.vid, request.sid);
-    },
+    // async parse(payload) {
+    //     for (const [seq, text] of payload.texts) {
+    //         enqueueParse(seq, text)
+    //             .then(tokens => post(port, { type: 'success', seq: seq, result: tokens }))
+    //             .catch(error => post(port, { type: 'error', seq: seq, error: serializeError(error) }));
+    //     }
+    //     startParse();
+    // },
+    // async setFlag(request) {
+    //     const deckId = request.flag === 'blacklist' ? config.blacklistDeckId : config.neverForgetDeckId;
+    //     if (deckId === null) {
+    //         throw Error(`No deck ID set for ${request.flag}, check the settings page`);
+    //     }
+    //     if (request.state === true) {
+    //         await addToDeck(request.vid, request.sid, deckId);
+    //     } else {
+    //         await removeFromDeck(request.vid, request.sid, deckId);
+    //     }
+    //     postResponse(port, request, null);
+    //     await broadcastNewWordState(request.vid, request.sid);
+    // },
+    // async review(request) {
+    //     await review(request.vid, request.sid, request.rating);
+    //     postResponse(port, request, null);
+    //     await broadcastNewWordState(request.vid, request.sid);
+    // },
+    // async mine(request) {
+    //     if (config.miningDeckId === null) {
+    //         throw Error(`No mining deck ID set, check the settings page`);
+    //     }
+    //     if (request.forq && config.forqDeckId === null) {
+    //         throw Error(`No forq deck ID set, check the settings page`);
+    //     }
+    //     // Safety: This is safe, because we early-errored for this condition
+    //     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //     await addToDeck(request.vid, request.sid, config.miningDeckId!);
+    //     if (request.sentence || request.translation) {
+    //         await setSentence(
+    //             request.vid,
+    //             request.sid,
+    //             request.sentence ?? undefined,
+    //             request.translation ?? undefined,
+    //         );
+    //     }
+    //     if (request.forq) {
+    //         // Safety: This is safe, because we early-errored for this condition
+    //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //         await addToDeck(request.vid, request.sid, config.forqDeckId!);
+    //     }
+    //     if (request.review) {
+    //         await review(request.vid, request.sid, request.review);
+    //     }
+    //     await broadcastNewWordState(request.vid, request.sid);
+    //     return null;
+    // },
 };
 
-async function onPortMessage(message: ContentToBackgroundMessage, port: browser.runtime.Port) {
-    console.log('message:', message, port);
+browser.runtime.onMessage.addListener(async (rawMessage, sender) => {
+    // TODO checking this might be better, but also annoying without pulling in an external library
+    // Just assume all messages are well-formed for now
+    const message = rawMessage as Message<BackgroundBoundMessageInfo>;
+    console.log('message:', message, sender);
 
-    try {
-        await messageHandlers[message.type](message as any, port);
-    } catch (error) {
-        post(port, { type: 'error', seq: (message as any).seq ?? null, error: serializeError(error as Error) });
-    }
-}
-
-browser.runtime.onConnect.addListener(port => {
-    console.log('connect:', port);
-
-    if (port.sender.tab === undefined) {
-        // Connection was not from a content script
-        port.disconnect();
-        return;
-    }
-
-    ports.add(port);
-
-    port.onDisconnect.addListener(onPortDisconnect);
-    port.onMessage.addListener(onPortMessage);
-
-    // TODO filter to only url-relevant config options
-    post(port, { type: 'updateConfig', config });
-    browser.tabs.insertCSS(port.sender.tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
+    await messageHandlers[message.type](message as any);
+    return { response: 'received', echo: message };
 });
 
-// Context menu (Parse with jpdb)
+//     try {
+//
+//     } catch (error) {
+//         post(port, { type: 'error', seq: (message as any).seq ?? null, error: serializeError(error as Error) });
+//     }
+// }
 
-function portForTab(tabId: number): browser.runtime.Port | undefined {
-    for (const port of ports) if (port.sender.tab.id === tabId) return port;
+// browser.runtime.onConnect.addListener(port => {
+//     console.log('connect:', port);
 
-    return undefined;
-}
+//     if (port.sender.tab === undefined) {
+//         // Connection was not from a content script
+//         port.disconnect();
+//         return;
+//     }
 
-const parseSelection = browser.contextMenus.create({
-    id: 'parse-selection',
-    title: 'Parse 「%s」with jpdb',
-    contexts: ['selection'],
-});
+//     ports.add(port);
 
-async function insertCSS(tabId?: number) {
-    // We need to await here, because ordering is significant.
-    // The custom styles should load after the default styles, so they can overwrite them
-    await browser.tabs.insertCSS(tabId, { file: '/content/word.css', cssOrigin: 'author' });
-    if (config.customWordCSS) await browser.tabs.insertCSS(tabId, { code: config.customWordCSS, cssOrigin: 'author' });
-}
+//     port.onDisconnect.addListener(onPortDisconnect);
+//     port.onMessage.addListener(onPortMessage);
+
+//     // TODO filter to only url-relevant config options
+//     post(port, { type: 'updateConfig', config });
+//     browser.tabs.insertCSS(port.sender.tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
+// });
+
+// Context menu (parse selection)
+
+// async function insertCSS(tabId?: number) {
+//     // We need to await here, because ordering is significant.
+//     // The custom styles should load after the default styles, so they can overwrite them
+//     await browser.tabs.insertCSS(tabId, { file: '/content/word.css', cssOrigin: 'author' });
+//     if (config.customWordCSS) await browser.tabs.insertCSS(tabId, { code: config.customWordCSS, cssOrigin: 'author' });
+// }
+
+const parseSelection = browser.contextMenus.create(
+    {
+        id: 'parse-selection',
+        title: 'Parse 「%s」with jpdb',
+        contexts: ['selection'],
+    },
+    () => {
+        // Not sure what to do here
+        if (browser.runtime.lastError) {
+            throw Error(browser.runtime.lastError.message);
+        }
+    },
+);
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === parseSelection) {
-        const port = portForTab(tab.id);
-
-        if (port === undefined) {
-            // New tab, inject css
-            await insertCSS(tab.id);
+        console.log('Context menu action: parse selection:', info.selectionText);
+        if (tab.id === undefined) {
+            console.error('Could not parse selection: No tab ID');
+            return;
         }
-
-        await browser.tabs.executeScript(tab.id, { file: '/integrations/contextmenu.js' });
+        await browser.scripting.executeScript({
+            target: { tabId: tab.id, frameIds: [info.frameId ?? 0] },
+            files: ['/integrations/contextmenu.js'],
+        });
+        // const port = portForTab(tab.id);
+        // if (port === undefined) {
+        //     // New tab, inject css
+        //     await insertCSS(tab.id);
+        // }
+        // await browser.tabs.executeScript(tab.id, { file: '/integrations/contextmenu.js' });
     }
 });

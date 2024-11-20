@@ -1,3 +1,7 @@
+* {
+    color: red;
+}
+
 :where(rt) {
     user-select: none;
     pointer-events: none;
