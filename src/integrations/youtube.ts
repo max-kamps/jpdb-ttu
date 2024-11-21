@@ -25,12 +25,12 @@ interface Transcript {
 async function getTranscriptFromURL(url: string): Promise<Transcript | null> {
     const response = await fetch(url);
     const data = await response.text();
-    const regex = /({"captionTracks":.*isTranslatable":(true|false)}])/;
+    const regex = /("captionTracks":.*isTranslatable":(true|false),"trackName":"[^"]*"}])/;
     const matches = regex.exec(data);
 
     if (!matches?.length) throw new Error('Could not find captions.');
 
-    const { captionTracks } = JSON.parse(`${matches[0]}}`) as { captionTracks: CaptionTrack[] };
+    const { captionTracks } = JSON.parse(`{${matches[0]}}`) as { captionTracks: CaptionTrack[] };
     const subSource = captionTracks.find(track => track.languageCode === 'ja');
     if (!subSource) return null;
 
