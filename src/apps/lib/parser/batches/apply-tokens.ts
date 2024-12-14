@@ -113,11 +113,11 @@ export const applyTokens = (fragments: Fragment[], tokens: Token[]) => {
         idx.elements.push(wrapper);
       }
 
-      // wrapper.jpdbData = {
-      //   token,
-      //   context: text,
-      //   contextOffset: curOffset,
-      // };
+      wrapper.ajbContext = {
+        token,
+        context: text,
+        contextOffset: curOffset,
+      };
 
       wrap(fragment.node, wrapper);
 
