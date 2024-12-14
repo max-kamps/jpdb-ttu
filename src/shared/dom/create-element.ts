@@ -14,10 +14,10 @@ export function createElement(
   p1?: DOMElementOptions,
 ): HTMLElement {
   if (!('ajb' in document)) {
-    Object.assign(document, { ajb: { id: 0 } });
+    document.ajb = { id: 0 };
   }
 
-  (document as any).ajb.id++;
+  document.ajb.id++;
 
   const tag = typeof p0 === 'string' ? p0 : p0.tag;
   const options = (p1 ?? p0 ?? {}) as DOMElementOptions;
