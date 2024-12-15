@@ -1,4 +1,4 @@
-import { sendToBackground } from '@shared/extension/send-to-background';
+import { sendToBackground } from '@shared/messages';
 import { IntegrationScript } from '../integration-script';
 import { KeybindManager } from '../keybind-manager';
 

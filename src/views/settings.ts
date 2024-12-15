@@ -1,13 +1,13 @@
-import { getApiVersion } from '@shared/anki/get-api-version';
-import { broadcast } from '@shared/broadcaster/broadcast';
-import { getConfiguration } from '@shared/configuration/get-configuration';
-import { setConfiguration } from '@shared/configuration/set-configuration';
-import { displayToast } from '@shared/dom/display-toast';
-import { findElement } from '@shared/dom/find-element';
-import { findElements } from '@shared/dom/find-elements';
-import { withElement } from '@shared/dom/with-element';
-import { withElements } from '@shared/dom/with-elements';
-import { ping } from '@shared/jpdb/ping';
+import { getApiVersion } from '@shared/anki';
+import {
+  getConfiguration,
+  setConfiguration,
+  ConfigurationSchema,
+  Keybind,
+} from '@shared/configuration';
+import { displayToast, findElement, findElements, withElement, withElements } from '@shared/dom';
+import { ping } from '@shared/jpdb';
+import { broadcast } from '@shared/messages';
 import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
 import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 
@@ -136,7 +136,8 @@ class SettingsController {
       }
 
       displayToast('success', 'Settings saved successfully');
-      await broadcast('configurationUpdated');
+
+      broadcast('configurationUpdated');
     };
   }
 

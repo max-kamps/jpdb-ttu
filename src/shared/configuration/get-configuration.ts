@@ -1,15 +1,16 @@
-import { readStorage } from '@shared/extension/read-storage';
+import { Keybind } from '@shared/configuration';
+import { readStorage } from '@shared/extension';
+import { FilterKeys } from '@shared/types';
 import { DEFAULT_CONFIGURATION } from './default-configuration';
+import {
+  ConfigurationBooleanKeys,
+  ConfigurationNumberKeys,
+  ConfigurationObjectKeys,
+} from './keys.types';
+import { ConfigurationSchema } from './types';
 
-type NumberKeys = FilterKeys<ConfigurationSchema, number>[];
-type BooleanKeys = FilterKeys<ConfigurationSchema, boolean>[];
-type ObjectKeys = FilterKeys<
-  ConfigurationSchema,
-  Keybind | DeckConfiguration | DiscoverWordConfiguration[]
->[];
-
-const NUMBER_KEYS: NumberKeys = ['schemaVersion', 'contextWidth'];
-const BOOLEAN_KEYS: BooleanKeys = [
+const NUMBER_KEYS: ConfigurationNumberKeys = ['schemaVersion', 'contextWidth'];
+const BOOLEAN_KEYS: ConfigurationBooleanKeys = [
   'jpdbAddToForq',
   'jpdbUseTwoGrades',
   'jpdbRotateFlags',
@@ -18,7 +19,7 @@ const BOOLEAN_KEYS: BooleanKeys = [
   'touchscreenSupport',
   'disableFadeAnimation',
 ];
-const OBJECT_KEYS: ObjectKeys = [
+const OBJECT_KEYS: ConfigurationObjectKeys = [
   'jpdbReviewNothing',
   'jpdbReviewSomething',
   'jpdbReviewHard',

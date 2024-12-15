@@ -1,5 +1,6 @@
-import { onBroadcast } from '@shared/broadcaster/on-broadcast';
-import { getConfiguration } from '@shared/configuration/get-configuration';
+import { getConfiguration, ConfigurationSchema, Keybind } from '@shared/configuration';
+import { onBroadcastMessage } from '@shared/messages';
+import { FilterKeys } from '@shared/types';
 import { IntegrationScript } from './integration-script';
 
 export class KeybindManager extends IntegrationScript {
@@ -8,10 +9,7 @@ export class KeybindManager extends IntegrationScript {
   /** Reference which can be added or removed as event listener */
   private _listener = this.handleKeydown.bind(this) as (e: KeyboardEvent | MouseEvent) => void;
 
-  constructor(
-    private _events: FilterKeys<ConfigurationSchema, Keybind>[],
-    private _extraListeners: Partial<Record<keyof LocalEvents, Keybind>> = {},
-  ) {
+  constructor(private _events: FilterKeys<ConfigurationSchema, Keybind>[]) {
     super();
 
     void this.setup();
@@ -62,7 +60,7 @@ export class KeybindManager extends IntegrationScript {
   }
 
   private async setup(): Promise<void> {
-    onBroadcast('configurationUpdated', () => void this.buildKeyMap());
+    onBroadcastMessage('configurationUpdated', () => this.buildKeyMap());
 
     await this.buildKeyMap();
   }
@@ -88,16 +86,10 @@ export class KeybindManager extends IntegrationScript {
       return;
     }
 
-    let keybind = Object.keys(this._keyMap).find(
+    const keybind = Object.keys(this._keyMap).find(
       (keybind: FilterKeys<ConfigurationSchema, Keybind>) =>
         this.checkKeybind(this._keyMap[keybind], e),
     );
-
-    if (!keybind) {
-      keybind = Object.keys(this._extraListeners).find((key: keyof LocalEvents) =>
-        this.checkKeybind(this._extraListeners[key], e),
-      );
-    }
 
     if (keybind) {
       e.preventDefault();

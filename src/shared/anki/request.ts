@@ -1,14 +1,11 @@
-import { getConfiguration } from '@shared/configuration/get-configuration';
+import { getConfiguration } from '@shared/configuration';
+import { AnkiEndpoints, AnkiRequestOptions } from './api.types';
 
-export type AnkiRequestOptions = {
-  ankiConnectUrl?: string;
-};
-
-export const request = async <TResult, TParams = Record<string, never>>(
-  action: string,
-  params: TParams | undefined,
+export const request = async <Key extends keyof AnkiEndpoints>(
+  action: Key,
+  params: AnkiEndpoints[Key][0] | undefined,
   options?: AnkiRequestOptions,
-): Promise<TResult> => {
+): Promise<AnkiEndpoints[Key][1]> => {
   const ankiUrl = options?.ankiConnectUrl || (await getConfiguration('ankiUrl'));
 
   if (!ankiUrl) {
@@ -33,7 +30,7 @@ export const request = async <TResult, TParams = Record<string, never>>(
         error: string;
       }
     | {
-        result: TResult;
+        result: AnkiEndpoints[Key][1];
       };
 
   if ('error' in responseObject) {

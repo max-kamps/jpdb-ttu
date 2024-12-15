@@ -1,4 +1,4 @@
-import { displayToast } from '@shared/dom/display-toast';
+import { displayToast } from '@shared/dom';
 import { HostEvaluator } from './lib/host-evaluator';
 import { Integration } from './lib/integration';
 import { KeybindManager } from './lib/keybind-manager';

@@ -1,14 +1,11 @@
-import { getConfiguration } from '@shared/configuration/get-configuration';
+import { getConfiguration } from '@shared/configuration';
+import { JPDBEndpoints, JPDBErrorResponse, JPDBRequestOptions } from './api.types';
 
-export type JPDBRequestOptions = {
-  apiToken?: string;
-};
-
-export const request = async <TResult extends object, TParams = Record<string, never>>(
-  action: string,
-  params: TParams | undefined,
+export const request = async <Key extends keyof JPDBEndpoints>(
+  action: Key,
+  params: JPDBEndpoints[Key][0] | undefined,
   options?: JPDBRequestOptions,
-): Promise<TResult> => {
+): Promise<JPDBEndpoints[Key][1]> => {
   const apiToken = options?.apiToken || (await getConfiguration('jpdbApiToken'));
 
   if (!apiToken) {
@@ -26,15 +23,11 @@ export const request = async <TResult extends object, TParams = Record<string, n
     body: params ? JSON.stringify(params) : undefined,
   });
 
-  const responseObject = (await response.json()) as
-    | {
-        error_message: string;
-      }
-    | TResult;
+  const responseObject = (await response.json()) as JPDBErrorResponse | JPDBEndpoints[Key][1];
 
-  if ('error_message' in responseObject) {
-    throw new Error(responseObject.error_message);
+  if ('error_message' in (responseObject as JPDBErrorResponse)) {
+    throw new Error((responseObject as JPDBErrorResponse).error_message);
   }
 
-  return responseObject;
+  return responseObject as JPDBEndpoints[Key][1];
 };

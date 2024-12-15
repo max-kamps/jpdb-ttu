@@ -1,3 +1,5 @@
+import { Fragment, Paragraph } from './types';
+
 function displayCategory(
   node: Element | Node,
 ): 'none' | 'text' | 'ruby' | 'ruby-text' | 'block' | 'inline' {

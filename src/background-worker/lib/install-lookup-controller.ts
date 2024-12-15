@@ -1,6 +1,5 @@
-import { addContextMenu } from '@shared/extension/add-context-menu';
-import { openNewTab } from '@shared/extension/open-new-tab';
-import { onTabMessage } from './on-tab-message';
+import { addContextMenu, openNewTab } from '@shared/extension';
+import { receiveTabMessage } from '@shared/messages';
 
 function lookupText(text: string | undefined): void {
   if (!text?.length) {
@@ -14,7 +13,7 @@ function lookupText(text: string | undefined): void {
 }
 
 export function installLookupController(): void {
-  onTabMessage('lookupText', (_, text) => lookupText(text));
+  receiveTabMessage('lookupText', (_, text) => lookupText(text));
 
   addContextMenu(
     {

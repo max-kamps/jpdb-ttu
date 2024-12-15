@@ -1,8 +1,6 @@
-import { broadcast } from '@shared/broadcaster/broadcast';
-import { getConfiguration } from '@shared/configuration/get-configuration';
-import { sendToTab } from '@shared/extension/send-to-tab';
-import { getCardState } from '@shared/jpdb/get-card-state';
-import { onTabMessage } from './on-tab-message';
+import { getConfiguration } from '@shared/configuration';
+import { getCardState } from '@shared/jpdb';
+import { broadcast, sendToTab, receiveTabMessage } from '@shared/messages';
 
 async function getDeck(
   sender: chrome.runtime.MessageSender,
@@ -50,13 +48,13 @@ async function manageDeck(
 }
 
 export const installJpdbCardActions = (): void => {
-  onTabMessage('updateCardState', async (_, vid: number, sid: number) => {
+  receiveTabMessage('updateCardState', async (_, vid: number, sid: number) => {
     const newCardState = await getCardState(vid, sid);
 
-    await broadcast('cardStateUpdated', vid, sid, newCardState);
+    broadcast('cardStateUpdated', vid, sid, newCardState);
   });
 
-  onTabMessage(
+  receiveTabMessage(
     'addToDeck',
     async (
       sender: chrome.runtime.MessageSender,
@@ -69,7 +67,7 @@ export const installJpdbCardActions = (): void => {
     },
   );
 
-  onTabMessage(
+  receiveTabMessage(
     'removeFromDeck',
     async (
       sender: chrome.runtime.MessageSender,

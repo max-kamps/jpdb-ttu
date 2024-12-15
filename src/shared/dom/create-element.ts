@@ -1,5 +1,5 @@
 import { appendElement } from './append-element';
-import { DOMElementOptions, DOMElementTagOptions } from './dom.types';
+import { DOMElementOptions, DOMElementTagOptions } from './types';
 
 export function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K,

@@ -1,5 +1,6 @@
-import { onBroadcast } from '@shared/broadcaster/on-broadcast';
-import { getConfiguration } from '@shared/configuration/get-configuration';
+import { getConfiguration, ConfigurationSchema, Keybind } from '@shared/configuration';
+import { onBroadcastMessage } from '@shared/messages';
+import { FilterKeys } from '@shared/types';
 import { IntegrationScript } from '../integration-script';
 import { KeybindManager } from '../keybind-manager';
 import { MiningActions } from './mining-actions';
@@ -15,7 +16,7 @@ export class GradingActions extends IntegrationScript {
 
     this.installEvents();
 
-    onBroadcast('configurationUpdated', () => void this.updateGradingKeys());
+    onBroadcastMessage('configurationUpdated', () => this.updateGradingKeys());
     void this.updateGradingKeys();
   }
 

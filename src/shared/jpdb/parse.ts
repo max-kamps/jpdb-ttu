@@ -1,19 +1,12 @@
-import { FieldList, PositionLengthEncoding, TokenList } from './jpdb-api.types';
-import { JPDBRequestOptions, request } from './request';
+import { JPDBRequestOptions } from './api.types';
+import { request } from './request';
+import { JPDBParseResult } from './types';
 
 export const parse = async (
   paragraphs: string[],
   options?: JPDBRequestOptions,
-): Promise<{ tokens: RawToken[][]; vocabulary: Vocabulary[] }> => {
-  const result = await request<
-    { tokens: RawToken[][]; vocabulary: Vocabulary[] },
-    {
-      position_length_encoding: PositionLengthEncoding;
-      token_fields: TokenList;
-      vocabulary_fields: FieldList;
-      text: string[];
-    }
-  >(
+): Promise<JPDBParseResult> => {
+  const result = await request(
     'parse',
     {
       text: paragraphs,

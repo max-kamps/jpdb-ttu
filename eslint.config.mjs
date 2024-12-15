@@ -165,13 +165,19 @@ export default [{
             includeExports: true,
         }],
 
-        "no-restricted-imports": ["warn", {
+        "no-restricted-imports": ["error", {
             patterns: [{
-                group: ["**/../shared/**/*"],
-                message: "Use @/* instead.",
+                group: ["src/**/*"],
+                message: "Use relative imports instead.",
             }, {
-                group: ["**/../styles/**/*"],
-                message: "Use @/* instead.",
+                group: ["**/../shared/**/*", "**/../styles/**/*"],
+                message: "Use @* instead.",
+            }, {
+                group: ["@shared/*/**/*"],
+                message: "Use @shared/moduleName instead.",
+            }, {
+                group: ["**/apps/**/*", "**/background-worker/**/*", "**/views/**/*"],
+                message: "This import hints to a missscoped module.",
             }],
         }],
 

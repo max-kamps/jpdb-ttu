@@ -1,4 +1,5 @@
-import { JPDBRequestOptions, request } from './request';
+import { JPDBRequestOptions } from './api.types';
+import { request } from './request';
 
 export const ping = async (options?: JPDBRequestOptions): Promise<boolean> => {
   await request('ping', undefined, options);

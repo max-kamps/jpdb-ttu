@@ -1,5 +1,7 @@
-import { createElement } from '@shared/dom/create-element';
+import { createElement } from '@shared/dom';
+import { JPDBToken } from '@shared/jpdb';
 import { PopupManager } from '../../popup/popup-manager';
+import { Fragment } from './types';
 
 export const reverseIndex = new Map<
   string,
@@ -52,7 +54,7 @@ function wrap(node: Node, wrapper: HTMLElement): void {
   wrapper.append(node);
 }
 
-export const applyTokens = (fragments: Fragment[], tokens: Token[]): void => {
+export const applyTokens = (fragments: Fragment[], tokens: JPDBToken[]): void => {
   let fragmentIndex = 0;
   let curOffset = 0;
   let fragment = fragments[fragmentIndex];

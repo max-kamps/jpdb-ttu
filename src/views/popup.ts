@@ -1,9 +1,7 @@
-import { appendElement } from '@shared/dom/append-element';
-import { onLoaded } from '@shared/dom/on-loaded';
-import { getTabs } from '@shared/extension/get-tabs';
-import { openOptionsPage } from '@shared/extension/open-options-page';
-import { sendToTab } from '@shared/extension/send-to-tab';
-import { isDisabled } from '@shared/host/is-disabled';
+import { appendElement, onLoaded } from '@shared/dom';
+import { getTabs, openOptionsPage } from '@shared/extension';
+import { isDisabled } from '@shared/host-meta';
+import { sendToTab } from '@shared/messages';
 
 onLoaded(async () => {
   document.getElementById('settings-link')?.addEventListener('click', () => {

@@ -1,3 +1,4 @@
+import { VisibleObserverOptions } from '@shared/host-meta';
 import { BaseParser } from './base.parser';
 
 export class AutomaticParser extends BaseParser {

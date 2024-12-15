@@ -1,8 +1,10 @@
-import { sendToBackground } from '@shared/extension/send-to-background';
+import { JPDBToken } from '@shared/jpdb';
+import { sendToBackground } from '@shared/messages';
 import { IntegrationScript } from '../../integration-script';
-import { AbortableSequence } from '../../requests.type';
+import { AbortableSequence } from '../../types';
 import { applyTokens } from './apply-tokens';
 import { getParagraphs } from './get-paragraphs';
+import { Paragraph } from './types';
 
 /**
  * The BatchController is a class that manages the parsing of nodes.
@@ -12,7 +14,7 @@ import { getParagraphs } from './get-paragraphs';
 export class BatchController extends IntegrationScript {
   protected batches = new Map<
     Element | Node,
-    { abort: () => void; sent: boolean; sequences: AbortableSequence<Token[], Paragraph>[] }
+    { abort: () => void; sent: boolean; sequences: AbortableSequence<JPDBToken[], Paragraph>[] }
   >();
 
   /**
@@ -84,7 +86,7 @@ export class BatchController extends IntegrationScript {
   }
 
   protected prepareParagraphs(node: Element | Node, paragraphs: Paragraph[]): void {
-    const batches = paragraphs.map((p) => this.getAbortableSequence<Token[], Paragraph>(p));
+    const batches = paragraphs.map((p) => this.getAbortableSequence<JPDBToken[], Paragraph>(p));
 
     this.batches.set(node, {
       sent: false,

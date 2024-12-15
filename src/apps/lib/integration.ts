@@ -1,3 +1,4 @@
+import { HostMeta } from '@shared/host-meta';
 import { IntegrationScript } from './integration-script';
 import { BaseParser } from './parser/base.parser';
 

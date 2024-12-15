@@ -1,6 +1,6 @@
 import { createElement } from './create-element';
-import { DOMElementTagOptions } from './dom.types';
 import { resolveElement } from './resolve-element';
+import { DOMElementTagOptions } from './types';
 
 export function appendElement<TChild extends HTMLElement = HTMLElement>(
   parent: string,
