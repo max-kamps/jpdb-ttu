@@ -1,9 +1,9 @@
 import { sendToTab } from '@shared/extension/send-to-tab';
+import { Parser } from './class/parser';
 import { onTabMessage } from './on-tab-message';
 import { queueRequest } from './queue-request';
-import { Parser } from './class/parser';
-import { Handle } from './types/handle';
 import { Batch } from './types/batch';
+import { Handle } from './types/handle';
 
 const BATCH_SIZE = 16384;
 const JPDB_TIMEOUT = 200;

@@ -1,14 +1,16 @@
-const pending: Array<{
+const pending: {
   fn: () => Promise<unknown>;
   resolve: (data: unknown) => void;
   reject: (reason: any) => void;
   timeout?: number;
-}> = [];
+}[] = [];
 
-let isRunning: boolean = false;
+let isRunning = false;
 
 const processQueue = async () => {
-  if (isRunning || !pending.length) return;
+  if (isRunning || !pending.length) {
+    return;
+  }
 
   isRunning = true;
 

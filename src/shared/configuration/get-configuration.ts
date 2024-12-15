@@ -1,5 +1,5 @@
-import { DEFAULT_CONFIGURATION } from './default-configuration';
 import { readStorage } from '@shared/extension/read-storage';
+import { DEFAULT_CONFIGURATION } from './default-configuration';
 
 type NumberKeys = FilterKeys<ConfigurationSchema, number>[];
 type BooleanKeys = FilterKeys<ConfigurationSchema, boolean>[];
@@ -12,6 +12,7 @@ const NUMBER_KEYS: NumberKeys = ['schemaVersion', 'contextWidth'];
 const BOOLEAN_KEYS: BooleanKeys = [
   'jpdbAddToForq',
   'jpdbUseTwoGrades',
+  'jpdbRotateFlags',
   'enableAnkiIntegration',
   'showPopupOnHover',
   'touchscreenSupport',
@@ -25,6 +26,8 @@ const OBJECT_KEYS: ObjectKeys = [
   'jpdbReviewEasy',
   'jpdbReviewFail',
   'jpdbReviewPass',
+  'jpdbRotateForward',
+  'jpdbRotateBackward',
   'ankiMiningConfig',
   'ankiBlacklistConfig',
   'ankiNeverForgetConfig',

@@ -8,6 +8,7 @@ export const DEFAULT_CONFIGURATION = Object.freeze<ConfigurationSchema>({
   jpdbNeverForgetDeck: '',
   jpdbAddToForq: false,
   jpdbUseTwoGrades: false,
+  jpdbRotateFlags: false,
   jpdbReviewNothing: { key: '', code: '', modifiers: [] },
   jpdbReviewSomething: { key: '', code: '', modifiers: [] },
   jpdbReviewHard: { key: '', code: '', modifiers: [] },
@@ -15,6 +16,8 @@ export const DEFAULT_CONFIGURATION = Object.freeze<ConfigurationSchema>({
   jpdbReviewEasy: { key: '', code: '', modifiers: [] },
   jpdbReviewFail: { key: '', code: '', modifiers: [] },
   jpdbReviewPass: { key: '', code: '', modifiers: [] },
+  jpdbRotateForward: { key: '', code: '', modifiers: [] },
+  jpdbRotateBackward: { key: '', code: '', modifiers: [] },
 
   enableAnkiIntegration: false,
   ankiUrl: 'http://localhost:8765',

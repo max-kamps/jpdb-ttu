@@ -1,10 +1,11 @@
-import { Integration } from './lib/integration';
-import { KeybindManager } from './lib/keybind-manager';
+import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 import { displayToast } from '@shared/dom/display-toast';
 import { HostEvaluator } from './lib/host-evaluator';
-import { TriggerParser } from './lib/parser/trigger.parser';
+import { Integration } from './lib/integration';
+import { KeybindManager } from './lib/keybind-manager';
 import { AutomaticParser } from './lib/parser/automatic.parser';
 import { BunproParser } from './lib/parser/custom-parsers/bunpro.parser';
+import { TriggerParser } from './lib/parser/trigger.parser';
 
 export class AJB extends Integration {
   private _lookupKeyManager = new KeybindManager(['lookupSelectionKey']);
@@ -18,6 +19,10 @@ export class AJB extends Integration {
 
     // Evaluate host for valid events and behaviors
     this.evaluateHost();
+
+    onBroadcast('cardStateUpdated', (vid: number, sid: number, newCardState: JPDBCardState[]) => {
+      console.log('Card state updated', vid, sid, newCardState);
+    });
   }
 
   private async evaluateHost(): Promise<void> {

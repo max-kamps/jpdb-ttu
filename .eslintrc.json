@@ -4,6 +4,7 @@
     "commonjs": true,
     "browser": true
   },
+  "plugins": ["@typescript-eslint", "eslint-plugin-jsdoc", "import"],
   "extends": [
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
@@ -23,8 +24,6 @@
       }
     }
   },
-  "ignorePatterns": ["webpack.*.js", "dist/**/*.js"],
-  "plugins": ["@typescript-eslint", "eslint-plugin-jsdoc", "import"],
   "rules": {
     "curly": ["error"],
     "require-await": ["error"],
@@ -40,7 +39,8 @@
         "ignorePattern": "^import",
         "ignoreTemplateLiterals": true,
         "ignoreRegExpLiterals": true,
-        "ignoreComments": true
+        "ignoreComments": true,
+        "ignoreStrings": true
       }
     ],
     "comma-dangle": ["error", "always-multiline"],
@@ -50,15 +50,7 @@
     "import/order": [
       "warn",
       {
-        "groups": [
-          "builtin",
-          "external",
-          "index",
-          "internal",
-          "parent",
-          "sibling",
-          "type"
-        ],
+        "groups": ["builtin", "external", "index", "internal", "parent", "sibling", "type"],
         "alphabetize": {
           "order": "asc",
           "caseInsensitive": true
@@ -107,16 +99,15 @@
         "next": ["if", "for", "do", "while", "try"]
       }
     ],
-    "@typescript-eslint/unbound-method": ["off"],
-    "@typescript-eslint/lines-between-class-members": ["off"],
-    "@typescript-eslint/no-explicit-any": ["off"],
+    "@typescript-eslint/lines-between-class-members": "off",
+    "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
         "argsIgnorePattern": "^_"
       }
     ],
-    "@typescript-eslint/no-unsafe-return": ["warn"],
+    "@typescript-eslint/no-unsafe-return": "error",
     "@typescript-eslint/explicit-member-accessibility": [
       "error",
       {
@@ -126,7 +117,7 @@
       }
     ],
     "@typescript-eslint/member-ordering": [
-      "warn",
+      "error",
       {
         "default": [
           "decorated-field",
@@ -139,30 +130,36 @@
         ]
       }
     ],
-    "@typescript-eslint/no-inferrable-types": ["off"],
+    "@typescript-eslint/no-inferrable-types": "error",
     "@typescript-eslint/ban-types": [
       "error",
       {
         "types": {
           "object": false,
-          "Record": false,
-          "Function": false
+          "Record": false
         },
         "extendDefaults": true
       }
     ],
-    "@typescript-eslint/explicit-function-return-type": ["error"],
-    "@typescript-eslint/prefer-nullish-coalescing": ["off"],
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "no-duplicate-imports": ["error", { "includeExports": true }],
     "no-restricted-imports": [
       "warn",
       {
         "patterns": [
           {
-            "group": ["**/../**/*"],
+            "group": ["**/../shared/**/*"],
+            "message": "Use @/* instead."
+          },
+          {
+            "group": ["**/../styles/**/*"],
             "message": "Use @/* instead."
           }
         ]
       }
-    ]
+    ],
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/consistent-type-definitions": "off",
+    "@typescript-eslint/unbound-method": "error"
   }
 }

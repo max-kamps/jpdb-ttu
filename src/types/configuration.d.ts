@@ -45,6 +45,7 @@ declare type ConfigurationSchema = {
   jpdbNeverForgetDeck: string;
   jpdbAddToForq: boolean;
   jpdbUseTwoGrades: boolean;
+  jpdbRotateFlags: boolean;
   jpdbReviewNothing: Keybind;
   jpdbReviewSomething: Keybind;
   jpdbReviewHard: Keybind;
@@ -52,6 +53,8 @@ declare type ConfigurationSchema = {
   jpdbReviewEasy: Keybind;
   jpdbReviewFail: Keybind;
   jpdbReviewPass: Keybind;
+  jpdbRotateForward: Keybind;
+  jpdbRotateBackward: Keybind;
 
   enableAnkiIntegration: boolean;
   ankiUrl: string;

@@ -26,7 +26,7 @@ export class AutomaticParser extends BaseParser {
     let filter: (node: HTMLElement | Text) => boolean;
 
     if (typeof this._meta.parseVisibleObserver === 'object') {
-      const obs = this._meta.parseVisibleObserver as Exclude<VisibleObserverOptions, boolean>;
+      const obs = this._meta.parseVisibleObserver;
 
       const isInclude = (
         arg: Exclude<VisibleObserverOptions, boolean>,

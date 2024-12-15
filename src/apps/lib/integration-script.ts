@@ -17,12 +17,12 @@ onMessage<keyof TabEvents>((event, _, ...args) => {
 class Canceled extends Error {}
 
 export abstract class IntegrationScript {
-  protected static _nextSequence: number = 0;
+  protected static _nextSequence = 0;
   protected static _preparedRequests = new Map<
     number,
     { resolve: (value: any) => void; reject: (reason: any) => void }
   >();
-  protected static _sequenceInitialized: boolean = false;
+  protected static _sequenceInitialized = false;
   protected static _initSequence() {
     if (IntegrationScript._sequenceInitialized) {
       return;

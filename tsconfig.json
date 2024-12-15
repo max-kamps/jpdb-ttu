@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "baseUrl": "./",
     "paths": {
       "@shared/*": ["src/shared/*"],

@@ -2,12 +2,16 @@ declare type EventFunction<T extends any[]> = (...args: [...T]) => void;
 
 declare interface BroadcastEvents {
   configurationUpdated: [];
+  cardStateUpdated: [vid: number, sid: number, cardstate: JPDBCardState[]];
 }
 
 declare interface BackgroundEvents {
+  parse: [data: [sequenceId: number, text: string][]];
   lookupText: [text: string];
-  parse: [data: Array<[sequenceId: number, text: string]>];
   abortRequest: [sequence: number];
+  updateCardState: [vid: number, sid: number];
+  addToDeck: [vid: number, sid: number, key: 'mining' | 'blacklist' | 'neverForget'];
+  removeFromDeck: [vid: number, sid: number, key: 'mining' | 'blacklist' | 'neverForget'];
 }
 
 declare interface TabEvents {
@@ -29,6 +33,8 @@ declare interface LocalEvents {
   jpdbReviewEasy: KeybindEvent;
   jpdbReviewFail: KeybindEvent;
   jpdbReviewPass: KeybindEvent;
+  jpdbRotateForward: KeybindEvent;
+  jpdbRotateBackward: KeybindEvent;
   parseKey: KeybindEvent;
   showPopupKey: KeybindEvent;
   showAdvancedDialogKey: KeybindEvent;

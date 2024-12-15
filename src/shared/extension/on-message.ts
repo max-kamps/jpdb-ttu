@@ -18,7 +18,7 @@ export const onMessage = <TEvent extends string>(
         return false;
       }
 
-      const handlerResult = handler(event as TEvent, sender, ...args);
+      const handlerResult = handler(event, sender, ...args);
       const promise =
         handlerResult instanceof Promise ? handlerResult : Promise.resolve(handlerResult);
 

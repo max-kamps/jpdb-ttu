@@ -1,15 +1,15 @@
-import { HTMLMiningInputElement } from './elements/html-mining-input-element';
-import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
 import { getApiVersion } from '@shared/anki/get-api-version';
-import { ping } from '@shared/jpdb/ping';
+import { broadcast } from '@shared/broadcaster/broadcast';
 import { getConfiguration } from '@shared/configuration/get-configuration';
 import { setConfiguration } from '@shared/configuration/set-configuration';
+import { displayToast } from '@shared/dom/display-toast';
 import { findElement } from '@shared/dom/find-element';
 import { findElements } from '@shared/dom/find-elements';
 import { withElement } from '@shared/dom/with-element';
 import { withElements } from '@shared/dom/with-elements';
-import { displayToast } from '@shared/dom/display-toast';
-import { broadcast } from '@shared/broadcaster/broadcast';
+import { ping } from '@shared/jpdb/ping';
+import { HTMLKeybindInputElement } from './elements/html-keybind-input-element';
+import { HTMLMiningInputElement } from './elements/html-mining-input-element';
 
 class SettingsController {
   private _lastSavedConfiguration = new Map<
@@ -247,6 +247,7 @@ class SettingsController {
       this._invalidFields.delete(input.name as keyof ConfigurationSchema);
 
       this._updateSaveButton();
+
       return;
     }
 
@@ -304,13 +305,13 @@ class SettingsController {
     if (skipAnimation) {
       if (show) {
         collapsible.removeAttribute('hidden');
-        collapsible.style.maxHeight = `unset`;
+        collapsible.style.maxHeight = 'unset';
 
         return;
       }
 
       collapsible.setAttribute('hidden', '');
-      collapsible.style.maxHeight = `0`;
+      collapsible.style.maxHeight = '0';
 
       return;
     }
@@ -324,7 +325,7 @@ class SettingsController {
 
       setTimeout(() => {
         collapsible.classList.add('rem-height');
-        collapsible.style.maxHeight = `unset`;
+        collapsible.style.maxHeight = 'unset';
       }, 300);
     } else {
       collapsible.classList.remove('rem-height');
@@ -332,7 +333,7 @@ class SettingsController {
 
       setTimeout(() => {
         collapsible.classList.remove('is-open');
-        collapsible.style.maxHeight = `0`;
+        collapsible.style.maxHeight = '0';
 
         setTimeout(() => {
           collapsible.setAttribute('hidden', '');
@@ -347,7 +348,7 @@ class SettingsController {
 
     enablers.forEach((enabler) => {
       enabler.addEventListener('change', () => {
-        const targets = findElements<'div'>(enabler.getAttribute('enables') as string);
+        const targets = findElements<'div'>(enabler.getAttribute('enables')!);
 
         targets.forEach((target) => {
           this._collapsible(target, enabler.checked);
@@ -359,7 +360,7 @@ class SettingsController {
 
     disablers.forEach((disabler) => {
       disabler.addEventListener('change', () => {
-        const targets = findElements<'div'>(disabler.getAttribute('disables') as string);
+        const targets = findElements<'div'>(disabler.getAttribute('disables')!);
 
         targets.forEach((target) => {
           this._collapsible(target, !disabler.checked);

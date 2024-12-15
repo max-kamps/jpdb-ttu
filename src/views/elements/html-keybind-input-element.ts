@@ -2,6 +2,7 @@ import { createElement } from '@shared/dom/create-element';
 import { getStyleUrl } from '@shared/extension/get-style-url';
 
 const observedAttributes = ['value', 'name'] as const;
+
 type ObservedAttributes = (typeof observedAttributes)[number];
 
 export class HTMLKeybindInputElement extends HTMLElement {
@@ -164,7 +165,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     const key =
       event instanceof KeyboardEvent
         ? event.key
-        : HTMLKeybindInputElement.MOUSE_BUTTONS[event.button] ?? code;
+        : (HTMLKeybindInputElement.MOUSE_BUTTONS[event.button] ?? code);
     const modifiers = HTMLKeybindInputElement.MODIFIERS.filter(
       (name) => name !== key && event.getModifierState(name),
     );

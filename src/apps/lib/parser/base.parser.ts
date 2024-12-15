@@ -93,7 +93,7 @@ export abstract class BaseParser extends IntegrationScript {
       root = document.querySelector(observeTargets.shift());
     }
 
-    const initialNodes = Array.from(root.querySelectorAll(notifyFor)) as HTMLElement[];
+    const initialNodes = Array.from(root.querySelectorAll(notifyFor));
 
     if (initialNodes.length) {
       callback(initialNodes);
@@ -106,7 +106,7 @@ export abstract class BaseParser extends IntegrationScript {
         .flat()
         .filter((node) => {
           if (node instanceof HTMLElement) {
-            return node.matches(notifyFor as string);
+            return node.matches(notifyFor);
           }
 
           return false;
@@ -143,7 +143,7 @@ export abstract class BaseParser extends IntegrationScript {
         const withItems = (intersecting: boolean, cb: (elements: Element[]) => void) => {
           const elements = entries
             .filter((entry) => entry.isIntersecting === intersecting)
-            .map((entry) => entry.target as Element);
+            .map((entry) => entry.target);
 
           if (elements.length) {
             cb(elements);

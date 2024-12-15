@@ -1,8 +1,8 @@
 import { sendToBackground } from '@shared/extension/send-to-background';
 import { IntegrationScript } from '../../integration-script';
 import { AbortableSequence } from '../../requests.type';
-import { getParagraphs } from './get-paragraphs';
 import { applyTokens } from './apply-tokens';
+import { getParagraphs } from './get-paragraphs';
 
 /**
  * The BatchController is a class that manages the parsing of nodes.

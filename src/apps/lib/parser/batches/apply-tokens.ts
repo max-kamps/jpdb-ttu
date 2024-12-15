@@ -1,4 +1,5 @@
 import { createElement } from '@shared/dom/create-element';
+import { PopupManager } from '../../popup/popup-manager';
 
 export const reverseIndex = new Map<
   string,
@@ -8,7 +9,7 @@ export const reverseIndex = new Map<
   }
 >();
 
-function splitFragment(fragments: Fragment[], fragmentIndex: number, splitOffset: number) {
+function splitFragment(fragments: Fragment[], fragmentIndex: number, splitOffset: number): void {
   const oldFragment = fragments[fragmentIndex];
   const newNode = oldFragment.node.splitText(splitOffset - oldFragment.start);
 
@@ -28,28 +29,30 @@ function splitFragment(fragments: Fragment[], fragmentIndex: number, splitOffset
   oldFragment.length = splitOffset - oldFragment.start;
 }
 
-function insertBefore(newNode: HTMLElement, referenceNode: Node) {
-  referenceNode.parentElement.insertBefore(newNode, referenceNode);
+function insertBefore(newNode: HTMLElement, referenceNode: Node): void {
+  referenceNode.parentElement!.insertBefore(newNode, referenceNode);
 }
 
-function insertAfter(newNode: HTMLElement, referenceNode: Node) {
-  const parent = referenceNode.parentElement;
+function insertAfter(newNode: HTMLElement, referenceNode: Node): void {
+  const parent = referenceNode.parentElement!;
   const sibling = referenceNode.nextSibling;
 
   if (sibling) {
-    return parent.insertBefore(newNode, sibling);
+    parent.insertBefore(newNode, sibling);
+
+    return;
   }
 
   parent.appendChild(newNode);
 }
 
-function wrap(node: Node, wrapper: HTMLElement) {
+function wrap(node: Node, wrapper: HTMLElement): void {
   insertBefore(wrapper, node);
 
   wrapper.append(node);
 }
 
-export const applyTokens = (fragments: Fragment[], tokens: Token[]) => {
+export const applyTokens = (fragments: Fragment[], tokens: Token[]): void => {
   let fragmentIndex = 0;
   let curOffset = 0;
   let fragment = fragments[fragmentIndex];
@@ -77,6 +80,7 @@ export const applyTokens = (fragments: Fragment[], tokens: Token[]) => {
         return;
       }
     }
+
     // Accumulate fragments until we have enough to fit the current token
     while (curOffset < token.end) {
       if (fragment.end > token.end) {
@@ -90,27 +94,27 @@ export const applyTokens = (fragments: Fragment[], tokens: Token[]) => {
           ? createElement('ruby', {
               class: classes,
               events: {
-                onmouseenter: console.log,
-                onmouseleave: console.log,
+                onmouseenter: (event: MouseEvent) => PopupManager.instance.enter(event),
+                onmouseleave: () => PopupManager.instance.leave(),
               },
             })
           : createElement('span', {
               class: classes,
               events: {
-                onmouseenter: console.log,
-                onmouseleave: console.log,
+                onmouseenter: (event: MouseEvent) => PopupManager.instance.enter(event),
+                onmouseleave: () => PopupManager.instance.leave(),
               },
             });
 
-      const idx = reverseIndex.get(`${token.card.vid}/${token.card.sid}`);
+      const classElementMap = reverseIndex.get(`${token.card.vid}/${token.card.sid}`);
 
-      if (idx === undefined) {
+      if (classElementMap === undefined) {
         reverseIndex.set(`${token.card.vid}/${token.card.sid}`, {
           classes: classes,
           elements: [wrapper],
         });
       } else {
-        idx.elements.push(wrapper);
+        classElementMap.elements.push(wrapper);
       }
 
       wrapper.ajbContext = {

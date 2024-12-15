@@ -9,6 +9,7 @@ function getOrCreateToastContainer(): HTMLDivElement {
     const toastContainer = createElement('div', {
       id: 'ajb-toast-container',
     });
+
     shadowRoot = toastContainer.attachShadow({ mode: 'open' });
 
     shadowRoot.append(
@@ -27,7 +28,7 @@ function getOrCreateToastContainer(): HTMLDivElement {
 export function displayToast(
   type: 'error' | 'success',
   message: string,
-  timeoutDuration: number = 5000,
+  timeoutDuration = 5000,
 ): void {
   const container = getOrCreateToastContainer();
   const toast: HTMLLIElement = createElement('li', {

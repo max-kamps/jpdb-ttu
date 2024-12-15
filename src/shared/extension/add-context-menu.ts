@@ -2,7 +2,7 @@ const handlers = new Map<
   string,
   (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => void | Promise<void>
 >();
-let hasInstalled: boolean = false;
+let hasInstalled = false;
 
 function install(): void {
   if (hasInstalled) {

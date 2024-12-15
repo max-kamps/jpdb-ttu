@@ -1,5 +1,5 @@
-import { getConfiguration } from '@shared/configuration/get-configuration';
 import { onBroadcast } from '@shared/broadcaster/on-broadcast';
+import { getConfiguration } from '@shared/configuration/get-configuration';
 import { IntegrationScript } from './integration-script';
 
 export class KeybindManager extends IntegrationScript {
@@ -17,22 +17,22 @@ export class KeybindManager extends IntegrationScript {
     this.setup();
   }
 
-  // private _events: FilterKeys<ConfigurationSchema, Keybind>[] = [
-  //   'jpdbReviewNothing',
-  //   'jpdbReviewSomething',
-  //   'jpdbReviewHard',
-  //   'jpdbReviewGood',
-  //   'jpdbReviewEasy',
-  //   'jpdbReviewFail',
-  //   'jpdbReviewPass',
-  //   'showAdvancedDialogKey',
-  //   'lookupSelectionKey',
-  //   'addToMiningKey',
-  //   'addToBlacklistKey',
-  //   'addToNeverForgetKey',
-  //   'parseKey',
-  //   'showPopupKey',
-  // ];
+  public addKeys(keys: FilterKeys<ConfigurationSchema, Keybind>[], skipBuild = false): void {
+    this._events = [...new Set([...this._events, ...keys])];
+
+    if (!skipBuild) {
+      this.buildKeyMap();
+    }
+  }
+
+  public removeKeys(keys: FilterKeys<ConfigurationSchema, Keybind>[], skipBuild = false): void {
+    this._events = this._events.filter((key) => !keys.includes(key));
+
+    if (!skipBuild) {
+      this.buildKeyMap();
+    }
+  }
+
   public activate(): void {
     window.addEventListener('keydown', this._listener);
     window.addEventListener('mousedown', this._listener);
