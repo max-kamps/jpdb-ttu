@@ -29,7 +29,7 @@ class SettingsController {
     customElements.define('mining-input', HTMLMiningInputElement);
     customElements.define('keybind-input', HTMLKeybindInputElement);
 
-    (async () => {
+    void (async (): Promise<void> => {
       await this._setupSimpleInputs();
       await this._setupSelectFields();
 
@@ -63,7 +63,8 @@ class SettingsController {
   private async _setupFields(
     selector: string,
     filter: string[] = [],
-    getTargetProperty: (type: string) => keyof HTMLInputElement = () => 'value',
+    getTargetProperty: (type: string) => keyof HTMLInputElement = (): keyof HTMLInputElement =>
+      'value',
   ): Promise<void> {
     await Promise.all(
       withElements(selector, async (inputElement: HTMLInputElement) => {
@@ -109,7 +110,7 @@ class SettingsController {
    * Setup the save button. When clicked, it will save the local changes to the storage.
    */
   private _setupSaveButton(): void {
-    this._saveButton.onclick = async (event: Event) => {
+    this._saveButton.onclick = async (event: Event): Promise<void> => {
       event.stopPropagation();
       event.preventDefault();
 
@@ -136,7 +137,7 @@ class SettingsController {
       }
 
       displayToast('success', 'Settings saved successfully');
-      broadcast('configurationUpdated');
+      await broadcast('configurationUpdated');
     };
   }
 
@@ -155,15 +156,12 @@ class SettingsController {
     this._setupInteraction(
       'input[name="jpdbApiToken"]',
       '#apiTokenButton',
-      this._testJPDB.bind(this),
+      (): Promise<void> => this._testJPDB(),
     );
   }
 
   private _setupAnkiInteraction(): void {
-    const maxHeight = Math.max(
-      ...Array.from(findElements('#anki-endpoints .form-box > div')).map((e) => e.offsetHeight),
-    );
-
+    // TODO: Check what this commented code does
     // this._view.withElement('input[name="enableAnkiIntegration"]', (inputElement: HTMLInputElement) => {
     //   this._collapsible('anki-endpoints', inputElement.checked);
 
@@ -172,25 +170,29 @@ class SettingsController {
     //   });
     // });
 
-    this._setupInteraction('input[name="ankiUrl"]', '#ankiUrlButton', this._testAnki.bind(this));
+    this._setupInteraction(
+      'input[name="ankiUrl"]',
+      '#ankiUrlButton',
+      (): Promise<void> => this._testAnki(),
+    );
     this._setupInteraction(
       'input[name="ankiProxyUrl"]',
       '#ankiProxyUrlButton',
-      this._testAnkiProxy.bind(this),
+      (): Promise<void> => this._testAnkiProxy(),
     );
   }
 
   private _setupInteraction(
     inputSelector: string,
     buttonSelector: string,
-    testFunction: () => void,
+    testFunction: () => void | Promise<void>,
   ): void {
     withElement(inputSelector, (inputElement: HTMLInputElement) => {
-      inputElement.addEventListener('change', testFunction);
+      inputElement.addEventListener('change', (): void => void testFunction());
     });
 
     withElement(buttonSelector, (buttonElement: HTMLButtonElement) => {
-      buttonElement.addEventListener('click', testFunction);
+      buttonElement.addEventListener('click', (): void => void testFunction());
     });
   }
 
@@ -209,7 +211,7 @@ class SettingsController {
       '[name="ankiUrl"]',
       (ankiConnectUrl) => getApiVersion({ ankiConnectUrl }),
       false,
-      async (ankiConnectUrl: string) => {
+      (ankiConnectUrl: string): void => {
         withElements('mining-input', (element: HTMLMiningInputElement) => {
           element.fetchUrl = ankiConnectUrl;
         });
@@ -229,12 +231,12 @@ class SettingsController {
     );
   }
 
-  private async _testEndpoint(
+  private async _testEndpoint<T>(
     buttonSelector: string,
     inputSelector: string,
-    testFunction: (value: string) => Promise<any>,
+    testFunction: (value: string) => Promise<T>,
     allowEmpty: boolean,
-    afterSuccess?: (value: string) => Promise<void>,
+    afterSuccess?: (value: string) => void | Promise<void>,
     afterFail?: () => void,
   ): Promise<void> {
     const button = findElement<'button'>(buttonSelector);
