@@ -58,14 +58,14 @@ export class HTMLMiningInputElement extends HTMLElement {
   }
 
   public get value(): DeckConfiguration {
-    return JSON.parse(this.getAttribute('value'));
+    return JSON.parse(this.getAttribute('value') ?? '{}') as DeckConfiguration;
   }
   public set value(value: DeckConfiguration) {
     this.setAttribute('value', JSON.stringify(value));
   }
 
   public get name(): string {
-    return this.getAttribute('name');
+    return this.getAttribute('name')!;
   }
   public set name(value: string) {
     this.setAttribute('name', value);
@@ -83,7 +83,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     super();
   }
 
-  public connectedCallback() {
+  public connectedCallback(): void {
     this._shadow = this.attachShadow({ mode: 'open' });
 
     this.installStyles();
@@ -94,7 +94,11 @@ export class HTMLMiningInputElement extends HTMLElement {
     this.buildDOM();
   }
 
-  public attributeChangedCallback(name: ObservedAttributes, oldValue: unknown, newValue: unknown) {
+  public attributeChangedCallback(
+    name: ObservedAttributes,
+    oldValue: unknown,
+    newValue: unknown,
+  ): void {
     const pascalCaseName = name.replace(/(^\w|-\w)/g, (a) => a.replace(/-/, '').toUpperCase());
     const functionName = `on${pascalCaseName}Changed`;
     const changeHandler = this[functionName as keyof this] as
@@ -106,7 +110,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     }
   }
 
-  protected installStyles() {
+  protected installStyles(): void {
     ['css/theme', 'css/common', 'css/settings'].forEach((style) => {
       this._shadow.appendChild(
         createElement('link', {
@@ -119,21 +123,21 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected registerSelectElementListeners() {
+  protected registerSelectElementListeners(): void {
     Object.values(this._selects).forEach((select) => {
       select.addEventListener('change', () => {
         this.packDeck();
       });
     });
 
-    this._selects.modelInput.addEventListener('change', async () => {
-      await this.updateFields(this.getAttribute('fetch-url'), this.value.model);
-
-      this.validateTemplatesThenPackDeck();
+    this._selects.modelInput.addEventListener('change', () => {
+      void this.updateFields(this.getAttribute('fetch-url')!, this.value.model).then(() =>
+        this.validateTemplatesThenPackDeck(),
+      );
     });
   }
 
-  protected buildInputElements() {
+  protected buildInputElements(): void {
     this._input = createElement('input', {
       attributes: {
         type: 'hidden',
@@ -142,7 +146,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
 
     this._input.addEventListener('change', () => {
-      this.value = JSON.parse(this._input.value);
+      this.value = JSON.parse(this._input.value) as DeckConfiguration;
 
       this.dispatchEvent(new Event('change'));
     });
@@ -150,7 +154,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     this._proxyInput.addEventListener('change', () => this.packDeck());
   }
 
-  protected buildDOM() {
+  protected buildDOM(): void {
     this._shadow.appendChild(this._input);
 
     const container = createElement('div', {
@@ -178,14 +182,14 @@ export class HTMLMiningInputElement extends HTMLElement {
     this._shadow.appendChild(this.buildAccordionBlock(container));
   }
 
-  protected buildAccordionBlock(contents: HTMLElement) {
+  protected buildAccordionBlock(contents: HTMLElement): HTMLDetailsElement {
     return createElement('details', {
       class: ['accordion'],
-      children: [{ tag: 'summary', innerText: this.getAttribute('title') }, contents],
+      children: [{ tag: 'summary', innerText: this.getAttribute('title')! }, contents],
     });
   }
 
-  protected buildHeaderBlock() {
+  protected buildHeaderBlock(): HTMLDivElement {
     return createElement('div', {
       style: {
         display: 'flex',
@@ -199,7 +203,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected buildColumn(inputs: HTMLElement[]) {
+  protected buildColumn(inputs: HTMLElement[]): HTMLDivElement {
     return createElement('div', {
       class: ['form-box'],
       children: inputs
@@ -208,7 +212,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected buildSelectBlock(label: string, input: HTMLSelectElement) {
+  protected buildSelectBlock(label: string, input: HTMLSelectElement): HTMLDivElement {
     return createElement('div', {
       children: [
         {
@@ -221,7 +225,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected buildProxyBlock() {
+  protected buildProxyBlock(): HTMLDivElement {
     return createElement('div', {
       style: { flex: '1' },
       children: [
@@ -241,7 +245,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected buildTemplateBlock() {
+  protected buildTemplateBlock(): HTMLDivElement {
     return createElement('div', {
       children: [
         { tag: 'p', innerText: 'Template Fields' },
@@ -252,7 +256,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected buildTemplateList() {
+  protected buildTemplateList(): HTMLDivElement {
     if (!this.value) {
       return this._templateContainer;
     }
@@ -282,7 +286,7 @@ export class HTMLMiningInputElement extends HTMLElement {
       [fieldSelect, templateSelect].forEach((select) => {
         select.value = target[select.name as keyof TemplateTarget];
         select.addEventListener('change', () => {
-          target[select.name as keyof TemplateTarget] = select.value as any;
+          (target as Record<string, string>)[select.name] = select.value;
 
           this.validateTemplatesThenPackDeck();
         });
@@ -309,7 +313,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     return this._templateContainer;
   }
 
-  protected buildTemplateControls() {
+  protected buildTemplateControls(): HTMLDivElement {
     return createElement('div', {
       class: ['controls-list'],
       children: [
@@ -341,7 +345,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected addTemplate() {
+  protected addTemplate(): void {
     const newTemplate: TemplateTarget = { template: 'empty', field: '' };
 
     this._templateTargets.push(newTemplate);
@@ -349,14 +353,14 @@ export class HTMLMiningInputElement extends HTMLElement {
     this.buildTemplateList();
   }
 
-  protected clearTemplates() {
+  protected clearTemplates(): void {
     this._templateTargets = [];
 
     this.buildTemplateList();
     this.packDeck();
   }
 
-  protected copyTemplate() {
+  protected copyTemplate(): void {
     HTMLMiningInputElement.copiedDeckConfiguration = {
       model: this._selects.modelInput.value,
       templateTargets: this._templateTargets,
@@ -365,7 +369,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     displayToast('success', 'Template copied');
   }
 
-  protected pasteTemplate() {
+  protected pasteTemplate(): void {
     if (!HTMLMiningInputElement.copiedDeckConfiguration?.model?.length) {
       displayToast('error', 'No template copied');
 
@@ -386,7 +390,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     }
   }
 
-  protected validateTemplatesThenPackDeck() {
+  protected validateTemplatesThenPackDeck(): void {
     this._templateTargets = this._templateTargets.filter(
       (target) => target.field && this._fields.includes(target.field) && target.template,
     );
@@ -395,7 +399,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     this.packDeck();
   }
 
-  protected onValueChanged(_: string, newValue: string) {
+  protected onValueChanged(_: string, newValue: string): void {
     if (this._input && this._input.value !== newValue) {
       this._input.value = newValue;
 
@@ -403,7 +407,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     }
   }
 
-  protected async onFetchUrlChanged(_: string, ankiConnectUrl: string) {
+  protected async onFetchUrlChanged(_: string, ankiConnectUrl: string): Promise<void> {
     if (!ankiConnectUrl) {
       return;
     }
@@ -416,7 +420,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     this.packDeck();
   }
 
-  protected async updateDecks(ankiConnectUrl: string) {
+  protected async updateDecks(ankiConnectUrl: string): Promise<void> {
     this._decks = await getDecks({ ankiConnectUrl });
 
     this._decks.unshift('');
@@ -425,7 +429,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     );
   }
 
-  protected async updateModels(ankiConnectUrl: string) {
+  protected async updateModels(ankiConnectUrl: string): Promise<void> {
     this._models = await getModels({ ankiConnectUrl });
 
     this._selects.modelInput.replaceChildren(
@@ -433,7 +437,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     );
   }
 
-  protected async updateFields(ankiConnectUrl: string, model: string) {
+  protected async updateFields(ankiConnectUrl: string, model: string): Promise<void> {
     this._fields = model ? await getFields(model, { ankiConnectUrl }) : [];
 
     ['wordInput', 'readingInput'].forEach((key: keyof typeof this._selects) => {
@@ -449,7 +453,7 @@ export class HTMLMiningInputElement extends HTMLElement {
     });
   }
 
-  protected packDeck() {
+  protected packDeck(): void {
     this.value = {
       deck: this._selects.deckInput.value,
       model: this._selects.modelInput.value,
@@ -460,8 +464,12 @@ export class HTMLMiningInputElement extends HTMLElement {
     };
   }
 
-  protected unpackDeck() {
-    const propagate = (key: keyof typeof this._selects, haystack: string[], needle: string) => {
+  protected unpackDeck(): void {
+    const propagate = (
+      key: keyof typeof this._selects,
+      haystack: string[],
+      needle: string,
+    ): void => {
       this._selects[key].value = haystack.includes(needle) ? needle : '';
     };
 

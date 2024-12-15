@@ -1,3 +1,1 @@
-export const openNewTab = (url: string): void => {
-  chrome.tabs.create({ url });
-};
+export const openNewTab = (url: string): Promise<chrome.tabs.Tab> => chrome.tabs.create({ url });

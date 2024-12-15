@@ -1,3 +1,1 @@
-export const openOptionsPage = (): void => {
-  chrome.runtime.openOptionsPage();
-};
+export const openOptionsPage = (): Promise<void> => chrome.runtime.openOptionsPage();

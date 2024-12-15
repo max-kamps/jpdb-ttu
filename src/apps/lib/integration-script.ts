@@ -23,7 +23,7 @@ export abstract class IntegrationScript {
     { resolve: (value: any) => void; reject: (reason: any) => void }
   >();
   protected static _sequenceInitialized = false;
-  protected static _initSequence() {
+  protected static _initSequence(): void {
     if (IntegrationScript._sequenceInitialized) {
       return;
     }

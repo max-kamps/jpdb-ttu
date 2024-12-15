@@ -6,27 +6,25 @@ import { sendToTab } from '@shared/extension/send-to-tab';
 import { isDisabled } from '@shared/host/is-disabled';
 
 onLoaded(async () => {
-  document.getElementById('settings-link').addEventListener('click', () => {
-    openOptionsPage();
+  document.getElementById('settings-link')?.addEventListener('click', () => {
+    void openOptionsPage();
   });
 
   for (const tab of await getTabs({ currentWindow: true })) {
-    if (tab.url.startsWith('about://') || tab.url.startsWith('chrome://')) {
+    const url = tab.url!;
+
+    if (!tab.id || url.startsWith('about://') || url.startsWith('chrome://')) {
       continue;
     }
 
-    if (await isDisabled(tab.url)) {
+    if (await isDisabled(url)) {
       continue;
     }
 
     appendElement<'a'>('.container', {
       tag: 'a',
       class: ['outline', 'parse'],
-      handler: async () => {
-        await sendToTab('parsePage', tab.id);
-
-        window.close();
-      },
+      handler: (): void => void sendToTab('parsePage', tab.id!).then(() => window.close()),
       innerText: `Parse "${tab.title ?? 'Untitled'}"`,
     });
   }

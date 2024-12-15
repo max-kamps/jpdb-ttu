@@ -25,14 +25,14 @@ export class HTMLKeybindInputElement extends HTMLElement {
   });
 
   public get value(): Keybind {
-    return JSON.parse(this.getAttribute('value'));
+    return JSON.parse(this.getAttribute('value')!) as Keybind;
   }
   public set value(value: Keybind) {
     this.setAttribute('value', JSON.stringify(value));
   }
 
   public get name(): string {
-    return this.getAttribute('name');
+    return this.getAttribute('name')!;
   }
   public set name(value: string) {
     this.setAttribute('name', value);
@@ -42,7 +42,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     super();
   }
 
-  connectedCallback() {
+  public connectedCallback(): void {
     this._shadow = this.attachShadow({ mode: 'open' });
 
     this.installStyles();
@@ -51,7 +51,11 @@ export class HTMLKeybindInputElement extends HTMLElement {
     this.buildDOM();
   }
 
-  public attributeChangedCallback(name: ObservedAttributes, oldValue: unknown, newValue: unknown) {
+  public attributeChangedCallback(
+    name: ObservedAttributes,
+    oldValue: unknown,
+    newValue: unknown,
+  ): void {
     const pascalCaseName = name.replace(/(^\w|-\w)/g, (a) => a.replace(/-/, '').toUpperCase());
     const functionName = `on${pascalCaseName}Changed`;
     const changeHandler = this[functionName as keyof this] as
@@ -63,7 +67,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     }
   }
 
-  protected installStyles() {
+  protected installStyles(): void {
     ['css/theme', 'css/common', 'css/settings'].forEach((style) => {
       this._shadow.appendChild(
         createElement('link', {
@@ -76,7 +80,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     });
   }
 
-  protected buildInputElements() {
+  protected buildInputElements(): void {
     this._input = createElement('input', {
       attributes: {
         type: 'hidden',
@@ -85,7 +89,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
     });
 
     this._input.addEventListener('change', () => {
-      this.value = JSON.parse(this._input.value);
+      this.value = JSON.parse(this._input.value) as Keybind;
 
       this.dispatchEvent(new Event('change'));
     });
@@ -95,12 +99,12 @@ export class HTMLKeybindInputElement extends HTMLElement {
     this._button.addEventListener('mousedown', (event) => this.initChooseKey(event));
   }
 
-  protected buildDOM() {
+  protected buildDOM(): void {
     this._shadow.appendChild(this._input);
     this._shadow.appendChild(this._button);
   }
 
-  protected initChooseKey(event: MouseEvent) {
+  protected initChooseKey(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
 
@@ -121,29 +125,35 @@ export class HTMLKeybindInputElement extends HTMLElement {
     this.activate();
   }
 
-  protected activate() {
+  protected activate(): void {
     this._button.value = 'Press a key, escape to cancel';
 
-    document.addEventListener('keydown', HTMLKeybindInputElement.keyListener);
-    document.addEventListener('keyup', HTMLKeybindInputElement.keyListener);
-    document.addEventListener('mousedown', HTMLKeybindInputElement.keyListener);
-    document.addEventListener('mouseup', HTMLKeybindInputElement.keyListener);
+    const events = ['keydown', 'keyup', 'mousedown', 'mouseup'];
+
+    events.forEach((event) =>
+      document.addEventListener(event, (ev: KeyboardEvent | MouseEvent) =>
+        HTMLKeybindInputElement.keyListener(ev),
+      ),
+    );
 
     HTMLKeybindInputElement.active = this;
   }
 
-  protected deactivate() {
+  protected deactivate(): void {
     this._button.value = this.keybindToString(this.value);
 
-    document.removeEventListener('keydown', HTMLKeybindInputElement.keyListener);
-    document.removeEventListener('keyup', HTMLKeybindInputElement.keyListener);
-    document.removeEventListener('mousedown', HTMLKeybindInputElement.keyListener);
-    document.removeEventListener('mouseup', HTMLKeybindInputElement.keyListener);
+    const events = ['keydown', 'keyup', 'mousedown', 'mouseup'];
+
+    events.forEach((event) =>
+      document.removeEventListener(event, (ev: KeyboardEvent | MouseEvent) =>
+        HTMLKeybindInputElement.keyListener(ev),
+      ),
+    );
 
     HTMLKeybindInputElement.active = undefined;
   }
 
-  protected static keyListener(event: KeyboardEvent | MouseEvent) {
+  protected static keyListener(event: KeyboardEvent | MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
@@ -170,8 +180,6 @@ export class HTMLKeybindInputElement extends HTMLElement {
       (name) => name !== key && event.getModifierState(name),
     );
 
-    console.log({ code, key, modifiers });
-
     if (!modifiers.length && code === 'Mouse0') {
       // We don't want to allow the left mouse button as keybind, as it would be impossible to click on anything.
       return;
@@ -182,7 +190,7 @@ export class HTMLKeybindInputElement extends HTMLElement {
       return;
     }
 
-    HTMLKeybindInputElement.active.value =
+    HTMLKeybindInputElement.active!.value =
       code === 'Escape'
         ? {
             key: '',
@@ -191,14 +199,14 @@ export class HTMLKeybindInputElement extends HTMLElement {
           }
         : { key, code, modifiers };
 
-    HTMLKeybindInputElement.active.deactivate();
+    HTMLKeybindInputElement.active!.deactivate();
   }
 
-  protected keybindToString({ key, modifiers, code }: Keybind) {
+  protected keybindToString({ key, modifiers, code }: Keybind): string {
     return !key.length && !code.length ? 'None' : `${key} (${[...modifiers, code].join('+')})`;
   }
 
-  protected onValueChanged(_: string, newValue: string) {
+  protected onValueChanged(_: string, newValue: string): void {
     if (this._input && this._input.value !== newValue) {
       this._input.value = newValue;
 

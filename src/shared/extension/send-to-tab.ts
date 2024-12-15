@@ -15,11 +15,11 @@ function send<T = void>(
   });
 }
 
-export const sendToTab = <TEvent extends keyof TabEvents>(
+export const sendToTab = <TEvent extends keyof TabEvents, TResult>(
   event: TEvent,
   tabId: number,
   ...args: [...TabEvents[TEvent]]
-): Promise<void> => send(event, tabId, false, ...args);
+): Promise<TResult> => send(event, tabId, false, ...args);
 
 export const broadcastToTab = <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
