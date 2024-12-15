@@ -15,17 +15,17 @@ export function getHostMeta(
 
 export async function getHostMeta(
   host: string,
-  filter: (meta: HostMeta) => boolean = () => true,
+  filter: (meta: HostMeta) => boolean = (): boolean => true,
   multiple?: boolean,
 ): Promise<HostMeta[] | HostMeta | undefined> {
   if (!hostsMeta) {
     const fetchData = await fetch(getURL('hosts.json'));
-    const jsonData = await fetchData.json();
+    const jsonData = (await fetchData.json()) as HostMeta[];
 
     hostsMeta = jsonData;
   }
 
-  const filterFn = (meta: HostMeta) => {
+  const filterFn = (meta: HostMeta): boolean => {
     const matchUrl = (matchPattern: string): boolean => {
       if (matchPattern === '<all_urls>') {
         return true;

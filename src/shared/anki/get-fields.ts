@@ -1,8 +1,4 @@
 import { AnkiRequestOptions, request } from './request';
 
-export const getFields = async (
-  modelName: string,
-  options?: AnkiRequestOptions,
-): Promise<string[]> => {
-  return request('modelFieldNames', { modelName }, options);
-};
+export const getFields = (modelName: string, options?: AnkiRequestOptions): Promise<string[]> =>
+  request('modelFieldNames', { modelName }, options);

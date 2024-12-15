@@ -1,3 +1,4 @@
+import { FieldList, VidSidTuple } from './jpdb-api.types';
 import { JPDBRequestOptions, request } from './request';
 
 export const getCardState = async (
@@ -5,9 +6,15 @@ export const getCardState = async (
   sid: number,
   options?: JPDBRequestOptions,
 ): Promise<JPDBCardState[]> => {
-  const result = await request<{
-    vocabulary_info: [[JPDBCardState]];
-  }>(
+  const result = await request<
+    {
+      vocabulary_info: [[JPDBCardState]];
+    },
+    {
+      list: VidSidTuple;
+      fields: FieldList;
+    }
+  >(
     'lookup-vocabulary',
     {
       list: [[vid, sid]],

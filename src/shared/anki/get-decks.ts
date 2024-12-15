@@ -1,5 +1,4 @@
 import { AnkiRequestOptions, request } from './request';
 
-export const getDecks = async (options?: AnkiRequestOptions): Promise<string[]> => {
-  return request('deckNames', {}, options);
-};
+export const getDecks = (options?: AnkiRequestOptions): Promise<string[]> =>
+  request('deckNames', {}, options);

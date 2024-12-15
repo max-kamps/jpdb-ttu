@@ -13,12 +13,13 @@ function install(): void {
 
   chrome.contextMenus.onClicked.addListener((info, tab) => {
     const id = info.menuItemId as string;
+    const handler = handlers.get(id);
 
-    if (!tab || !handlers.has(id)) {
+    if (!tab || !handler) {
       return;
     }
 
-    handlers.get(id)(info, tab);
+    void handler(info, tab);
   });
 }
 
@@ -26,12 +27,14 @@ export const addContextMenu = (
   options: chrome.contextMenus.CreateProperties,
   handler: (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => void | Promise<void>,
 ): void => {
-  if (handlers.has(options.id)) {
+  const { id } = options;
+
+  if (!id || handlers.has(id)) {
     return;
   }
 
   chrome.contextMenus.create(options);
-  handlers.set(options.id, handler);
+  handlers.set(id, handler);
 
   install();
 };

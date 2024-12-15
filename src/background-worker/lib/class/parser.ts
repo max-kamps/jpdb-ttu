@@ -97,7 +97,7 @@ export class Parser {
     const { spelling: kanji } = card;
 
     if (!ruby.length) {
-      return null;
+      return;
     }
 
     const word = kanji.split('');

@@ -11,7 +11,9 @@ export const broadcast = async <TEvent extends keyof BroadcastEvents>(
   promises.push(broadcastToBackground(event, ...args));
 
   for (const tab of await getTabs({})) {
-    promises.push(broadcastToTab(event as any, tab.id, ...(args as [])));
+    if (tab.id) {
+      promises.push(broadcastToTab(event, tab.id, ...args));
+    }
   }
 
   await Promise.allSettled(promises);

@@ -4,9 +4,9 @@ export type JPDBRequestOptions = {
   apiToken?: string;
 };
 
-export const request = async <TResult extends object>(
+export const request = async <TResult extends object, TParams = Record<string, never>>(
   action: string,
-  params: any,
+  params: TParams | undefined,
   options?: JPDBRequestOptions,
 ): Promise<TResult> => {
   const apiToken = options?.apiToken || (await getConfiguration('jpdbApiToken'));

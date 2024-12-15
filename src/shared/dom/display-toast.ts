@@ -3,7 +3,7 @@ import { createElement } from './create-element';
 import { findElement } from './find-element';
 
 function getOrCreateToastContainer(): HTMLDivElement {
-  let shadowRoot: ShadowRoot = findElement<'div'>('#ajb-toast-container')?.shadowRoot;
+  let shadowRoot: ShadowRoot | null = findElement<'div'>('#ajb-toast-container')?.shadowRoot;
 
   if (!shadowRoot) {
     const toastContainer = createElement('div', {
@@ -47,13 +47,13 @@ export function displayToast(
             ? {
                 tag: 'span',
                 innerText: '⎘',
-                handler(e: Event) {
-                  e.stopPropagation();
+                handler(ev?: MouseEvent): void {
+                  ev?.stopPropagation();
 
-                  navigator.clipboard.writeText(message);
+                  void navigator.clipboard.writeText(message);
                 },
               }
-            : null,
+            : false,
         ],
       },
     ],

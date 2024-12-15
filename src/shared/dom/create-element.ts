@@ -17,13 +17,13 @@ export function createElement(
     document.ajb = { id: 0 };
   }
 
-  document.ajb.id++;
+  document.ajb!.id++;
 
   const tag = typeof p0 === 'string' ? p0 : p0.tag;
   const options = (p1 ?? p0 ?? {}) as DOMElementOptions;
 
   const e = document.createElement(tag);
-  const id = options.id ?? `${tag}-${(document as any).ajb.id}`;
+  const id = options.id ?? `${tag}-${document.ajb!.id}`;
 
   if (options.id !== false) {
     e.setAttribute('id', id as string);
@@ -43,7 +43,7 @@ export function createElement(
 
   if (options.events) {
     for (const key of Object.keys(options.events)) {
-      (e as any)[key] = options.events[key];
+      (e as unknown as Record<string, (ev: Event) => void>)[key] = options.events[key];
     }
   }
 
@@ -61,8 +61,7 @@ export function createElement(
     for (const key of Object.keys(options.style)) {
       const style = options.style[key as keyof CSSStyleDeclaration];
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (e.style as any)[key] = style;
+      (e.style as unknown as Record<string, typeof style>)[key] = style;
     }
   }
 

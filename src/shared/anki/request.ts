@@ -4,9 +4,9 @@ export type AnkiRequestOptions = {
   ankiConnectUrl?: string;
 };
 
-export const request = async <TResult>(
+export const request = async <TResult, TParams = Record<string, never>>(
   action: string,
-  params: any,
+  params: TParams | undefined,
   options?: AnkiRequestOptions,
 ): Promise<TResult> => {
   const ankiUrl = options?.ankiConnectUrl || (await getConfiguration('ankiUrl'));
@@ -28,12 +28,15 @@ export const request = async <TResult>(
     }),
   });
 
-  const responseObject = (await response.json()) as {
-    error?: string;
-    result?: TResult;
-  };
+  const responseObject = (await response.json()) as
+    | {
+        error: string;
+      }
+    | {
+        result: TResult;
+      };
 
-  if (responseObject.error) {
+  if ('error' in responseObject) {
     throw new Error(responseObject.error);
   }
 
