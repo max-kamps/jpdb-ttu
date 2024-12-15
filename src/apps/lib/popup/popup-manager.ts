@@ -6,7 +6,7 @@ import { MiningActions } from './mining-actions';
 export class PopupManager extends IntegrationScript {
   private static _instance: PopupManager;
 
-  public static get instance() {
+  public static get instance(): PopupManager {
     if (!this._instance) {
       this._instance = new PopupManager();
     }
@@ -61,10 +61,10 @@ export class PopupManager extends IntegrationScript {
   }
 
   private showPopup(): void {
-    console.log('showing popup');
+    // console.log('showing popup');
   }
 
   private showAdvancedDialog(): void {
-    console.log('showing advanced dialog');
+    // console.log('showing advanced dialog');
   }
 }

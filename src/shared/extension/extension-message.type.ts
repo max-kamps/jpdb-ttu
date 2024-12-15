@@ -1,5 +1,5 @@
-export interface ExtensionMessage<TEvent extends string, TEventArgs extends unknown[]> {
-  event: TEvent;
+export interface ExtensionMessage<Collection extends EventTypes, Key extends keyof Collection> {
+  event: Key;
   isBroadcast: boolean;
-  args: TEventArgs;
+  args: ArgumentsForEvent<Collection, Key>;
 }

@@ -1,25 +1,21 @@
 import { onMessage } from '@shared/extension/on-message';
 
-const listeners: Partial<
-  Record<keyof BroadcastEvents, EventFunction<BroadcastEvents[keyof BroadcastEvents]>[]>
-> = {};
+const listeners: Partial<Record<keyof BroadcastEvents, EventFunctions<BroadcastEvents>[]>> = {};
 
-onMessage<keyof BroadcastEvents>(
+onMessage<BroadcastEvents, keyof BroadcastEvents>(
   (event, _, ...args) => {
     if (!listeners[event]) {
       return;
     }
 
-    listeners[event].forEach((listener) =>
-      listener(...(args as BroadcastEvents[keyof BroadcastEvents])),
-    );
+    listeners[event].forEach((listener) => void listener(...args));
   },
   ({ isBroadcast }) => isBroadcast,
 );
 
 export const onBroadcast = <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
-  listener: EventFunction<BroadcastEvents[TEvent]>,
+  listener: EventFunction<BroadcastEvents, TEvent>,
 ): void => {
   if (!listeners[event]) {
     listeners[event] = [];

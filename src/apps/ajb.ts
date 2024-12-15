@@ -1,4 +1,3 @@
-import { onBroadcast } from '@shared/broadcaster/on-broadcast';
 import { displayToast } from '@shared/dom/display-toast';
 import { HostEvaluator } from './lib/host-evaluator';
 import { Integration } from './lib/integration';
@@ -18,11 +17,7 @@ export class AJB extends Integration {
     this.installDefaultListeners();
 
     // Evaluate host for valid events and behaviors
-    this.evaluateHost();
-
-    onBroadcast('cardStateUpdated', (vid: number, sid: number, newCardState: JPDBCardState[]) => {
-      console.log('Card state updated', vid, sid, newCardState);
-    });
+    void this.evaluateHost();
   }
 
   private async evaluateHost(): Promise<void> {
@@ -48,8 +43,7 @@ export class AJB extends Integration {
       return;
     }
 
-    console.log('Installing rejection triggers...');
-    const reject = () => {
+    const reject = (): void => {
       displayToast('error', 'This page has been disabled for manual parsing.');
     };
 

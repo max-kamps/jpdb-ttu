@@ -6,7 +6,7 @@ export class BunproParser extends AutomaticParser {
       const childDiv = node.querySelector('div.text-center')!;
 
       if (childDiv?.children.length) {
-        this._visibleObserver.observe(childDiv);
+        this._visibleObserver?.observe(childDiv);
       }
     });
   }

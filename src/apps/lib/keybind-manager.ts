@@ -6,7 +6,7 @@ export class KeybindManager extends IntegrationScript {
   /** Map of configured keybinds */
   private _keyMap: Partial<Record<FilterKeys<ConfigurationSchema, Keybind>, Keybind>> = {};
   /** Reference which can be added or removed as event listener */
-  private _listener = this.handleKeydown.bind(this);
+  private _listener = this.handleKeydown.bind(this) as (e: KeyboardEvent | MouseEvent) => void;
 
   constructor(
     private _events: FilterKeys<ConfigurationSchema, Keybind>[],
@@ -14,22 +14,40 @@ export class KeybindManager extends IntegrationScript {
   ) {
     super();
 
-    this.setup();
+    void this.setup();
   }
 
-  public addKeys(keys: FilterKeys<ConfigurationSchema, Keybind>[], skipBuild = false): void {
+  public addKeys(
+    keys: FilterKeys<ConfigurationSchema, Keybind>[],
+    skipBuild?: false,
+  ): Promise<void>;
+  public addKeys(keys: FilterKeys<ConfigurationSchema, Keybind>[], skipBuild: true): void;
+
+  public addKeys(
+    keys: FilterKeys<ConfigurationSchema, Keybind>[],
+    skipBuild = false,
+  ): void | Promise<void> {
     this._events = [...new Set([...this._events, ...keys])];
 
     if (!skipBuild) {
-      this.buildKeyMap();
+      return this.buildKeyMap();
     }
   }
 
-  public removeKeys(keys: FilterKeys<ConfigurationSchema, Keybind>[], skipBuild = false): void {
+  public async removeKeys(
+    keys: FilterKeys<ConfigurationSchema, Keybind>[],
+    skipBuild?: false,
+  ): Promise<void>;
+  public removeKeys(keys: FilterKeys<ConfigurationSchema, Keybind>[], skipBuild: true): void;
+
+  public removeKeys(
+    keys: FilterKeys<ConfigurationSchema, Keybind>[],
+    skipBuild = false,
+  ): void | Promise<void> {
     this._events = this._events.filter((key) => !keys.includes(key));
 
     if (!skipBuild) {
-      this.buildKeyMap();
+      return this.buildKeyMap();
     }
   }
 
@@ -90,7 +108,11 @@ export class KeybindManager extends IntegrationScript {
     }
   }
 
-  private checkKeybind(keybind: Keybind, event: KeyboardEvent | MouseEvent): boolean {
+  private checkKeybind(keybind: Keybind | undefined, event: KeyboardEvent | MouseEvent): boolean {
+    if (!keybind) {
+      return false;
+    }
+
     const code = event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
 
     return code === keybind.code && keybind.modifiers.every((name) => event.getModifierState(name));

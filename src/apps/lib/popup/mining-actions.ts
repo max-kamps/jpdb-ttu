@@ -1,7 +1,4 @@
-import { getConfiguration } from '@shared/configuration/get-configuration';
-import { displayToast } from '@shared/dom/display-toast';
 import { sendToBackground } from '@shared/extension/send-to-background';
-import { getCardState } from '@shared/jpdb/get-card-state';
 import { IntegrationScript } from '../integration-script';
 import { KeybindManager } from '../keybind-manager';
 

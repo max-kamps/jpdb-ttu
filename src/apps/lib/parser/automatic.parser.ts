@@ -23,7 +23,7 @@ export class AutomaticParser extends BaseParser {
 
   /** Sets up a `getParseVisibleObserver (IntersectionObserver)` for the page */
   protected setupVisibleObserver(): void {
-    let filter: (node: HTMLElement | Text) => boolean;
+    let filter: ((node: HTMLElement | Text) => boolean) | undefined;
 
     if (typeof this._meta.parseVisibleObserver === 'object') {
       const obs = this._meta.parseVisibleObserver;
@@ -40,7 +40,7 @@ export class AutomaticParser extends BaseParser {
         return 'include' in arg;
       };
 
-      filter = (node) => {
+      filter = (node): boolean => {
         if (node instanceof Text) {
           return true;
         }
@@ -86,6 +86,6 @@ export class AutomaticParser extends BaseParser {
       return this.parseNodes(nodes);
     }
 
-    nodes.forEach((node) => this._visibleObserver.observe(node));
+    nodes.forEach((node) => this._visibleObserver?.observe(node));
   }
 }

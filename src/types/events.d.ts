@@ -1,29 +1,57 @@
-declare type EventFunction<T extends unknown[]> = (...args: [...T]) => void;
+//#region Event Types
+
+declare type EventTypes = BackgroundEvents | BroadcastEvents | TabEvents | LocalEvents;
+
+declare type EventFunctions<
+  T extends EventTypes,
+  // @ts-expect-error: Typescript does not allow indexing, but we know they exist
+> = (...args: [...T[keyof T][0]]) => T[keyof T][1];
+
+declare type EventFunction<
+  Collection extends EventTypes,
+  Key extends keyof Collection,
+  // @ts-expect-error: Typescript does not allow indexing, but we know they exist
+> = (...args: [...Collection[Key][0]]) => Collection[Key][1];
+
+declare type ArgumentsForEvent<
+  Collection extends EventTypes,
+  Key extends keyof Collection,
+  // @ts-expect-error: Typescript does not allow indexing, but we know they exist
+> = Collection[Key][0];
+
+declare type ResultForEvent<
+  Collection extends EventTypes,
+  Key extends keyof Collection,
+  // @ts-expect-error: Typescript does not allow indexing, but we know they exist
+> = Collection[Key][1];
+
+//#endregion
+//#region Events
 
 declare interface BroadcastEvents {
-  configurationUpdated: [];
-  cardStateUpdated: [vid: number, sid: number, cardstate: JPDBCardState[]];
+  configurationUpdated: [[], void];
+  cardStateUpdated: [[vid: number, sid: number, cardstate: JPDBCardState[]], void];
 }
 
 declare interface BackgroundEvents {
-  parse: [data: [sequenceId: number, text: string][]];
-  lookupText: [text: string];
-  abortRequest: [sequence: number];
-  updateCardState: [vid: number, sid: number];
-  addToDeck: [vid: number, sid: number, key: 'mining' | 'blacklist' | 'neverForget'];
-  removeFromDeck: [vid: number, sid: number, key: 'mining' | 'blacklist' | 'neverForget'];
+  parse: [[data: [sequenceId: number, text: string][]], void];
+  lookupText: [[text: string], void];
+  abortRequest: [[sequence: number], void];
+  updateCardState: [[vid: number, sid: number], void];
+  addToDeck: [[vid: number, sid: number, key: 'mining' | 'blacklist' | 'neverForget'], void];
+  removeFromDeck: [[vid: number, sid: number, key: 'mining' | 'blacklist' | 'neverForget'], void];
 }
 
 declare interface TabEvents {
-  sequenceAborted: [sequence: number];
-  sequenceSuccess: [sequence: number, data: unknown];
-  sequenceError: [sequence: number, data: string];
-  parsePage: [];
-  parseSelection: [];
-  toast: [type: 'error' | 'success', message: string, timeoutDuration?: number];
+  sequenceAborted: [[sequence: number], void];
+  sequenceSuccess: [[sequence: number, data: unknown], void];
+  sequenceError: [[sequence: number, data: string], void];
+  parsePage: [[], void];
+  parseSelection: [[], void];
+  toast: [[type: 'error' | 'success', message: string, timeoutDuration?: number], void];
 }
 
-type KeybindEvent = [e: KeyboardEvent | MouseEvent];
+type KeybindEvent = [[e: KeyboardEvent | MouseEvent], void];
 declare interface LocalEvents {
   closeAllDialogs: KeybindEvent;
   jpdbReviewNothing: KeybindEvent;
@@ -43,3 +71,5 @@ declare interface LocalEvents {
   addToBlacklistKey: KeybindEvent;
   addToNeverForgetKey: KeybindEvent;
 }
+
+//#endregion

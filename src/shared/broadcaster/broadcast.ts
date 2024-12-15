@@ -4,7 +4,7 @@ import { broadcastToTab } from '@shared/extension/send-to-tab';
 
 export const broadcast = async <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
-  ...args: [...BroadcastEvents[TEvent]]
+  ...args: [...ArgumentsForEvent<BroadcastEvents, TEvent>]
 ): Promise<void> => {
   const promises = [];
 

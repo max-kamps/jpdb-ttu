@@ -1,25 +1,21 @@
-function send<TEvent extends keyof BackgroundEvents | keyof BroadcastEvents, TResult = void>(
-  event: TEvent,
-  isBroadcast: boolean,
-  ...args: unknown[]
-): Promise<TResult> {
-  return new Promise<TResult>((resolve, reject) => {
-    chrome.runtime.sendMessage({ event, isBroadcast, args }, (response) => {
+function send<T>(event: string, isBroadcast: boolean, ...args: unknown[]): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    chrome.runtime.sendMessage({ event, isBroadcast, args }, (response: T) => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       }
 
-      resolve(response as TResult);
+      resolve(response);
     });
   });
 }
 
-export const sendToBackground = <TEvent extends keyof BackgroundEvents, TResult = void>(
+export const sendToBackground = <TEvent extends keyof BackgroundEvents>(
   event: TEvent,
-  ...args: [...BackgroundEvents[TEvent]]
-): Promise<TResult> => send(event, false, ...args);
+  ...args: [...ArgumentsForEvent<BackgroundEvents, TEvent>]
+): Promise<ResultForEvent<BackgroundEvents, TEvent>> => send(event, false, ...args);
 
 export const broadcastToBackground = <TEvent extends keyof BroadcastEvents>(
   event: TEvent,
-  ...args: [...BroadcastEvents[TEvent]]
-): Promise<void> => send(event, true, ...args);
+  ...args: [...ArgumentsForEvent<BroadcastEvents, TEvent>]
+): Promise<ResultForEvent<BroadcastEvents, TEvent>> => send(event, true, ...args);

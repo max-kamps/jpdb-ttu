@@ -75,19 +75,19 @@ export class GradingActions extends IntegrationScript {
 
     if (useTwoButtonGradingSystem) {
       this._keyManager.removeKeys(fiveGradeKeys, true);
-      this._keyManager.addKeys(twoGradeKeys);
+      await this._keyManager.addKeys(twoGradeKeys);
 
       return;
     }
 
     this._keyManager.addKeys(fiveGradeKeys, true);
-    this._keyManager.removeKeys(twoGradeKeys);
+    await this._keyManager.removeKeys(twoGradeKeys);
   }
 
   private reviewCard(
-    grade: 'nothing' | 'something' | 'hard' | 'good' | 'easy' | 'fail' | 'pass',
+    _grade: 'nothing' | 'something' | 'hard' | 'good' | 'easy' | 'fail' | 'pass',
   ): void {
-    console.log('grading crad', grade, this._currentContext?.ajbContext.token);
+    // console.log('grading crad', grade, this._currentContext?.ajbContext?.token);
   }
 
   private async rotateFlag(forward: boolean): Promise<void> {

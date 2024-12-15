@@ -75,12 +75,12 @@ export class BatchController extends IntegrationScript {
     );
 
     sequences.forEach((s) => {
-      s.promise.then((tokens) => {
+      void s.promise.then((tokens) => {
         applyTokens(s.data, tokens);
       });
     });
 
-    sendToBackground('parse', sequenceData);
+    void sendToBackground('parse', sequenceData);
   }
 
   protected prepareParagraphs(node: Element | Node, paragraphs: Paragraph[]): void {

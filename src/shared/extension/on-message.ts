@@ -1,24 +1,26 @@
 import { ExtensionMessage } from './extension-message.type';
 
-export const onMessage = <TEvent extends string, TEventArgs extends unknown[]>(
+export const onMessage = <Collection extends EventTypes, Key extends keyof Collection>(
   handler: (
-    event: TEvent,
+    event: Key,
     sender: chrome.runtime.MessageSender,
-    ...args: TEventArgs
+    // @ts-expect-error: This always resolves an array type
+    ...args: [...ArgumentsForEvent<Collection, Key>]
   ) => void | Promise<void>,
   filter: (
-    message: ExtensionMessage<TEvent, TEventArgs>,
+    message: ExtensionMessage<Collection, Key>,
     sender: chrome.runtime.MessageSender,
   ) => boolean = ({ isBroadcast }): boolean => !isBroadcast,
 ): void => {
   chrome.runtime.onMessage.addListener(
-    (request: ExtensionMessage<TEvent, TEventArgs>, sender, sendResponse): boolean => {
+    (request: ExtensionMessage<Collection, Key>, sender, sendResponse): boolean => {
       const { event, args } = request;
 
       if (filter && !filter(request, sender)) {
         return false;
       }
 
+      // @ts-expect-error: Tuples...
       const handlerResult = handler(event, sender, ...args);
       const promise =
         handlerResult instanceof Promise ? handlerResult : Promise.resolve(handlerResult);

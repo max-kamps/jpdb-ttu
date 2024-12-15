@@ -134,7 +134,7 @@ function recurse(
   filter?: (node: Element | Node) => boolean,
 ): void {
   const display = displayCategory(node);
-  const isBlock = () => {
+  const checkBlock = (): void => {
     if (display === 'block') {
       breakParagraph(paragraphs, fragments);
 
@@ -143,7 +143,7 @@ function recurse(
     }
   };
 
-  isBlock();
+  checkBlock();
 
   if (display === 'none' || display === 'ruby-text' || filter?.(node) === false) {
     return;
@@ -162,11 +162,14 @@ function recurse(
   }
 
   if (display === 'block') {
-    isBlock();
+    checkBlock();
   }
 }
 
-export const getParagraphs = (node: Element | Node, filter?: (node: Element | Node) => boolean) => {
+export const getParagraphs = (
+  node: Element | Node,
+  filter?: (node: Element | Node) => boolean,
+): Paragraph[] => {
   const fragments: Fragment[] = [];
   const paragraphs: Paragraph[] = [];
 

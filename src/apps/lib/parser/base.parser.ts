@@ -3,7 +3,7 @@ import { BatchController } from './batches/batch-controller';
 
 export abstract class BaseParser extends IntegrationScript {
   /** The root element to parse */
-  protected root: HTMLElement = document.body;
+  protected root: HTMLElement | null = document.body;
 
   /**
    * The batch controller. Use this to register nodes for parsing, then call parseBatches to parse all outstanding node batches.
@@ -40,6 +40,10 @@ export abstract class BaseParser extends IntegrationScript {
    * @returns {void}
    */
   protected parsePage(): void {
+    if (!this.root) {
+      return;
+    }
+
     this.parseNode(this.root);
   }
 
@@ -87,13 +91,13 @@ export abstract class BaseParser extends IntegrationScript {
     callback: (nodes: HTMLElement[]) => void,
   ): MutationObserver {
     const observeTargets = Array.isArray(observeFrom) ? observeFrom : [observeFrom];
-    let root: HTMLElement;
+    let root: HTMLElement | null | undefined;
 
     while (observeTargets.length && !root) {
-      root = document.querySelector(observeTargets.shift());
+      root = document.querySelector<HTMLElement>(observeTargets.shift()!);
     }
 
-    const initialNodes = Array.from(root.querySelectorAll(notifyFor));
+    const initialNodes = Array.from<HTMLElement>(root?.querySelectorAll(notifyFor) ?? []);
 
     if (initialNodes.length) {
       callback(initialNodes);
@@ -117,7 +121,9 @@ export abstract class BaseParser extends IntegrationScript {
       }
     });
 
-    observer.observe(root, config);
+    if (root) {
+      observer.observe(root, config);
+    }
 
     return observer;
   }
@@ -140,7 +146,7 @@ export abstract class BaseParser extends IntegrationScript {
   ): IntersectionObserver {
     return new IntersectionObserver(
       (entries) => {
-        const withItems = (intersecting: boolean, cb: (elements: Element[]) => void) => {
+        const withItems = (intersecting: boolean, cb: (elements: Element[]) => void): void => {
           const elements = entries
             .filter((entry) => entry.isIntersecting === intersecting)
             .map((entry) => entry.target);
@@ -169,7 +175,7 @@ export abstract class BaseParser extends IntegrationScript {
    * @returns {IntersectionObserver}
    */
   protected getParseVisibleObserver(
-    filter: (node: HTMLElement | Text) => boolean = () => true,
+    filter: (node: HTMLElement | Text) => boolean = (): boolean => true,
   ): IntersectionObserver {
     const observer = this.getVisibleObserver(
       (elements) => {
