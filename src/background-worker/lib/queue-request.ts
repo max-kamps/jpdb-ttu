@@ -1,13 +1,13 @@
 const pending: {
   fn: () => Promise<unknown>;
   resolve: (data: unknown) => void;
-  reject: (reason: any) => void;
+  reject: (reason: Error) => void;
   timeout?: number;
 }[] = [];
 
 let isRunning = false;
 
-const processQueue = async () => {
+const processQueue = async (): Promise<void> => {
   if (isRunning || !pending.length) {
     return;
   }
@@ -22,7 +22,7 @@ const processQueue = async () => {
 
       resolve(data);
     } catch (error) {
-      reject(error);
+      reject(error as Error);
     }
 
     if (timeout) {
@@ -37,6 +37,6 @@ export const queueRequest = <T>(fn: () => Promise<T>, timeout?: number): Promise
   return new Promise((resolve, reject) => {
     pending.push({ fn, resolve, reject, timeout });
 
-    processQueue();
+    void processQueue();
   });
 };

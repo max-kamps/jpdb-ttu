@@ -2,20 +2,18 @@ import { addContextMenu } from '@shared/extension/add-context-menu';
 import { openNewTab } from '@shared/extension/open-new-tab';
 import { onTabMessage } from './on-tab-message';
 
-function lookupText(text: string): void {
+function lookupText(text: string | undefined): void {
   if (!text?.length) {
-    console.error('No text selected');
-
     return;
   }
 
   const urlEncoded = encodeURIComponent(text);
   const url = `https://jpdb.io/search?q=${urlEncoded}&lang=english#a`;
 
-  openNewTab(url);
+  void openNewTab(url);
 }
 
-export async function installLookupController(): Promise<void> {
+export function installLookupController(): void {
   onTabMessage('lookupText', (_, text) => lookupText(text));
 
   addContextMenu(

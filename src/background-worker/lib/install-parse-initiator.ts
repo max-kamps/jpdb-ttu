@@ -8,7 +8,7 @@ export function installParseInitiator(): void {
       title: 'Parse selected text',
       contexts: ['selection'],
     },
-    (_, { id: tabId }) => sendToTab('parseSelection', tabId),
+    (_, { id: tabId }) => sendToTab('parseSelection', tabId!),
   );
 
   addContextMenu(
@@ -17,6 +17,6 @@ export function installParseInitiator(): void {
       title: 'Parse page',
       contexts: ['page'],
     },
-    (_, { id: tabId }) => sendToTab('parsePage', tabId),
+    (_, { id: tabId }) => sendToTab('parsePage', tabId!),
   );
 }

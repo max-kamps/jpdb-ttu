@@ -16,7 +16,7 @@ async function getDeck(
   );
 
   if (!deck) {
-    await sendToTab('toast', sender.tab!.id, 'error', `No deck selected for ${key}`);
+    await sendToTab('toast', sender.tab!.id!, 'error', `No deck selected for ${key}`);
 
     return false;
   }
@@ -39,15 +39,17 @@ async function manageDeck(
   }
 
   if (action === 'add') {
+    // TODO: Implement
+    // eslint-disable-next-line no-console
     console.log(`Adding ${vid}:${sid} to ${deckName}...`);
-    // Add to deck...
   } else {
+    // TODO: Implement
+    // eslint-disable-next-line no-console
     console.log(`Removing ${vid}:${sid} from ${deckName}...`);
-    // Remove from deck...
   }
 }
 
-export const installJpdbCardActions = async (): Promise<void> => {
+export const installJpdbCardActions = (): void => {
   onTabMessage('updateCardState', async (_, vid: number, sid: number) => {
     const newCardState = await getCardState(vid, sid);
 
