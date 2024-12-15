@@ -2,7 +2,7 @@ function send<T>(event: string, isBroadcast: boolean, ...args: unknown[]): Promi
   return new Promise<T>((resolve, reject) => {
     chrome.runtime.sendMessage({ event, isBroadcast, args }, (response: T) => {
       if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
+        reject(chrome.runtime.lastError as Error);
       }
 
       resolve(response);

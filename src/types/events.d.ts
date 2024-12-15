@@ -51,7 +51,7 @@ declare interface TabEvents {
   toast: [[type: 'error' | 'success', message: string, timeoutDuration?: number], void];
 }
 
-type KeybindEvent = [[e: KeyboardEvent | MouseEvent], void];
+type KeybindEvent = [[e: KeyboardEvent | MouseEvent], PotentialPromise<void>];
 declare interface LocalEvents {
   closeAllDialogs: KeybindEvent;
   jpdbReviewNothing: KeybindEvent;

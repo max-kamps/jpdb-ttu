@@ -46,6 +46,7 @@ export const getConfiguration = async <K extends keyof ConfigurationSchema>(
   fetchDefault?: boolean,
 ): Promise<ConfigurationSchema[K]> => {
   const defaultValue = fetchDefault ? DEFAULT_CONFIGURATION[key] : undefined;
+  // eslint-disable-next-line @typescript-eslint/no-base-to-string
   const value: string = await readStorage(key, defaultValue?.toString());
 
   if (NUMBER_KEYS.includes(key as FilterKeys<ConfigurationSchema, number>)) {

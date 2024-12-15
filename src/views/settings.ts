@@ -81,8 +81,7 @@ class SettingsController {
 
         this._currentConfiguration.set(name, value);
 
-        (inputElement[targetProperty] as ConfigurationSchema[keyof ConfigurationSchema]) =
-          value as Exclude<ConfigurationSchema[keyof ConfigurationSchema], Keybind>;
+        (inputElement[targetProperty] as ConfigurationSchema[keyof ConfigurationSchema]) = value;
 
         // We keep track of the local changes. We enable the save button if there are local changes.
         inputElement.addEventListener('change', () => {
@@ -262,7 +261,7 @@ class SettingsController {
       this._invalidFields.delete(input.name as keyof ConfigurationSchema);
 
       await afterSuccess?.(input.value);
-    } catch (error) {
+    } catch (_error) {
       button.classList.add('v1');
       input.classList.add('v1');
 
@@ -279,6 +278,7 @@ class SettingsController {
 
     if (show) {
       miningElement.removeAttribute('hidden');
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- We need to trigger a reflow
       miningElement.offsetHeight;
 
       miningElement.classList.add('is-open');
@@ -320,6 +320,7 @@ class SettingsController {
 
     if (show) {
       collapsible.removeAttribute('hidden');
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- We need to trigger a reflow
       collapsible.offsetHeight;
 
       collapsible.classList.add('is-open');

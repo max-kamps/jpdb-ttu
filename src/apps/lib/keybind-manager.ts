@@ -62,7 +62,7 @@ export class KeybindManager extends IntegrationScript {
   }
 
   private async setup(): Promise<void> {
-    onBroadcast('configurationUpdated', () => this.buildKeyMap());
+    onBroadcast('configurationUpdated', () => void this.buildKeyMap());
 
     await this.buildKeyMap();
   }

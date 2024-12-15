@@ -89,15 +89,16 @@ export abstract class IntegrationScript {
       return;
     }
 
-    localListeners[event].forEach((listener: EventFunction<LocalEvents, keyof LocalEvents>) =>
-      /**
-       * The spread operator works fine as soon as we have multiple different parameters.
-       * As of now it just happens to always resolve (ev: KeyboardEvent | MouseEvent).
-       *
-       * While it would be correct to parse the parameters accordingly, it would break as soon as we add another event to the local events
-       */
-      // @ts-expect-error: TS2556
-      listener(...args),
+    localListeners[event].forEach(
+      (listener: EventFunction<LocalEvents, keyof LocalEvents>) =>
+        /**
+         * The spread operator works fine as soon as we have multiple different parameters.
+         * As of now it just happens to always resolve (ev: KeyboardEvent | MouseEvent).
+         *
+         * While it would be correct to parse the parameters accordingly, it would break as soon as we add another event to the local events
+         */
+        // @ts-expect-error: TS2556
+        void listener(...args),
     );
   }
 

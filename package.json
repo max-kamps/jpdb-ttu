@@ -29,6 +29,9 @@
     "chrome >= 116"
   ],
   "devDependencies": {
+    "@eslint/compat": "^1.2.4",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.17.0",
     "@types/chrome": "^0.0.270",
     "@types/node": "^20.14.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
@@ -42,6 +45,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "^50.6.1",
     "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.13.0",
     "html-bundler-webpack-plugin": "^3.14.0",
     "prettier": "^3.4.2",
     "sass": "^1.77.5",

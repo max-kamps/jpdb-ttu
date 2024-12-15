@@ -15,7 +15,7 @@ export class GradingActions extends IntegrationScript {
 
     this.installEvents();
 
-    onBroadcast('configurationUpdated', () => this.updateGradingKeys());
+    onBroadcast('configurationUpdated', () => void this.updateGradingKeys());
     void this.updateGradingKeys();
   }
 
