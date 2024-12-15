@@ -1,4 +1,4 @@
-declare type EventFunction<T extends any[]> = (...args: [...T]) => void;
+declare type EventFunction<T extends unknown[]> = (...args: [...T]) => void;
 
 declare interface BroadcastEvents {
   configurationUpdated: [];
@@ -16,7 +16,7 @@ declare interface BackgroundEvents {
 
 declare interface TabEvents {
   sequenceAborted: [sequence: number];
-  sequenceSuccess: [sequence: number, data: any];
+  sequenceSuccess: [sequence: number, data: unknown];
   sequenceError: [sequence: number, data: string];
   parsePage: [];
   parseSelection: [];
